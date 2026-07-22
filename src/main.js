@@ -371,20 +371,8 @@ function start() {
     el.addEventListener('click', (e) => {
       e.preventDefault();
       go(parseInt(el.dataset.room));
-      closeSidebar();
     });
   });
-
-  const sidebar = document.getElementById('sidebar');
-  const menuBtn = document.getElementById('menu-btn');
-  const sidebarClose = document.getElementById('sidebar-close');
-  const overlayBg = document.getElementById('overlay-bg');
-
-  function openSidebar() { sidebar.classList.add('open'); overlayBg.classList.add('show'); document.body.style.overflow = 'hidden'; }
-  function closeSidebar() { sidebar.classList.remove('open'); overlayBg.classList.remove('show'); document.body.style.overflow = ''; }
-  menuBtn?.addEventListener('click', openSidebar);
-  sidebarClose?.addEventListener('click', closeSidebar);
-  overlayBg?.addEventListener('click', closeSidebar);
 
   function ui() {
     document.querySelectorAll('[data-room]').forEach(el => {
