@@ -298,23 +298,26 @@ async function init() {
 }
 
 function start() {
-  let cr = 0, tr = 0, orbitAngle = 0;
+  let cr = 0, tr = 0;
   let trans = false, ts = 0;
   let as = 0;
+  let theta = 0, phi = Math.PI / 4;
+  let isDragging = false, px = 0, py = 0;
   const fromPos = new THREE.Vector3();
   const toPos = new THREE.Vector3();
   const camTarget = new THREE.Vector3();
 
-  function getCamPos(idx, angle) {
-    const p = planetDefs[idx].pos;
+  function getCamPos(idx, t, p) {
+    const def = planetDefs[idx].pos;
+    const r = ORBIT_R;
     return new THREE.Vector3(
-      p[0] + Math.sin(angle) * ORBIT_R,
-      p[1] + 0.8 + Math.sin(angle * 0.5) * 1.5,
-      p[2] + Math.cos(angle) * ORBIT_R
+      def[0] + Math.sin(t) * Math.cos(p) * r,
+      def[1] + Math.sin(p) * r,
+      def[2] + Math.cos(t) * Math.cos(p) * r
     );
   }
 
-  const introEndPos = getCamPos(0, 0);
+  const introEndPos = getCamPos(0, 0, Math.PI / 4);
   const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius : 1.5);
   camera.position.copy(introStartPos);
   camera.lookAt(0, 100, 0);
@@ -324,7 +327,7 @@ function start() {
     r = Math.max(0, Math.min(N - 1, r));
     if (r === tr) return;
     fromPos.copy(camera.position);
-    toPos.copy(getCamPos(r, orbitAngle));
+    toPos.copy(getCamPos(r, 0, Math.PI / 4));
     ts = performance.now(); trans = true; tr = r;
   }
 
@@ -334,6 +337,27 @@ function start() {
     if (Math.abs(as) >= 60) { go(tr + (as > 0 ? 1 : -1)); as = 0; }
     document.getElementById('scroll-hint')?.classList.toggle('hidden', tr > 0);
   }, { passive: true });
+
+  const cv = renderer.domElement;
+  cv.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || introActive || trans) return;
+    isDragging = true; px = e.clientX; py = e.clientY;
+  });
+  addEventListener('mousemove', (e) => {
+    if (!isDragging || introActive || trans) return;
+    theta -= (e.clientX - px) * 0.005;
+    phi -= (e.clientY - py) * 0.005;
+    phi = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, phi));
+    px = e.clientX; py = e.clientY;
+    const p = planetDefs[cr].pos;
+    camera.position.set(
+      p[0] + Math.sin(theta) * Math.cos(phi) * ORBIT_R,
+      p[1] + Math.sin(phi) * ORBIT_R,
+      p[2] + Math.cos(theta) * Math.cos(phi) * ORBIT_R
+    );
+    camera.lookAt(p[0], p[1], p[2]);
+  });
+  addEventListener('mouseup', () => { isDragging = false; });
 
   addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); comp.setSize(innerWidth, innerHeight); });
 
@@ -393,7 +417,6 @@ function start() {
       l.position.z = p[2] + Math.cos(t * 0.02 + i) * 0.5;
     });
 
-    // Sky dome: fades as camera moves away from Earth
     if (skyMesh && earthRadius > 0) {
       const camDist = camera.position.length();
       const fadeStart = earthRadius;
@@ -406,13 +429,11 @@ function start() {
       const elapsed = performance.now() - introStart;
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
-
       camera.position.lerpVectors(introStartPos, introEndPos, s);
       camera.lookAt(0, 100 * (1 - s), 0);
-
       if (_t >= 1) {
         introActive = false;
-        orbitAngle = 0;
+        theta = 0; phi = Math.PI / 4;
         camera.position.copy(introEndPos);
         camera.lookAt(0, 0, 0);
         uiEl.classList.remove('hidden');
@@ -429,11 +450,21 @@ function start() {
         cp[2] + (tp[2] - cp[2]) * s
       );
       camera.lookAt(camTarget);
-      if (_t >= 1) { trans = false; cr = tr; orbitAngle = 0; camera.position.copy(toPos); camera.lookAt(tp[0], tp[1], tp[2]); ui(); }
-    } else {
-      orbitAngle += 0.0006;
-      camera.position.copy(getCamPos(cr, orbitAngle));
-      camera.lookAt(planetDefs[cr].pos[0], planetDefs[cr].pos[1], planetDefs[cr].pos[2]);
+      if (_t >= 1) {
+        trans = false; cr = tr;
+        theta = 0; phi = Math.PI / 4;
+        camera.position.copy(toPos);
+        camera.lookAt(tp[0], tp[1], tp[2]);
+        ui();
+      }
+    } else if (!isDragging) {
+      const p = planetDefs[cr].pos;
+      camera.position.set(
+        p[0] + Math.sin(theta) * Math.cos(phi) * ORBIT_R,
+        p[1] + Math.sin(phi) * ORBIT_R,
+        p[2] + Math.cos(theta) * Math.cos(phi) * ORBIT_R
+      );
+      camera.lookAt(p[0], p[1], p[2]);
     }
 
     comp.render();
