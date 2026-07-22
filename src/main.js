@@ -159,18 +159,40 @@ function uniformScale(root) {
   const box = new THREE.Box3().setFromObject(root);
   const size = box.getSize(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z);
-  console.log(`${root.name}: bbox ${size.x.toFixed(3)}x${size.y.toFixed(3)}x${size.z.toFixed(3)} max=${maxDim.toFixed(4)}`);
+  console.log(`${root.name}: bbox ${size.x.toFixed(4)}x${size.y.toFixed(4)}x${size.z.toFixed(4)} max=${maxDim.toFixed(4)}`);
   if (maxDim > 0.001 && maxDim < 1000) {
     let s = ORBIT_R * 0.35 / maxDim;
     s = Math.max(0.02, Math.min(s, 10));
     root.scale.set(s, s, s);
-    console.log(`${root.name}: scaled x${s.toFixed(4)} → final size ${(maxDim*s).toFixed(3)}`);
+    console.log(`${root.name}: scaled x${s.toFixed(4)} → final ${(maxDim*s).toFixed(3)}`);
     if (root.name === 'Земля') earthRadius = maxDim * s / 2;
-  } else {
-    console.warn(`${root.name}: unusual bbox, applying fallback scale 1`);
-    root.scale.set(1, 1, 1);
-    if (root.name === 'Земля') earthRadius = 2;
+    return;
   }
+  // Try bbox on first mesh child only (skip bones/skeletons)
+  let mBox = null;
+  root.traverse((c) => {
+    if (c.isMesh && !mBox) {
+      mBox = new THREE.Box3().setFromObject(c);
+    }
+  });
+  if (mBox) {
+    const mSize = mBox.getSize(new THREE.Vector3());
+    const mMax = Math.max(mSize.x, mSize.y, mSize.z);
+    console.log(`${root.name}: mesh-only bbox ${mSize.x.toFixed(4)}x${mSize.y.toFixed(4)}x${mSize.z.toFixed(4)} max=${mMax.toFixed(4)}`);
+    if (mMax > 0.001 && mMax < 1000) {
+      let s = ORBIT_R * 0.35 / mMax;
+      s = Math.max(0.02, Math.min(s, 10));
+      root.scale.set(s, s, s);
+      console.log(`${root.name}: mesh-scaled x${s.toFixed(4)} → final ${(mMax*s).toFixed(3)}`);
+      if (root.name === 'Земля') earthRadius = mMax * s / 2;
+      return;
+    }
+  }
+  // Last resort: fixed scale
+  const s = 1.5;
+  root.scale.set(s, s, s);
+  console.log(`${root.name}: fallback scale x${s} (fixed)`);
+  if (root.name === 'Земля') earthRadius = 2;
 }
 
 const loader = new GLTFLoader();
@@ -200,6 +222,7 @@ async function init() {
     try {
       const ldr = (i === 1) ? [loader, plainLoader] : [loader];
       let m = null;
+      let sceneRef = null;
       let errs = [];
       for (const l of ldr) {
         try {
@@ -211,6 +234,7 @@ async function init() {
             );
           });
           m = gltf.scene;
+          sceneRef = gltf;
           console.log(`${names[i]}: loaded with ${l === loader ? 'Draco' : 'plain'} loader`);
           break;
         } catch (e) {
@@ -219,10 +243,17 @@ async function init() {
       }
       if (!m) throw new Error(errs.join(' | '));
       m.name = names[i];
+      if (m.children.length === 0 && sceneRef && sceneRef.scenes) {
+        const alt = sceneRef.scenes.find(s => s.children.length > 0);
+        if (alt) { m = alt; m.name = names[i]; }
+      }
       m.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      // Check if there are any meshes
+      let meshCount = 0;
+      m.traverse((c) => { if (c.isMesh) meshCount++; });
+      if (meshCount === 0) throw new Error('no meshes found');
       group.add(m);
       uniformScale(m);
-      // Debug: log children
       m.traverse((c) => { if (c.isMesh) console.log(`${names[i]} mesh:`, c.geometry.type, c.material.type, c.material.color?.getHex()); });
     } catch (err) {
       console.error(`${names[i]}: ${err}`);
