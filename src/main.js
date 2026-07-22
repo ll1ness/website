@@ -242,7 +242,7 @@ async function init() {
 
   // Atmosphere around Earth
   if (earthRadius > 0) {
-    createAtmosphere(pivots[0], earthRadius * 1.55, 0x4a90d9);
+    createAtmosphere(pivots[0], earthRadius * 1.15, 0x4a90d9);
   }
 
   console.log('Ready');
@@ -267,10 +267,11 @@ function start() {
     );
   }
 
-  // Camera starts inside Earth atmosphere
+  // Camera starts on Earth surface looking away, flies out then turns to Earth
   const introEndPos = getCamPos(0, 0);
-  camera.position.set(0, 0.5, earthRadius > 0 ? earthRadius * 0.8 : 1.5);
-  camera.lookAt(0, 0, 0);
+  const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius * 0.8 : 1.5);
+  camera.position.copy(introStartPos);
+  camera.lookAt(0, 100, 0);
 
   function go(r) {
     if (introActive || trans) return;
@@ -353,12 +354,12 @@ function start() {
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
 
-      camera.position.lerpVectors(
-        new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius * 0.8 : 1.5),
-        introEndPos,
-        s
+      camera.position.lerpVectors(introStartPos, introEndPos, s);
+      camera.lookAt(
+        0,
+        100 * (1 - s),
+        0
       );
-      camera.lookAt(0, 0, 0);
 
       if (atmosUniforms) {
         atmosUniforms.intensity.value = 1.0 - s * 0.65;
