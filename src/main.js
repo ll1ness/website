@@ -137,15 +137,39 @@ function fallbackSphere(parent, color, size) {
   return m;
 }
 
+function createGasGiant(parent, size) {
+  const geo = new THREE.SphereGeometry(size, 48, 64);
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+  const ctx = c.getContext('2d');
+  const bands = ['#d4a06a','#c4955a','#e8c878','#b8844a','#d4a06a','#a07040','#c89860','#d4a06a','#e0b070','#c09050'];
+  const bh = 128 / bands.length;
+  bands.forEach((col, i) => { ctx.fillStyle = col; ctx.fillRect(0, i * bh, 512, bh + 1); });
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  const mat = new THREE.MeshStandardMaterial({
+    map: tex, roughness: 0.7, metalness: 0.1,
+    emissive: 0xd4a06a, emissiveIntensity: 0.05,
+  });
+  const m = new THREE.Mesh(geo, mat);
+  parent.add(m);
+  return m;
+}
+
 function uniformScale(root) {
   const box = new THREE.Box3().setFromObject(root);
   const size = box.getSize(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z);
+  console.log(`${root.name}: bbox ${size.x.toFixed(3)}x${size.y.toFixed(3)}x${size.z.toFixed(3)} max=${maxDim.toFixed(4)}`);
   if (maxDim > 0.001 && maxDim < 1000) {
     let s = ORBIT_R * 0.35 / maxDim;
     s = Math.max(0.02, Math.min(s, 10));
     root.scale.set(s, s, s);
+    console.log(`${root.name}: scaled x${s.toFixed(4)} → final size ${(maxDim*s).toFixed(3)}`);
     if (root.name === 'Земля') earthRadius = maxDim * s / 2;
+  } else {
+    console.warn(`${root.name}: unusual bbox, applying fallback scale 1`);
+    root.scale.set(1, 1, 1);
+    if (root.name === 'Земля') earthRadius = 2;
   }
 }
 
@@ -153,6 +177,9 @@ const loader = new GLTFLoader();
 const draco = new DRACOLoader();
 draco.setDecoderPath('/draco/');
 loader.setDRACOLoader(draco);
+
+// Also keep a plain loader for fallback attempts
+const plainLoader = new GLTFLoader();
 
 async function init() {
   const groups = planetDefs.map((def, i) => {
@@ -171,24 +198,44 @@ async function init() {
     const def = planetDefs[i];
     const group = groups[i];
     try {
-      const gltf = await new Promise((resolve, reject) => {
-        loader.load(`/models/${def.file}`,
-          (g) => resolve(g),
-          (xhr) => { if (xhr.total) console.log(`${names[i]}: ${Math.round(xhr.loaded / xhr.total * 100)}%`); },
-          (e) => reject(e)
-        );
-      });
-      const m = gltf.scene;
+      const ldr = (i === 1) ? [loader, plainLoader] : [loader];
+      let m = null;
+      let errs = [];
+      for (const l of ldr) {
+        try {
+          const gltf = await new Promise((resolve, reject) => {
+            l.load(`/models/${def.file}`,
+              (g) => resolve(g),
+              (xhr) => { if (xhr.total) console.log(`${names[i]}: ${Math.round(xhr.loaded / xhr.total * 100)}%`); },
+              (e) => reject(e)
+            );
+          });
+          m = gltf.scene;
+          console.log(`${names[i]}: loaded with ${l === loader ? 'Draco' : 'plain'} loader`);
+          break;
+        } catch (e) {
+          errs.push(`${l === loader ? 'Draco' : 'plain'}: ${e?.message || e}`);
+        }
+      }
+      if (!m) throw new Error(errs.join(' | '));
       m.name = names[i];
       m.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
       group.add(m);
       uniformScale(m);
-      console.log(`${names[i]}: OK`);
+      // Debug: log children
+      m.traverse((c) => { if (c.isMesh) console.log(`${names[i]} mesh:`, c.geometry.type, c.material.type, c.material.color?.getHex()); });
     } catch (err) {
-      console.error(`${names[i]}: ${err?.message || err}`);
-      const fb = fallbackSphere(group, def.color, 2);
-      fb.name = names[i] + '_fallback';
-      if (i === 0) earthRadius = 2;
+      console.error(`${names[i]}: ${err}`);
+      // Gas giant fallback for Jupiter
+      if (i === 1) {
+        const g = createGasGiant(group, 2);
+        g.name = names[i] + '_fallback';
+        if (i === 0) earthRadius = 2;
+      } else {
+        const fb = fallbackSphere(group, def.color, 2);
+        fb.name = names[i] + '_fallback';
+        if (i === 0) earthRadius = 2;
+      }
     }
     updateLoader();
   }
