@@ -303,6 +303,8 @@ function start() {
   let as = 0;
   let theta = 0, phi = Math.PI / 4;
   let isDragging = false, px = 0, py = 0;
+  let thetaVel = 0, phiVel = 0;
+  const MOUSE_SENS = 0.005, DAMP = 0.92, VEL_THRESH = 0.00005;
   const fromPos = new THREE.Vector3();
   const toPos = new THREE.Vector3();
   const camTarget = new THREE.Vector3();
@@ -342,20 +344,17 @@ function start() {
   cv.addEventListener('mousedown', (e) => {
     if (e.button !== 0 || introActive || trans) return;
     isDragging = true; px = e.clientX; py = e.clientY;
+    thetaVel = 0; phiVel = 0;
   });
   addEventListener('mousemove', (e) => {
     if (!isDragging || introActive || trans) return;
-    theta -= (e.clientX - px) * 0.005;
-    phi -= (e.clientY - py) * 0.005;
+    const dx = e.clientX - px, dy = e.clientY - py;
+    thetaVel = -dx * MOUSE_SENS;
+    phiVel = dy * MOUSE_SENS;
+    theta += thetaVel;
+    phi += phiVel;
     phi = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, phi));
     px = e.clientX; py = e.clientY;
-    const p = planetDefs[cr].pos;
-    camera.position.set(
-      p[0] + Math.sin(theta) * Math.cos(phi) * ORBIT_R,
-      p[1] + Math.sin(phi) * ORBIT_R,
-      p[2] + Math.cos(theta) * Math.cos(phi) * ORBIT_R
-    );
-    camera.lookAt(p[0], p[1], p[2]);
   });
   addEventListener('mouseup', () => { isDragging = false; });
 
@@ -457,7 +456,14 @@ function start() {
         camera.lookAt(tp[0], tp[1], tp[2]);
         ui();
       }
-    } else if (!isDragging) {
+    } else {
+      theta += thetaVel;
+      phi += phiVel;
+      phi = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, phi));
+      thetaVel *= DAMP;
+      phiVel *= DAMP;
+      if (Math.abs(thetaVel) < VEL_THRESH) thetaVel = 0;
+      if (Math.abs(phiVel) < VEL_THRESH) phiVel = 0;
       const p = planetDefs[cr].pos;
       camera.position.set(
         p[0] + Math.sin(theta) * Math.cos(phi) * ORBIT_R,
