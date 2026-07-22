@@ -16,9 +16,9 @@ const names = ['Земля', 'Юпитер', 'Фобос', 'Седна'];
 
 let introActive = true;
 let introStart = 0;
-let atmosUniforms = null;
+let skyMesh = null;
+let earthRadius = 0;
 
-// Loader
 const loaderEl = document.getElementById('loader');
 const loaderBar = document.querySelector('.loader-bar');
 const uiEl = document.getElementById('ui');
@@ -27,8 +27,7 @@ const LOAD_TOTAL = 5;
 
 function updateLoader() {
   loadCount = Math.min(loadCount + 1, LOAD_TOTAL);
-  const pct = (loadCount / LOAD_TOTAL) * 100;
-  if (loaderBar) loaderBar.style.width = pct + '%';
+  if (loaderBar) loaderBar.style.width = (loadCount / LOAD_TOTAL * 100) + '%';
 }
 
 function completeLoading() {
@@ -37,7 +36,6 @@ function completeLoading() {
   document.body.style.cursor = 'default';
 }
 
-// Scene
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x03030a, 0.0004);
 
@@ -74,8 +72,6 @@ planetDefs.forEach((def, i) => {
 
 const pivots = [];
 let satPivot = null;
-let atmosMesh = null;
-let earthRadius = 0;
 
 function circleTexture() {
   const c = document.createElement('canvas'); c.width = 32; c.height = 32;
@@ -110,56 +106,25 @@ function starfield() {
 
 starfield();
 
-// ===== ATMOSPHERE SHADER =====
-const atmosVert = `
-varying vec3 vNormal;
-varying vec3 vWorldPos;
-void main() {
-  vNormal = normalize(normalMatrix * normal);
-  vec4 wp = modelMatrix * vec4(position, 1.0);
-  vWorldPos = wp.xyz;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}
-`;
-const atmosFrag = `
-uniform vec3 glowColor;
-uniform float intensity;
-uniform vec3 sphereCenter;
-uniform float sphereRadius;
-varying vec3 vNormal;
-varying vec3 vWorldPos;
-void main() {
-  vec3 viewDir = normalize(cameraPosition - vWorldPos);
-  float rim = 1.0 - abs(dot(viewDir, vNormal));
-  rim = pow(rim, 4.0);
-  float camDist = distance(cameraPosition, sphereCenter);
-  float insideAtmos = clamp((sphereRadius - camDist) / (sphereRadius * 0.25), 0.0, 1.0);
-  float alpha = max(rim, insideAtmos) * intensity * 0.55;
-  gl_FragColor = vec4(glowColor, alpha);
-}
-`;
-
-function createAtmosphere(parent, radius, color) {
-  const center = new THREE.Vector3();
-  parent.getWorldPosition(center);
-  const geo = new THREE.SphereGeometry(radius, 48, 48);
-  atmosUniforms = {
-    glowColor: { value: new THREE.Color(color) },
-    intensity: { value: 1.0 },
-    sphereCenter: { value: center },
-    sphereRadius: { value: radius },
-  };
-  const mat = new THREE.ShaderMaterial({
-    vertexShader: atmosVert,
-    fragmentShader: atmosFrag,
-    uniforms: atmosUniforms,
-    transparent: true,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
+function createSkyDome(parent, r) {
+  const c = document.createElement('canvas'); c.width = 4; c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, '#0a1e3d');
+  g.addColorStop(0.3, '#1a4a8a');
+  g.addColorStop(0.6, '#4a90d9');
+  g.addColorStop(0.85, '#87ceeb');
+  g.addColorStop(1, '#d0e8f5');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 4, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 1);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, side: THREE.BackSide, transparent: true, opacity: 1, depthWrite: false,
   });
-  atmosMesh = new THREE.Mesh(geo, mat);
-  parent.add(atmosMesh);
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 32), mat);
+  parent.add(m);
+  return m;
 }
 
 function fallbackSphere(parent, color, size) {
@@ -179,11 +144,8 @@ function uniformScale(root) {
     let s = ORBIT_R * 0.35 / maxDim;
     s = Math.max(0.02, Math.min(s, 10));
     root.scale.set(s, s, s);
-    const finalSize = maxDim * s;
-    if (root.name === 'Земля') earthRadius = finalSize / 2;
-    return finalSize;
+    if (root.name === 'Земля') earthRadius = maxDim * s / 2;
   }
-  return 0;
 }
 
 const loader = new GLTFLoader();
@@ -227,7 +189,6 @@ async function init() {
     updateLoader();
   }
 
-  // Satellite
   try {
     const gltf = await new Promise((resolve, reject) => {
       loader.load('/models/sattelite.glb',
@@ -248,10 +209,8 @@ async function init() {
   }
   updateLoader();
 
-  // Atmosphere around Earth
-  if (earthRadius > 0) {
-    createAtmosphere(pivots[0], earthRadius * 1.15, 0x4a90d9);
-  }
+  const er = earthRadius > 0 ? earthRadius : 2;
+  skyMesh = createSkyDome(pivots[0], er * 3.5);
 
   console.log('Ready');
   completeLoading();
@@ -275,7 +234,6 @@ function start() {
     );
   }
 
-  // Camera starts on Earth surface looking away, flies out then turns to Earth
   const introEndPos = getCamPos(0, 0);
   const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius : 1.5);
   camera.position.copy(introStartPos);
@@ -306,7 +264,6 @@ function start() {
     setTimeout(() => { b.textContent = o; b.style.pointerEvents = 'auto'; e.target.reset(); }, 2000);
   });
 
-  // Navigation: header links, sidebar links, nav dots
   document.querySelectorAll('[data-room]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
@@ -315,7 +272,6 @@ function start() {
     });
   });
 
-  // Sidebar
   const sidebar = document.getElementById('sidebar');
   const menuBtn = document.getElementById('menu-btn');
   const sidebarClose = document.getElementById('sidebar-close');
@@ -357,21 +313,22 @@ function start() {
       l.position.z = p[2] + Math.cos(t * 0.02 + i) * 0.5;
     });
 
+    // Sky dome: fades as camera moves away from Earth
+    if (skyMesh && earthRadius > 0) {
+      const camDist = camera.position.length();
+      const fadeStart = earthRadius;
+      const fadeEnd = earthRadius * 3;
+      const d = (camDist - fadeStart) / (fadeEnd - fadeStart);
+      skyMesh.material.opacity = 1 - Math.max(0, Math.min(d, 1));
+    }
+
     if (introActive) {
       const elapsed = performance.now() - introStart;
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
 
       camera.position.lerpVectors(introStartPos, introEndPos, s);
-      camera.lookAt(
-        0,
-        100 * (1 - s),
-        0
-      );
-
-      if (atmosUniforms) {
-        atmosUniforms.intensity.value = 1.0 - s * 0.65;
-      }
+      camera.lookAt(0, 100 * (1 - s), 0);
 
       if (_t >= 1) {
         introActive = false;
