@@ -374,6 +374,70 @@ function start() {
     });
   });
 
+  // Modal + Products dropdown
+  const modalEl = document.getElementById('modal');
+  const modalBg = modalEl?.querySelector('.modal-bg');
+  const modalClose = modalEl?.querySelector('.modal-close');
+  const menuEl = document.getElementById('product-menu');
+
+  let projectsData = [];
+
+  fetch('/projects.json').then(r => r.json()).then(d => {
+    projectsData = d.projects;
+    if (!menuEl) return;
+    const cats = d.categories || [];
+    cats.forEach(cat => {
+      const items = projectsData.filter(p => p.cat === cat.id);
+      if (!items.length) return;
+      const col = document.createElement('div');
+      col.className = 'drop-col';
+      const label = document.createElement('span');
+      label.className = 'drop-label';
+      label.textContent = cat.label;
+      col.appendChild(label);
+      items.forEach(p => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.dataset.project = p.id;
+        a.textContent = p.name;
+        a.addEventListener('click', (e) => { e.preventDefault(); openModal(p.id); });
+        col.appendChild(a);
+      });
+      menuEl.appendChild(col);
+    });
+  }).catch(() => {});
+
+  function openModal(id) {
+    const proj = projectsData.find(p => p.id === id);
+    if (!proj || !modalEl) return;
+    document.getElementById('modal-title').textContent = proj.name;
+    document.getElementById('modal-tagline').textContent = proj.tagline;
+    document.getElementById('modal-desc').textContent = proj.description;
+    const logoEl = document.getElementById('modal-logo');
+    if (proj.logo) { logoEl.innerHTML = `<img src="${proj.logo}" alt="${proj.name}" style="width:48px;height:48px;border-radius:10px;object-fit:cover">`; }
+    else { logoEl.textContent = proj.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+    const ss = document.getElementById('modal-screenshots');
+    ss.innerHTML = '';
+    if (proj.screenshots && proj.screenshots.length) {
+      proj.screenshots.forEach(s => { const img = document.createElement('img'); img.src = s; img.alt = ''; ss.appendChild(img); });
+    }
+    const dl = document.getElementById('modal-downloads');
+    dl.innerHTML = '';
+    if (proj.downloads && proj.downloads.length) {
+      proj.downloads.forEach(d => {
+        const a = document.createElement('a');
+        a.href = d.url; a.className = 'to-button'; a.textContent = d.label;
+        if (d.url && d.url !== '#') a.target = '_blank'; a.rel = 'noopener';
+        dl.appendChild(a);
+      });
+    }
+    modalEl.classList.add('open');
+  }
+  function closeModal() { modalEl?.classList.remove('open'); }
+
+  modalClose?.addEventListener('click', closeModal);
+  modalBg?.addEventListener('click', closeModal);
+
   function ui() {
     document.querySelectorAll('[data-room]').forEach(el => {
       const r = parseInt(el.dataset.room);
