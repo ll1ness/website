@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ll1ness — Space Portfolio</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">ЗАГРУЗКА ВСЕЛЕННОЙ</div>
+    <div class="loader-progress"><div class="loader-bar"></div></div>
+  </div>
+
+  <div id="app"></div>
+
+  <div id="ui" class="hidden">
+    <header id="header">
+      <button id="menu-btn" class="menu-btn" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="header-brand">
+        <a href="/" class="header-logo">ll1ness</a>
+        <span class="header-version">v1.0</span>
+      </div>
+      <nav class="header-nav">
+        <a href="#" data-room="0" class="active">Главная</a>
+        <a href="#" data-room="1">Портфолио</a>
+        <a href="#" data-room="2">Навыки</a>
+        <a href="#" data-room="3">Контакты</a>
+      </nav>
+    </header>
+
+    <aside id="sidebar" aria-hidden="true">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">ll1ness</span>
+        <button id="sidebar-close" class="sidebar-close" aria-label="Закрыть меню">✕</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" data-room="0" class="active"><span class="sidebar-idx">01</span> Главная</a>
+        <a href="#" data-room="1"><span class="sidebar-idx">02</span> Портфолио</a>
+        <a href="#" data-room="2"><span class="sidebar-idx">03</span> Навыки</a>
+        <a href="#" data-room="3"><span class="sidebar-idx">04</span> Контакты</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GH</a>
+        <a href="#">TG</a>
+        <a href="#">LI</a>
+      </div>
+    </aside>
+
+    <div id="overlay-bg"></div>
+
+    <div id="nav-dots">
+      <div class="nav-dot active" data-room="0"><span></span></div>
+      <div class="nav-dot" data-room="1"><span></span></div>
+      <div class="nav-dot" data-room="2"><span></span></div>
+      <div class="nav-dot" data-room="3"><span></span></div>
+    </div>
+
+    <div id="room-label">
+      <span class="room-idx">01</span>
+      <span class="room-name">Земля</span>
+    </div>
+
+    <div id="scroll-hint">
+      <svg width="20" height="32" viewBox="0 0 20 32"><rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" stroke-width="1.5" opacity="0.3" fill="none"/><circle cx="10" cy="10" r="2.5" fill="currentColor" opacity="0.6"><animate attributeName="cy" values="10;18;10" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0.15;0.6" dur="1.8s" repeatCount="indefinite"/></circle></svg>
+    </div>
+  </div>
+
+  <div id="overlays">
+    <div class="room-overlay active" data-room="0">
+      <div class="overlay-content">
+        <p class="overlay-label">ПРИВЕТ, Я</p>
+        <h1 class="overlay-title">ll1ness</h1>
+        <p class="overlay-desc">Full-stack разработчик, создающий цифровые вселенные</p>
+        <div class="overlay-stats">
+          <div class="stat-item"><span class="stat-n">5+</span><span class="stat-l">Лет опыта</span></div>
+          <div class="stat-item"><span class="stat-n">50+</span><span class="stat-l">Проектов</span></div>
+          <div class="stat-item"><span class="stat-n">∞</span><span class="stat-l">Идей</span></div>
+        </div>
+        <div class="overlay-actions">
+          <a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button" data-variant="primary">GitHub</a>
+          <a href="#" class="to-button">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-overlay" data-room="1">
+      <div class="overlay-content">
+        <p class="overlay-label">ПОРТФОЛИО</p>
+        <h2 class="overlay-title">Проекты</h2>
+        <p class="overlay-desc">Что я создал</p>
+        <div class="project-list">
+          <div class="project-card"><div class="card-head"><span class="card-icon">🛸</span><h3>Space Platform</h3></div><p>Full-stack платформа для управления космическими миссиями</p><div class="card-tags"><span>React</span><span>Node.js</span><span>Three.js</span></div></div>
+          <div class="project-card"><div class="card-head"><span class="card-icon">🧠</span><h3>Neuro Chat</h3></div><p>AI-чат с поддержкой множества моделей</p><div class="card-tags"><span>Python</span><span>FastAPI</span><span>WebSocket</span></div></div>
+          <div class="project-card"><div class="card-head"><span class="card-icon">⚡</span><h3>DevForge</h3></div><p>Автоматизация CI/CD пайплайнов</p><div class="card-tags"><span>Go</span><span>Docker</span><span>K8s</span></div></div>
+          <div class="project-card"><div class="card-head"><span class="card-icon">🌐</span><h3>Web Nexus</h3></div><p>Фреймворк для микросервисных архитектур</p><div class="card-tags"><span>TypeScript</span><span>gRPC</span><span>GraphQL</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-overlay" data-room="2">
+      <div class="overlay-content">
+        <p class="overlay-label">НАВЫКИ</p>
+        <h2 class="overlay-title">Технологии</h2>
+        <p class="overlay-desc">Мой стек</p>
+        <div class="skills-list">
+          <div class="skill-group"><h3>Frontend</h3>
+            <div class="skill-row"><span class="skill-name">React / Next.js</span><span class="skill-pct">95</span><div class="skill-track"><div class="skill-fill" style="width:95%"></div></div></div>
+            <div class="skill-row"><span class="skill-name">TypeScript</span><span class="skill-pct">90</span><div class="skill-track"><div class="skill-fill" style="width:90%"></div></div></div>
+            <div class="skill-row"><span class="skill-name">Three.js / WebGL</span><span class="skill-pct">80</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
+          </div>
+          <div class="skill-group"><h3>Backend</h3>
+            <div class="skill-row"><span class="skill-name">Node.js</span><span class="skill-pct">92</span><div class="skill-track"><div class="skill-fill" style="width:92%"></div></div></div>
+            <div class="skill-row"><span class="skill-name">Python / FastAPI</span><span class="skill-pct">88</span><div class="skill-track"><div class="skill-fill" style="width:88%"></div></div></div>
+            <div class="skill-row"><span class="skill-name">Go</span><span class="skill-pct">70</span><div class="skill-track"><div class="skill-fill" style="width:70%"></div></div></div>
+          </div>
+          <div class="skill-group"><h3>DevOps</h3>
+            <div class="skill-row"><span class="skill-name">Docker / K8s</span><span class="skill-pct">85</span><div class="skill-track"><div class="skill-fill" style="width:85%"></div></div></div>
+            <div class="skill-row"><span class="skill-name">AWS / GCP</span><span class="skill-pct">78</span><div class="skill-track"><div class="skill-fill" style="width:78%"></div></div></div>
+            <div class="skill-row"><span class="skill-name">CI/CD</span><span class="skill-pct">90</span><div class="skill-track"><div class="skill-fill" style="width:90%"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-overlay" data-room="3">
+      <div class="overlay-content">
+        <p class="overlay-label">КОНТАКТЫ</p>
+        <h2 class="overlay-title">Связь</h2>
+        <p class="overlay-desc">Напишите мне</p>
+        <form id="contact-form">
+          <div class="form-r"><input type="text" name="name" placeholder="Имя" required /><input type="email" name="email" placeholder="Email" required /></div>
+          <input type="text" name="subject" placeholder="Тема" />
+          <textarea name="message" rows="4" placeholder="Сообщение..."></textarea>
+          <button type="submit" class="to-button" data-variant="primary">Отправить</button>
+        </form>
+        <div class="social-links">
+          <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
+          <a href="#">LinkedIn</a>
+          <a href="#">Telegram</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
