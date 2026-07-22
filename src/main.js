@@ -438,6 +438,12 @@ function start() {
   modalClose?.addEventListener('click', closeModal);
   modalBg?.addEventListener('click', closeModal);
 
+  document.querySelectorAll('.faq-q').forEach(el => {
+    el.addEventListener('click', () => {
+      el.parentElement.classList.toggle('open');
+    });
+  });
+
   function ui() {
     document.querySelectorAll('[data-room]').forEach(el => {
       const r = parseInt(el.dataset.room);
