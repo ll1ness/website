@@ -369,6 +369,8 @@ function start() {
 
   document.querySelectorAll('[data-room]').forEach(el => {
     el.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (link && link.getAttribute('href') && link.getAttribute('href') !== '#') return;
       e.preventDefault();
       go(parseInt(el.dataset.room));
     });
