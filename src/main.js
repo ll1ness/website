@@ -379,6 +379,12 @@ function start() {
   const modalBg = modalEl?.querySelector('.modal-bg');
   const modalClose = modalEl?.querySelector('.modal-close');
   const menuEl = document.getElementById('product-menu');
+  const ssTrack = document.getElementById('ss-track');
+  const ssPrev = document.getElementById('ss-prev');
+  const ssNext = document.getElementById('ss-next');
+  const ssDots = document.getElementById('ss-dots');
+  const ssEmpty = document.getElementById('ss-empty');
+  let ssIndex = 0, ssCount = 0;
 
   let projectsData = [];
 
@@ -431,10 +437,20 @@ function start() {
     const logoEl = document.getElementById('modal-logo');
     if (proj.logo) { logoEl.innerHTML = `<img src="${proj.logo}" alt="${proj.name}" style="width:48px;height:48px;border-radius:10px;object-fit:cover">`; }
     else { logoEl.textContent = proj.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
-    const ss = document.getElementById('modal-screenshots');
-    ss.innerHTML = '';
-    if (proj.screenshots && proj.screenshots.length) {
-      proj.screenshots.forEach(s => { const img = document.createElement('img'); img.src = s; img.alt = ''; ss.appendChild(img); });
+    ssTrack.innerHTML = '';
+    ssDots.innerHTML = '';
+    ssIndex = 0;
+    ssCount = (proj.screenshots && proj.screenshots.length) || 0;
+    if (ssCount) {
+      proj.screenshots.forEach(s => { const img = document.createElement('img'); img.src = s; img.alt = ''; ssTrack.appendChild(img); });
+      for (let i = 0; i < ssCount; i++) { const d = document.createElement('span'); d.className = 'ss-dot' + (i === 0 ? ' active' : ''); d.dataset.i = i; ssDots.appendChild(d); }
+      ssPrev.classList.toggle('hidden', ssCount <= 1);
+      ssNext.classList.toggle('hidden', ssCount <= 1);
+      ssEmpty.classList.remove('show');
+    } else {
+      ssEmpty.classList.add('show');
+      ssPrev.classList.add('hidden');
+      ssNext.classList.add('hidden');
     }
     const dl = document.getElementById('modal-downloads');
     dl.innerHTML = '';
@@ -458,6 +474,17 @@ function start() {
       el.parentElement.classList.toggle('open');
     });
   });
+
+  function ssGo(i) {
+    if (i < 0) i = ssCount - 1;
+    if (i >= ssCount) i = 0;
+    ssIndex = i;
+    ssTrack.style.transform = 'translateX(-' + (i * 100) + '%)';
+    ssDots.querySelectorAll('.ss-dot').forEach((d, j) => d.classList.toggle('active', j === i));
+  }
+  ssPrev?.addEventListener('click', () => ssGo(ssIndex - 1));
+  ssNext?.addEventListener('click', () => ssGo(ssIndex + 1));
+  ssDots?.addEventListener('click', (e) => { if (e.target.dataset.i) ssGo(parseInt(e.target.dataset.i)); });
 
   function ui() {
     document.querySelectorAll('[data-room]').forEach(el => {
