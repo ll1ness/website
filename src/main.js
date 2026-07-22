@@ -405,6 +405,21 @@ function start() {
       });
       menuEl.appendChild(col);
     });
+    // Portfolio cards
+    const cardsEl = document.getElementById('project-cards');
+    if (cardsEl) {
+      projectsData.slice(0, 5).forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        card.style.cursor = 'pointer';
+        card.innerHTML =
+          '<div class="card-head"><span class="card-icon">' + (p.icon || '📄') +
+          '</span><h3>' + p.name + '</h3></div><p>' + (p.tagline || '') +
+          '</p><div class="card-tags">' + (p.tags || []).map(t => '<span>' + t + '</span>').join('') + '</div>';
+        card.addEventListener('click', () => openModal(p.id));
+        cardsEl.appendChild(card);
+      });
+    }
   }).catch(() => {});
 
   function openModal(id) {
