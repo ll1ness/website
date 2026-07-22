@@ -160,15 +160,14 @@ function uniformScale(root) {
   const size = box.getSize(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z);
   console.log(`${root.name}: bbox ${size.x.toFixed(4)}x${size.y.toFixed(4)}x${size.z.toFixed(4)} max=${maxDim.toFixed(4)}`);
-  if (maxDim > 0.001 && maxDim < 1000) {
+  if (maxDim > 0.001 && maxDim < 1000000) {
     let s = ORBIT_R * 0.35 / maxDim;
-    s = Math.max(0.02, Math.min(s, 10));
+    s = Math.max(0.0001, Math.min(s, 10));
     root.scale.set(s, s, s);
-    console.log(`${root.name}: scaled x${s.toFixed(4)} → final ${(maxDim*s).toFixed(3)}`);
+    console.log(`${root.name}: scaled x${s.toFixed(6)} → final ${(maxDim*s).toFixed(3)}`);
     if (root.name === 'Земля') earthRadius = maxDim * s / 2;
     return;
   }
-  // Try bbox on first mesh child only (skip bones/skeletons)
   let mBox = null;
   root.traverse((c) => {
     if (c.isMesh && !mBox) {
@@ -179,16 +178,15 @@ function uniformScale(root) {
     const mSize = mBox.getSize(new THREE.Vector3());
     const mMax = Math.max(mSize.x, mSize.y, mSize.z);
     console.log(`${root.name}: mesh-only bbox ${mSize.x.toFixed(4)}x${mSize.y.toFixed(4)}x${mSize.z.toFixed(4)} max=${mMax.toFixed(4)}`);
-    if (mMax > 0.001 && mMax < 1000) {
+    if (mMax > 0.001 && mMax < 1000000) {
       let s = ORBIT_R * 0.35 / mMax;
-      s = Math.max(0.02, Math.min(s, 10));
+      s = Math.max(0.0001, Math.min(s, 10));
       root.scale.set(s, s, s);
-      console.log(`${root.name}: mesh-scaled x${s.toFixed(4)} → final ${(mMax*s).toFixed(3)}`);
+      console.log(`${root.name}: mesh-scaled x${s.toFixed(6)} → final ${(mMax*s).toFixed(3)}`);
       if (root.name === 'Земля') earthRadius = mMax * s / 2;
       return;
     }
   }
-  // Last resort: fixed scale
   const s = 1.5;
   root.scale.set(s, s, s);
   console.log(`${root.name}: fallback scale x${s} (fixed)`);
