@@ -124,22 +124,30 @@ void main() {
 const atmosFrag = `
 uniform vec3 glowColor;
 uniform float intensity;
+uniform vec3 sphereCenter;
+uniform float sphereRadius;
 varying vec3 vNormal;
 varying vec3 vWorldPos;
 void main() {
   vec3 viewDir = normalize(cameraPosition - vWorldPos);
   float rim = 1.0 - abs(dot(viewDir, vNormal));
   rim = pow(rim, 4.0);
-  float alpha = rim * intensity * 0.55;
+  float camDist = distance(cameraPosition, sphereCenter);
+  float insideAtmos = clamp((sphereRadius - camDist) / (sphereRadius * 0.25), 0.0, 1.0);
+  float alpha = max(rim, insideAtmos) * intensity * 0.55;
   gl_FragColor = vec4(glowColor, alpha);
 }
 `;
 
 function createAtmosphere(parent, radius, color) {
+  const center = new THREE.Vector3();
+  parent.getWorldPosition(center);
   const geo = new THREE.SphereGeometry(radius, 48, 48);
   atmosUniforms = {
     glowColor: { value: new THREE.Color(color) },
     intensity: { value: 1.0 },
+    sphereCenter: { value: center },
+    sphereRadius: { value: radius },
   };
   const mat = new THREE.ShaderMaterial({
     vertexShader: atmosVert,
@@ -269,7 +277,7 @@ function start() {
 
   // Camera starts on Earth surface looking away, flies out then turns to Earth
   const introEndPos = getCamPos(0, 0);
-  const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius * 0.8 : 1.5);
+  const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius : 1.5);
   camera.position.copy(introStartPos);
   camera.lookAt(0, 100, 0);
 
