@@ -36,6 +36,7 @@ button,input,textarea{font-family:inherit}
 .loader-text{font-family:var(--mono);font-size:11px;letter-spacing:4px;color:var(--text-dim);text-transform:uppercase;position:relative;z-index:1}
 .loader-progress{width:120px;height:2px;background:var(--border-light);border-radius:1px;overflow:hidden;position:relative;z-index:1}
 .loader-bar{height:100%;width:0;background:var(--text);border-radius:1px;transition:width .3s}
+.loader-powered{font-size:11px;color:var(--text-dim);letter-spacing:2px;font-family:var(--mono)}
 .loader-credit{position:fixed;right:20px;bottom:16px;font-family:var(--mono);font-size:9px;color:var(--text-dim);opacity:.45;z-index:1;letter-spacing:.5px;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
