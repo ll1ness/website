@@ -5,7 +5,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const N = 8, D = 1000, ORBIT_R = 15, INTRO_D = 2500;
+const N = 8, D = 1000, ORBIT_R = 15, INTRO_D = 3500;
 
 const DIAM = 12756;
 const RATIO = (d) => Math.pow(d / DIAM, 0.4);
@@ -51,7 +51,7 @@ function updateLoader() {
 
 function completeLoading() {
   loaderEl.classList.add('done');
-  introStart = performance.now();
+  introStart = performance.now() + 500;
   document.body.style.cursor = 'default';
 }
 
@@ -455,12 +455,12 @@ function start() {
   const endTheta = Math.atan2(toSun.x, toSun.z);
   const introEndPos = getCamPos(2, endTheta, endPhi);
   const introStartPos = new THREE.Vector3(
-    ep[0] + toSun.x * (ORBIT_R * 0.4),
-    ep[1] + toSun.y * (ORBIT_R * 0.4),
-    ep[2] + toSun.z * (ORBIT_R * 0.4)
+    ep[0] + toSun.x * ((earthRadius > 0 ? earthRadius : 2) * 1.3),
+    ep[1] + toSun.y * ((earthRadius > 0 ? earthRadius : 2) * 1.3),
+    ep[2] + toSun.z * ((earthRadius > 0 ? earthRadius : 2) * 1.3)
   );
   camera.position.copy(introStartPos);
-  camera.lookAt(ep[0], ep[1], ep[2]);
+  camera.lookAt(ep[0], 100, ep[2]);
 
   function go(r) {
     if (introActive || trans) return;
@@ -695,20 +695,42 @@ function start() {
 
   function smoothstep(t) { return t * t * (3 - 2 * t); }
 
+  const ORBIT_SPEED = [0.00012, 0.00008, 0.00005, 0.000036, 0.00002, 0.000014, 0.000008, 0.000005];
+  const orbitAngle = planetDefs.map((def, i) => {
+    const a = AU_INCL[i][1] * Math.PI / 180;
+    return a;
+  });
+
   animate();
 
   function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
 
-    if (satPivot) satPivot.rotation.y += 0.0015;
-    if (moonPivot) moonPivot.rotation.y += 0.0003;
+    if (satPivot) satPivot.rotation.y += 0.0007;
+    if (moonPivot) moonPivot.rotation.y += 0.00015;
     orbitR += (targetOrbitR - orbitR) * 0.08;
     if (sunGroup) sunGroup.rotation.y += 0.00015;
     if (sunState) {
       sunState.shader.uniforms.uTime.value += 0.016;
     }
     pivots.forEach((p, i) => p.rotation.y += ROT_BASE / ROT_PERIOD[i]);
+
+    // Orbital motion around Sun
+    for (let i = 0; i < N; i++) {
+      orbitAngle[i] += ORBIT_SPEED[i];
+      const r = AU_INCL[i][0] * 80;
+      pivots[i].position.x = r * Math.cos(orbitAngle[i]);
+      pivots[i].position.z = r * Math.sin(orbitAngle[i]);
+      const pos = planetDefs[i].pos;
+      pos[0] = pivots[i].position.x;
+      pos[1] = pivots[i].position.y;
+      pos[2] = pivots[i].position.z;
+    }
+    // Update ep reference for camera/UI
+    ep[0] = pivots[2].position.x;
+    ep[1] = pivots[2].position.y;
+    ep[2] = pivots[2].position.z;
 
     if (skyMesh && earthRadius > 0) {
       const epp = planetDefs[2].pos;
@@ -721,22 +743,28 @@ function start() {
     }
 
     if (introActive) {
+      introEndPos.copy(getCamPos(2, endTheta, endPhi));
       const elapsed = performance.now() - introStart;
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
       camera.position.lerpVectors(introStartPos, introEndPos, s);
-      camera.lookAt(ep[0], ep[1], ep[2]);
+      camera.lookAt(
+        ep[0] * s + introStartPos.x * (1 - s),
+        ep[1] * s + (introStartPos.y + 100) * (1 - s),
+        ep[2] * s + introStartPos.z * (1 - s)
+      );
       if (_t >= 1) {
         introActive = false;
         theta = endTheta; phi = endPhi;
         cr = 2; tr = 2;
         camera.position.copy(introEndPos);
-        camera.lookAt(ep[0], ep[1], ep[2]);
+      camera.lookAt(ep[0], ep[1], ep[2]);
         uiEl.classList.remove('hidden');
         ui();
         document.getElementById('scroll-hint')?.classList.remove('hidden');
       }
     } else if (trans) {
+      toPos.copy(getCamPos(tr, 0, Math.PI / 4));
       const el = performance.now() - ts, _t = Math.min(el / D, 1), s = smoothstep(_t);
       camera.position.lerpVectors(fromPos, toPos, s);
       const cp = planetDefs[cr].pos, tp = planetDefs[tr].pos;
