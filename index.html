@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ll1ness — Space Portfolio</title>
+  <title>ll1ness</title>
   <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -13,7 +13,7 @@
     <div class="loader-spinner"></div>
     <div class="loader-text">Welcome</div>
     <div class="loader-progress"><div class="loader-bar"></div></div>
-    <div class="loader-powered">Powered by TechOne UI</div>
+    <div class="loader-logos"><img src="/assets/techone.png" class="loader-logo" alt="TechOne"><img src="/assets/AlbaLogo.png" class="loader-logo" alt="AlbaSpace"></div>
     <div class="loader-credit">Makima from &ldquo;Chainsaw Man&rdquo;</div>
   </div>
 
@@ -28,23 +28,19 @@
         <div class="dropdown" tabindex="0">
           <a href="#" class="drop-btn">Карта сайта <span class="drop-arrow">▼</span></a>
             <div class="drop-menu">
-              <a href="#" data-room="0">Меркурий</a>
-              <a href="#" data-room="1">Венера</a>
-              <a href="#" data-room="2">Земля</a>
-              <a href="#" data-room="3">Марс</a>
-              <a href="#" data-room="4">Юпитер</a>
-              <a href="#" data-room="5">Сатурн</a>
-              <a href="#" data-room="6">Уран</a>
-              <a href="#" data-room="7">Нептун</a>
+              <a href="#" data-page="0">Главная</a>
+              <a href="#" data-page="1">Проекты</a>
+              <a href="#" data-page="2">ЧаВо</a>
+              <a href="#" data-page="3">Контакты</a>
             </div>
         </div>
         <div class="dropdown" tabindex="0">
           <a href="#" class="drop-btn">Продукты <span class="drop-arrow">▼</span></a>
           <div class="drop-menu drop-menu--cols" id="product-menu"></div>
         </div>
-        <a href="#" data-room="2">Навыки</a>
-        <a href="#" data-room="5">Контакты</a>
-        <a href="#" data-room="4">ЧаВо</a>
+        <a href="#" data-page="0">Главная</a>
+        <a href="#" data-page="3">Контакты</a>
+        <a href="#" data-page="2">ЧаВо</a>
         <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
       </nav>
     </header>
@@ -63,6 +59,7 @@
     <div id="room-label">
       <span class="room-idx">03</span>
       <span class="room-name">Земля</span>
+      <span class="room-author">by <img src="/assets/AlbaLogo.png"> AlbaSpace</span>
     </div>
 
     <div id="scroll-hint">
@@ -71,94 +68,14 @@
   </div>
 
   <div id="overlays">
-    <div class="room-overlay" data-room="0">
-      <div class="overlay-content"></div>
-    </div>
-
-    <div class="room-overlay" data-room="1">
-      <div class="overlay-content"></div>
-    </div>
-
-    <div class="room-overlay" data-room="2">
-      <div class="overlay-content">
-        <p class="overlay-label">ПРИВЕТ, Я</p>
-        <h1 class="overlay-title">ll1ness</h1>
-        <p class="overlay-desc">Indy software engineer ✨ Web-developer 📐 Crafting web apps, desktop apps and API 💎 Like to code as hobby 🧬🛡️</p>
-        <div class="overlay-stats">
-          <div class="stat-item"><span class="stat-n">16</span><span class="stat-l">Проектов</span></div>
-          <div class="stat-item"><span class="stat-n">3</span><span class="stat-l">Пинов</span></div>
-          <div class="stat-item"><span class="stat-n">✦</span><span class="stat-l">SparkStudio</span></div>
-        </div>
-        <div class="overlay-actions">
-          <a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button" data-variant="primary">GitHub</a>
-          <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="room-overlay" data-room="3">
-      <div class="overlay-content">
-        <p class="overlay-label">ПОРТФОЛИО</p>
-        <h2 class="overlay-title">Проекты</h2>
-        <p class="overlay-desc">Мои открытые проекты на GitHub</p>
-        <div class="project-list" id="project-cards"></div>
-      </div>
-    </div>
-
-    <div class="room-overlay" data-room="4">
-      <div class="overlay-content">
-        <p class="overlay-label">ЧАВО</p>
-        <h2 class="overlay-title">Часто задаваемые вопросы</h2>
-        <p class="overlay-desc">Ответы на популярные вопросы</p>
-        <div class="faq-list">
-          <div class="faq-item">
-            <div class="faq-q">Кто ты такой?</div>
-            <div class="faq-a">Indy software engineer и web-разработчик. Создаю веб-приложения, десктопные программы и API. Кодинг — моё хобби.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">Какие проекты ты делаешь?</div>
-            <div class="faq-a">Работаю над TechOne UI (дизайн-фреймворк), Spark Studio (IDE на JavaFX/JPHP), Weather Seeker и другими открытыми проектами на GitHub.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">Как с тобой связаться?</div>
-            <div class="faq-a">Лучший способ — Discord (виджет на странице контактов). Также можешь написать на GitHub или в Steam.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">Ты используешь AI в разработке?</div>
-            <div class="faq-a">Да, использую профессиональные AI-инструменты для ускорения разработки, но это не vibecode — каждая строка осмысленна.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">Какие технологии ты знаешь?</div>
-            <div class="faq-a">Веб: HTML, CSS, JavaScript, Three.js. Бэкенд: PHP, Java, Node.js, Python. Инструменты: Git, Docker, AI-assisted coding.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="room-overlay" data-room="5">
-      <div class="overlay-content">
-        <p class="overlay-label">КОНТАКТЫ</p>
-        <h2 class="overlay-title">Связь</h2>
-        <p class="overlay-desc">Напишите мне</p>
-        <div style="margin-bottom:16px;pointer-events:auto">
-          <iframe src="https://discord.com/widget?id=1443358714315800711&theme=dark" width="350" height="400" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
-        </div>
-        <div class="social-btns">
-          <a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button">GitHub</a>
-          <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a>
-          <a href="https://steamcommunity.com/id/ll1ness/" target="_blank" rel="noopener" class="to-button">Steam</a>
-          <a href="https://orcid.org/0009-0001-2539-7302" target="_blank" rel="noopener" class="to-button">ORCID</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="room-overlay" data-room="6">
-      <div class="overlay-content"></div>
-    </div>
-
-    <div class="room-overlay" data-room="7">
-      <div class="overlay-content"></div>
-    </div>
+    <div class="room-overlay" data-room="0"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="1"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="2"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="3"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="4"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="5"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="6"><div class="overlay-content"></div></div>
+    <div class="room-overlay" data-room="7"><div class="overlay-content"></div></div>
   </div>
 
   <div id="modal" class="modal">
@@ -181,6 +98,14 @@
         <div class="ss-empty" id="ss-empty">Нет скриншотов</div>
       </div>
       <div class="modal-downloads" id="modal-downloads"></div>
+    </div>
+  </div>
+
+  <div id="page-modal" class="modal">
+    <div class="modal-bg"></div>
+    <div class="modal-body page-modal-body">
+      <button class="modal-close page-modal-close" aria-label="Закрыть">✕</button>
+      <div id="page-modal-content"></div>
     </div>
   </div>
 
