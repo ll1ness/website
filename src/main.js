@@ -7,15 +7,18 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
 const N = 8, D = 1200, ORBIT_R = 12, INTRO_D = 4000;
 
+const DIAM = 12756; // Earth diameter km
+const RATIO = (d) => Math.pow(d / DIAM, 0.4);
+
 const planetDefs = [
-  { pos: [18, 0, 0],    file: 'Mercury_1_4878.glb',      color: 0x9ea4ad },
-  { pos: [30, 0.5, 0],   file: 'Venus_1_12103.glb',       color: 0xedd59e },
-  { pos: [42, -0.5, 0],  file: 'earth.glb',               color: 0x4a90d9 },
-  { pos: [54, 1, 0],     file: '24881_Mars_1_6792.glb',   color: 0xd4684a },
-  { pos: [75, 0, 3],     file: 'jupiter.glb',             color: 0xd4a06a },
-  { pos: [96, -1.5, -3], file: 'Saturn_1_120536.glb',     color: 0xe8d5a0 },
-  { pos: [114, 1, 6],    file: 'Uranus_1_51118.glb',      color: 0x7ec8e3 },
-  { pos: [132, -0.5, -6], file: 'Neptune_1_49528.glb',    color: 0x3b6ea0 },
+  { pos: [16, 0, 0],        file: 'Mercury_1_4878.glb',      color: 0x9ea4ad, ratio: RATIO(4879) },
+  { pos: [13.5, 0.3, 16.1], file: 'Venus_1_12103.glb',       color: 0xedd59e, ratio: RATIO(12104) },
+  { pos: [-12.5, -0.3, 21.7], file: 'earth.glb',              color: 0x4a90d9, ratio: RATIO(12756) },
+  { pos: [-29.1, 0.5, -10.6], file: '24881_Mars_1_6792.glb',  color: 0xd4684a, ratio: RATIO(6792) },
+  { pos: [9.9, -0.5, -56.1],  file: 'jupiter.glb',            color: 0xd4a06a, ratio: RATIO(142984) },
+  { pos: [72.3, 0.5, -26.3],  file: 'Saturn_1_120536.glb',    color: 0xe8d5a0, ratio: RATIO(120536) },
+  { pos: [37.6, -0.3, 103.4], file: 'Uranus_1_51118.glb',     color: 0x7ec8e3, ratio: RATIO(51118) },
+  { pos: [-128.7, 0.8, 46.9], file: 'Neptune_1_49528.glb',    color: 0x3b6ea0, ratio: RATIO(49528) },
 ];
 const names = ['Меркурий', 'Венера', 'Земля', 'Марс', 'Юпитер', 'Сатурн', 'Уран', 'Нептун'];
 
@@ -28,7 +31,7 @@ const loaderEl = document.getElementById('loader');
 const loaderBar = document.querySelector('.loader-bar');
 const uiEl = document.getElementById('ui');
 let loadCount = 0;
-const LOAD_TOTAL = 9;
+const LOAD_TOTAL = 10;
 
 function updateLoader() {
   loadCount = Math.min(loadCount + 1, LOAD_TOTAL);
@@ -75,8 +78,13 @@ planetDefs.forEach((def, i) => {
   pointLights.push(pl);
 });
 
+const sunLight = new THREE.PointLight(0xffeedd, 60, 600);
+sunLight.position.set(0, 0, 0);
+scene.add(sunLight);
+
 const pivots = [];
 let satPivot = null;
+let sunGroup = null;
 
 function circleTexture() {
   const c = document.createElement('canvas'); c.width = 32; c.height = 32;
@@ -159,16 +167,16 @@ function createGasGiant(parent, size) {
   return m;
 }
 
-function uniformScale(root) {
+function uniformScale(root, ratio = 1) {
   const box = new THREE.Box3().setFromObject(root);
   const size = box.getSize(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z);
   console.log(`${root.name}: bbox ${size.x.toFixed(4)}x${size.y.toFixed(4)}x${size.z.toFixed(4)} max=${maxDim.toFixed(4)}`);
   if (maxDim > 0.001 && maxDim < 1000000) {
-    let s = ORBIT_R * 0.35 / maxDim;
-    s = Math.max(0.0001, Math.min(s, 10));
+    let s = (ORBIT_R * 0.35 / maxDim) * ratio;
+    s = Math.max(0.0001, Math.min(s, 20));
     root.scale.set(s, s, s);
-    console.log(`${root.name}: scaled x${s.toFixed(6)} → final ${(maxDim*s).toFixed(3)}`);
+    console.log(`${root.name}: scaled x${s.toFixed(6)} (ratio ${ratio}) → final ${(maxDim*s).toFixed(3)}`);
     if (root.name === 'Земля') earthRadius = maxDim * s / 2;
     return;
   }
@@ -183,10 +191,10 @@ function uniformScale(root) {
     const mMax = Math.max(mSize.x, mSize.y, mSize.z);
     console.log(`${root.name}: mesh-only bbox ${mSize.x.toFixed(4)}x${mSize.y.toFixed(4)}x${mSize.z.toFixed(4)} max=${mMax.toFixed(4)}`);
     if (mMax > 0.001 && mMax < 1000000) {
-      let s = ORBIT_R * 0.35 / mMax;
-      s = Math.max(0.0001, Math.min(s, 10));
+      let s = (ORBIT_R * 0.35 / mMax) * ratio;
+      s = Math.max(0.0001, Math.min(s, 20));
       root.scale.set(s, s, s);
-      console.log(`${root.name}: mesh-scaled x${s.toFixed(6)} → final ${(mMax*s).toFixed(3)}`);
+      console.log(`${root.name}: mesh-scaled x${s.toFixed(6)} (ratio ${ratio}) → final ${(mMax*s).toFixed(3)}`);
       if (root.name === 'Земля') earthRadius = mMax * s / 2;
       return;
     }
@@ -255,7 +263,7 @@ async function init() {
       m.traverse((c) => { if (c.isMesh) meshCount++; });
       if (meshCount === 0) throw new Error('no meshes found');
       group.add(m);
-      uniformScale(m);
+      uniformScale(m, def.ratio);
       m.traverse((c) => { if (c.isMesh) console.log(`${names[i]} mesh:`, c.geometry.type, c.material.type, c.material.color?.getHex()); });
     } catch (err) {
       console.error(`${names[i]}: ${err}`);
@@ -291,6 +299,28 @@ async function init() {
   }
   updateLoader();
 
+  try {
+    const gltf = await new Promise((resolve, reject) => {
+      loader.load('/models/sun.glb',
+        (g) => resolve(g),
+        (xhr) => { if (xhr.total) console.log(`sun: ${Math.round(xhr.loaded / xhr.total * 100)}%`); },
+        (e) => reject(e)
+      );
+    });
+    const m = gltf.scene;
+    m.name = 'Sun';
+    m.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { c.material.emissive = new THREE.Color(0xffaa44); c.material.emissiveIntensity = 0.3; } } });
+    const sg = new THREE.Group();
+    sg.add(m);
+    scene.add(sg);
+    uniformScale(m, 6.53);
+    sunGroup = sg;
+    console.log('sun: OK');
+  } catch (err) {
+    console.error(`sun: ${err?.message || err}`);
+  }
+  updateLoader();
+
   const er = earthRadius > 0 ? earthRadius : 2;
   skyMesh = createSkyDome(pivots[2], er * 3.5);
 
@@ -322,9 +352,9 @@ function start() {
   }
 
   const introEndPos = getCamPos(0, 0, Math.PI / 4);
-  const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius : 1.5);
+  const introStartPos = new THREE.Vector3(0, 15, 35);
   camera.position.copy(introStartPos);
-  camera.lookAt(planetDefs[0].pos[0], 100, planetDefs[0].pos[2]);
+  camera.lookAt(0, 0, 0);
 
   function go(r) {
     if (introActive || trans) return;
@@ -512,6 +542,7 @@ function start() {
     const t = clock.getElapsedTime();
 
     if (satPivot) satPivot.rotation.y += 0.0006;
+    if (sunGroup) sunGroup.rotation.y += 0.00015;
     pivots.forEach((p, i) => p.rotation.y += 0.0003 * (i + 1));
 
     pointLights.forEach((l, i) => {
@@ -533,7 +564,7 @@ function start() {
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
       camera.position.lerpVectors(introStartPos, introEndPos, s);
-      camera.lookAt(planetDefs[0].pos[0], 100 * (1 - s), planetDefs[0].pos[2]);
+      camera.lookAt(planetDefs[0].pos[0] * s, planetDefs[0].pos[1] * s, planetDefs[0].pos[2] * s);
       if (_t >= 1) {
         introActive = false;
         theta = 0; phi = Math.PI / 4;
