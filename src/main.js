@@ -44,6 +44,13 @@ const uiEl = document.getElementById('ui');
 let loadCount = 0;
 const LOAD_TOTAL = 11;
 
+const ruWarning = document.getElementById('ru-warning');
+const ruClose = ruWarning?.querySelector('.ru-warning-close');
+const isRu = navigator.language.startsWith('ru') ||
+  Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Moscow');
+if (ruWarning && isRu) ruWarning.classList.remove('hidden');
+ruClose?.addEventListener('click', () => ruWarning?.classList.add('hidden'));
+
 function updateLoader() {
   loadCount = Math.min(loadCount + 1, LOAD_TOTAL);
   if (loaderBar) loaderBar.style.width = (loadCount / LOAD_TOTAL * 100) + '%';

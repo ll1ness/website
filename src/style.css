@@ -37,6 +37,10 @@ button,input,textarea{font-family:inherit}
 .loader-bar{height:100%;width:0;background:var(--text);border-radius:1px;transition:width .3s}
 .loader-logos{position:fixed;left:20px;bottom:16px;display:flex;gap:10px;z-index:1;pointer-events:none}
 .loader-logo{height:28px;width:auto;opacity:.55}
+.ru-warning{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;background:rgba(180,40,40,.15);border:1px solid rgba(180,40,40,.3);border-radius:var(--radius);padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--text-dim);z-index:2;max-width:90%;text-align:center;line-height:1.4;pointer-events:auto}
+.ru-warning.hidden{display:none}
+.ru-warning-close{background:none;border:none;color:var(--text-dim);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;opacity:.6}
+.ru-warning-close:hover{opacity:1}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ===== UI CONTAINER ===== */
