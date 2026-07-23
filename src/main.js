@@ -85,6 +85,7 @@ scene.add(sunLight);
 const pivots = [];
 let satPivot = null;
 let sunGroup = null;
+let sunState = null;
 
 function circleTexture() {
   const c = document.createElement('canvas'); c.width = 32; c.height = 32;
@@ -309,12 +310,153 @@ async function init() {
     });
     const m = gltf.scene;
     m.name = 'Sun';
-    m.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { c.material.emissive = new THREE.Color(0xffaa44); c.material.emissiveIntensity = 0.3; } } });
     const sg = new THREE.Group();
     sg.add(m);
     scene.add(sg);
     uniformScale(m, 6.53);
+
+    // Sun surface shader — animated plasma/boiling
+    const sunVS = `
+      varying vec3 vNormal;
+      varying vec3 vPos;
+      varying vec3 vViewDir;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vPos = position;
+        vNormal = normalize(normalMatrix * normal);
+        vViewDir = normalize(cameraPosition - wp.xyz);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`;
+    const sunFS = `
+      uniform float uTime;
+      varying vec3 vNormal;
+      varying vec3 vPos;
+      varying vec3 vViewDir;
+      float hash(vec3 p) {
+        p = fract(p * 0.3183099 + 0.1);
+        p *= 17.0;
+        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+      }
+      float snoise(vec3 p) {
+        vec3 i = floor(p); vec3 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = hash(i), b = hash(i+vec3(1,0,0)), c = hash(i+vec3(0,1,0)), d = hash(i+vec3(1,1,0));
+        float e = hash(i+vec3(0,0,1)), fg = hash(i+vec3(1,0,1)), g = hash(i+vec3(0,1,1)), h = hash(i+vec3(1,1,1));
+        return mix(mix(mix(a,b,f.x),mix(c,d,f.x),f.y),mix(mix(e,fg,f.x),mix(g,h,f.x),f.y),f.z);
+      }
+      float fbm(vec3 p) {
+        float v = 0.0, a = 0.5;
+        for (int i = 0; i < 5; i++) { v += a * snoise(p); p = p * 2.0 + 100.0; a *= 0.5; }
+        return v;
+      }
+      void main() {
+        vec3 p = vPos * 0.8 + uTime * 0.015;
+        float n = fbm(p);
+        vec3 dark = vec3(1.0, 0.45, 0.05);
+        vec3 bright = vec3(1.0, 0.85, 0.25);
+        vec3 col = mix(dark, bright, n);
+        float hot = fbm(p * 2.0 - uTime * 0.02);
+        hot = smoothstep(0.6, 0.9, hot);
+        col += vec3(1.0, 0.7, 0.2) * hot * 0.6;
+        vec3 norm = normalize(vNormal);
+        float rim = 1.0 - max(0.0, dot(norm, vViewDir));
+        rim = pow(rim, 0.3);
+        col += vec3(1.0, 0.3, 0.0) * rim * 0.4;
+        gl_FragColor = vec4(col, 1.0);
+      }`;
+    const sunMat = new THREE.ShaderMaterial({
+      uniforms: { uTime: { value: 0 } },
+      vertexShader: sunVS,
+      fragmentShader: sunFS,
+    });
+    m.traverse(c => { if (c.isMesh) c.material = sunMat; });
+
+    // Corona — animated noise-driven outer glow
+    const coronaFS = `
+      uniform float uTime;
+      varying vec3 vPos;
+      varying vec3 vViewDir;
+      float hash(vec3 p) {
+        p = fract(p * 0.3183099 + 0.1);
+        p *= 17.0;
+        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+      }
+      float snoise(vec3 p) {
+        vec3 i = floor(p); vec3 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = hash(i), b = hash(i+vec3(1,0,0)), c = hash(i+vec3(0,1,0)), d = hash(i+vec3(1,1,0));
+        float e = hash(i+vec3(0,0,1)), fg = hash(i+vec3(1,0,1)), g = hash(i+vec3(0,1,1)), h = hash(i+vec3(1,1,1));
+        return mix(mix(mix(a,b,f.x),mix(c,d,f.x),f.y),mix(mix(e,fg,f.x),mix(g,h,f.x),f.y),f.z);
+      }
+      void main() {
+        float d = length(vPos);
+        float fade = 1.0 - smoothstep(0.85, 1.5, d);
+        vec3 np = vPos * 2.0 + uTime * 0.03;
+        float n = snoise(np);
+        float streamer = smoothstep(0.3, 0.7, n) * (1.0 - fade);
+        float alpha = (fade * 0.25 + streamer * 0.4) * (0.8 + 0.2 * sin(uTime * 0.4 + d * 3.0));
+        vec3 col = mix(vec3(1.0, 0.6, 0.1), vec3(1.0, 0.9, 0.4), n);
+        gl_FragColor = vec4(col, alpha * 0.6);
+      }`;
+    const coronaMat = new THREE.ShaderMaterial({
+      uniforms: { uTime: { value: 0 } },
+      vertexShader: `
+        varying vec3 vPos;
+        varying vec3 vViewDir;
+        void main() {
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vPos = position;
+          vViewDir = normalize(cameraPosition - wp.xyz);
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }`,
+      fragmentShader: coronaFS,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.BackSide,
+    });
+    const corona = new THREE.Mesh(new THREE.SphereGeometry(1.5, 48, 48), coronaMat);
+    sg.add(corona);
+
+    // Flare particles
+    const FLARE_N = 400;
+    const fPos = new Float32Array(FLARE_N * 3);
+    const fSiz = new Float32Array(FLARE_N);
+    const fFlareData = [];
+    for (let i = 0; i < FLARE_N; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const dir = new THREE.Vector3(Math.sin(phi)*Math.cos(theta), Math.sin(phi)*Math.sin(theta), Math.cos(phi));
+      const dist = 1 + Math.random() * 0.15;
+      fPos[i*3] = dir.x * dist;
+      fPos[i*3+1] = dir.y * dist;
+      fPos[i*3+2] = dir.z * dist;
+      fSiz[i] = 0.02 + Math.random() * 0.04;
+      fFlareData.push({ dir, speed: 0.003 + Math.random() * 0.012, life: Math.random() * 6, maxLife: 3 + Math.random() * 6 });
+    }
+    const fGeo = new THREE.BufferGeometry();
+    fGeo.setAttribute('position', new THREE.BufferAttribute(fPos, 3));
+    fGeo.setAttribute('size', new THREE.BufferAttribute(fSiz, 1));
+    const fTex = (() => {
+      const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(16,16,0,16,16,16);
+      g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.15,'rgba(255,200,100,0.8)');
+      g.addColorStop(0.5,'rgba(255,100,30,0.3)'); g.addColorStop(1,'rgba(255,0,0,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,32,32);
+      return new THREE.CanvasTexture(c);
+    })();
+    const flares = new THREE.Points(fGeo, new THREE.PointsMaterial({
+      map: fTex, size: 0.5, transparent: true, blending: THREE.AdditiveBlending,
+      depthWrite: false, sizeAttenuation: true, color: 0xffaa44, opacity: 0.7,
+    }));
+    sg.add(flares);
+
     sunGroup = sg;
+    sunState = {
+      shader: sunMat, corona: corona, flares,
+      fData: fFlareData, fPos, fN: FLARE_N, sr: 1,
+    };
     console.log('sun: OK');
   } catch (err) {
     console.error(`sun: ${err?.message || err}`);
@@ -543,6 +685,28 @@ function start() {
 
     if (satPivot) satPivot.rotation.y += 0.0006;
     if (sunGroup) sunGroup.rotation.y += 0.00015;
+    if (sunState) {
+      const dt = 0.016;
+      sunState.shader.uniforms.uTime.value += dt;
+      sunState.corona.material.uniforms.uTime.value += dt;
+      const pos = sunState.flares.geometry.attributes.position.array;
+      for (let i = 0; i < sunState.fN; i++) {
+        const f = sunState.fData[i];
+        f.life += dt;
+        if (f.life >= f.maxLife) {
+          f.life = 0; f.maxLife = 3 + Math.random() * 6; f.speed = 0.003 + Math.random() * 0.012;
+          const th = Math.random() * 6.2832, ph = Math.acos(2 * Math.random() - 1);
+          f.dir.set(Math.sin(ph)*Math.cos(th), Math.sin(ph)*Math.sin(th), Math.cos(ph));
+          pos[i*3] = f.dir.x * 1; pos[i*3+1] = f.dir.y * 1; pos[i*3+2] = f.dir.z * 1;
+        } else {
+          const spd = f.speed * (1 - f.life / f.maxLife * 0.3);
+          pos[i*3] += f.dir.x * spd; pos[i*3+1] += f.dir.y * spd; pos[i*3+2] += f.dir.z * spd;
+        }
+      }
+      sunState.flares.geometry.attributes.position.needsUpdate = true;
+      const pulse = 1 + Math.sin(t * 0.4) * 0.02;
+      sunState.corona.scale.set(pulse, pulse, pulse);
+    }
     pivots.forEach((p, i) => p.rotation.y += 0.0003 * (i + 1));
 
     pointLights.forEach((l, i) => {
