@@ -5,20 +5,21 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const N = 8, D = 1200, ORBIT_R = 12, INTRO_D = 4000;
+const N = 8, D = 2500, ORBIT_R = 20, INTRO_D = 4000;
 
 const DIAM = 12756; // Earth diameter km
 const RATIO = (d) => Math.pow(d / DIAM, 0.4);
+const AU = (au) => Math.sqrt(au) * 50;
 
 const planetDefs = [
-  { pos: [16, 0, 0],        file: 'Mercury_1_4878.glb',      color: 0x9ea4ad, ratio: RATIO(4879) },
-  { pos: [13.5, 0.3, 16.1], file: 'Venus_1_12103.glb',       color: 0xedd59e, ratio: RATIO(12104) },
-  { pos: [-12.5, -0.3, 21.7], file: 'earth.glb',              color: 0x4a90d9, ratio: RATIO(12756) },
-  { pos: [-29.1, 0.5, -10.6], file: '24881_Mars_1_6792.glb',  color: 0xd4684a, ratio: RATIO(6792) },
-  { pos: [9.9, -0.5, -56.1],  file: 'jupiter.glb',            color: 0xd4a06a, ratio: RATIO(142984) },
-  { pos: [72.3, 0.5, -26.3],  file: 'Saturn_1_120536.glb',    color: 0xe8d5a0, ratio: RATIO(120536) },
-  { pos: [37.6, -0.3, 103.4], file: 'Uranus_1_51118.glb',     color: 0x7ec8e3, ratio: RATIO(51118) },
-  { pos: [-128.7, 0.8, 46.9], file: 'Neptune_1_49528.glb',    color: 0x3b6ea0, ratio: RATIO(49528) },
+  { pos: [AU(0.39), 0, 0],            file: 'Mercury_1_4878.glb',      color: 0x9ea4ad, ratio: RATIO(4879) },
+  { pos: [AU(0.72)*Math.cos(50), 0.5, AU(0.72)*Math.sin(50)], file: 'Venus_1_12103.glb', color: 0xedd59e, ratio: RATIO(12104) },
+  { pos: [AU(1.0)*Math.cos(120), -0.5, AU(1.0)*Math.sin(120)], file: 'earth.glb',       color: 0x4a90d9, ratio: RATIO(12756) },
+  { pos: [AU(1.52)*Math.cos(200), 1, AU(1.52)*Math.sin(200)], file: '24881_Mars_1_6792.glb', color: 0xd4684a, ratio: RATIO(6792) },
+  { pos: [AU(5.2)*Math.cos(280), -1, AU(5.2)*Math.sin(280)], file: 'jupiter.glb',       color: 0xd4a06a, ratio: RATIO(142984) },
+  { pos: [AU(9.54)*Math.cos(340), 0.5, AU(9.54)*Math.sin(340)], file: 'Saturn_1_120536.glb', color: 0xe8d5a0, ratio: RATIO(120536) },
+  { pos: [AU(19.2)*Math.cos(70), -0.5, AU(19.2)*Math.sin(70)], file: 'Uranus_1_51118.glb',  color: 0x7ec8e3, ratio: RATIO(51118) },
+  { pos: [AU(30.1)*Math.cos(160), 1, AU(30.1)*Math.sin(160)], file: 'Neptune_1_49528.glb',  color: 0x3b6ea0, ratio: RATIO(49528) },
 ];
 const names = ['Меркурий', 'Венера', 'Земля', 'Марс', 'Юпитер', 'Сатурн', 'Уран', 'Нептун'];
 
@@ -45,7 +46,7 @@ function completeLoading() {
 }
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x03030a, 0.0004);
+scene.fog = new THREE.Fog(0x03030a, 50, 600);
 
 const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 1200);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -494,7 +495,7 @@ function start() {
   }
 
   const introEndPos = getCamPos(0, 0, Math.PI / 4);
-  const introStartPos = new THREE.Vector3(0, 15, 35);
+  const introStartPos = new THREE.Vector3(0, 30, 60);
   camera.position.copy(introStartPos);
   camera.lookAt(0, 0, 0);
 
