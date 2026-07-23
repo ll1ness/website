@@ -5,11 +5,11 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const N = 8, D = 2500, ORBIT_R = 20, INTRO_D = 4000;
+const N = 8, D = 2500, ORBIT_R = 15, INTRO_D = 4000;
 
 const DIAM = 12756; // Earth diameter km
 const RATIO = (d) => Math.pow(d / DIAM, 0.4);
-const AU = (au) => Math.sqrt(au) * 50;
+const AU = (au) => au * 30;
 
 const planetDefs = [
   { pos: [AU(0.39), 0, 0],            file: 'Mercury_1_4878.glb',      color: 0x9ea4ad, ratio: RATIO(4879) },
@@ -46,9 +46,9 @@ function completeLoading() {
 }
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x03030a, 50, 600);
+scene.fog = new THREE.Fog(0x03030a, 100, 1800);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 1200);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -495,7 +495,7 @@ function start() {
   }
 
   const introEndPos = getCamPos(0, 0, Math.PI / 4);
-  const introStartPos = new THREE.Vector3(0, 30, 60);
+  const introStartPos = new THREE.Vector3(0, 40, 60);
   camera.position.copy(introStartPos);
   camera.lookAt(0, 0, 0);
 
