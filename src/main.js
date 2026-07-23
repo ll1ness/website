@@ -5,15 +5,19 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const N = 4, D = 1200, ORBIT_R = 12, INTRO_D = 4000;
+const N = 8, D = 1200, ORBIT_R = 12, INTRO_D = 4000;
 
 const planetDefs = [
-  { pos: [0, 0, 0],        file: 'earth.glb',    color: 0x4a90d9 },
-  { pos: [60, 8, 45],      file: 'jupiter.glb',  color: 0xd4a06a },
-  { pos: [-55, -6, 65],    file: 'phobos.glb',   color: 0x8a7f6e },
-  { pos: [50, -8, -55],    file: 'sedna.glb',    color: 0xd4684a },
+  { pos: [18, 0, 0],    file: 'Mercury_1_4878.glb',      color: 0x9ea4ad },
+  { pos: [30, 0.5, 0],   file: 'Venus_1_12103.glb',       color: 0xedd59e },
+  { pos: [42, -0.5, 0],  file: 'earth.glb',               color: 0x4a90d9 },
+  { pos: [54, 1, 0],     file: '24881_Mars_1_6792.glb',   color: 0xd4684a },
+  { pos: [75, 0, 3],     file: 'jupiter.glb',             color: 0xd4a06a },
+  { pos: [96, -1.5, -3], file: 'Saturn_1_120536.glb',     color: 0xe8d5a0 },
+  { pos: [114, 1, 6],    file: 'Uranus_1_51118.glb',      color: 0x7ec8e3 },
+  { pos: [132, -0.5, -6], file: 'Neptune_1_49528.glb',    color: 0x3b6ea0 },
 ];
-const names = ['Земля', 'Юпитер', 'Фобос', 'Седна'];
+const names = ['Меркурий', 'Венера', 'Земля', 'Марс', 'Юпитер', 'Сатурн', 'Уран', 'Нептун'];
 
 let introActive = true;
 let introStart = 0;
@@ -24,7 +28,7 @@ const loaderEl = document.getElementById('loader');
 const loaderBar = document.querySelector('.loader-bar');
 const uiEl = document.getElementById('ui');
 let loadCount = 0;
-const LOAD_TOTAL = 5;
+const LOAD_TOTAL = 9;
 
 function updateLoader() {
   loadCount = Math.min(loadCount + 1, LOAD_TOTAL);
@@ -211,7 +215,7 @@ async function init() {
   });
 
   const sp = new THREE.Group();
-  pivots[0].add(sp);
+  pivots[2].add(sp);
   satPivot = sp;
 
   for (let i = 0; i < N; i++) {
@@ -255,16 +259,14 @@ async function init() {
       m.traverse((c) => { if (c.isMesh) console.log(`${names[i]} mesh:`, c.geometry.type, c.material.type, c.material.color?.getHex()); });
     } catch (err) {
       console.error(`${names[i]}: ${err}`);
-      // Gas giant fallback for Jupiter
-      if (i === 1) {
+      if (i === 4) {
         const g = createGasGiant(group, 2);
         g.name = names[i] + '_fallback';
-        if (i === 0) earthRadius = 2;
       } else {
         const fb = fallbackSphere(group, def.color, 2);
         fb.name = names[i] + '_fallback';
-        if (i === 0) earthRadius = 2;
       }
+      if (i === 2) earthRadius = 2;
     }
     updateLoader();
   }
@@ -290,7 +292,7 @@ async function init() {
   updateLoader();
 
   const er = earthRadius > 0 ? earthRadius : 2;
-  skyMesh = createSkyDome(pivots[0], er * 3.5);
+  skyMesh = createSkyDome(pivots[2], er * 3.5);
 
   console.log('Ready');
   completeLoading();
@@ -322,7 +324,7 @@ function start() {
   const introEndPos = getCamPos(0, 0, Math.PI / 4);
   const introStartPos = new THREE.Vector3(0, 0.5, earthRadius > 0 ? earthRadius : 1.5);
   camera.position.copy(introStartPos);
-  camera.lookAt(0, 100, 0);
+  camera.lookAt(planetDefs[0].pos[0], 100, planetDefs[0].pos[2]);
 
   function go(r) {
     if (introActive || trans) return;
@@ -531,12 +533,12 @@ function start() {
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
       camera.position.lerpVectors(introStartPos, introEndPos, s);
-      camera.lookAt(0, 100 * (1 - s), 0);
+      camera.lookAt(planetDefs[0].pos[0], 100 * (1 - s), planetDefs[0].pos[2]);
       if (_t >= 1) {
         introActive = false;
         theta = 0; phi = Math.PI / 4;
         camera.position.copy(introEndPos);
-        camera.lookAt(0, 0, 0);
+        camera.lookAt(planetDefs[0].pos[0], planetDefs[0].pos[1], planetDefs[0].pos[2]);
         uiEl.classList.remove('hidden');
         ui();
         document.getElementById('scroll-hint')?.classList.remove('hidden');
