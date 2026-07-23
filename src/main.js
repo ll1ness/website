@@ -9,7 +9,7 @@ const N = 8, D = 2500, ORBIT_R = 15, INTRO_D = 4000;
 
 const DIAM = 12756; // Earth diameter km
 const RATIO = (d) => Math.pow(d / DIAM, 0.4);
-const AU = (au) => au * 30;
+const AU = (au) => au * 45;
 
 const planetDefs = [
   { pos: [AU(0.39), 0, 0],            file: 'Mercury_1_4878.glb',      color: 0x9ea4ad, ratio: RATIO(4879) },
@@ -46,9 +46,9 @@ function completeLoading() {
 }
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x03030a, 100, 1800);
+scene.fog = new THREE.Fog(0x03030a, 200, 3000);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 2000);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 4000);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -314,7 +314,7 @@ async function init() {
     const sg = new THREE.Group();
     sg.add(m);
     scene.add(sg);
-    uniformScale(m, 6.53);
+    uniformScale(m, 0.4);
 
     // Sun surface shader — animated plasma/boiling
     const sunVS = `
@@ -473,7 +473,7 @@ async function init() {
 }
 
 function start() {
-  let cr = 0, tr = 0;
+  let cr = 2, tr = 2;
   let trans = false, ts = 0;
   let as = 0;
   let theta = 0, phi = Math.PI / 4;
@@ -483,6 +483,7 @@ function start() {
   const fromPos = new THREE.Vector3();
   const toPos = new THREE.Vector3();
   const camTarget = new THREE.Vector3();
+  const ep = planetDefs[2].pos;
 
   function getCamPos(idx, t, p) {
     const def = planetDefs[idx].pos;
@@ -494,10 +495,10 @@ function start() {
     );
   }
 
-  const introEndPos = getCamPos(0, 0, Math.PI / 4);
-  const introStartPos = new THREE.Vector3(0, 40, 60);
+  const introEndPos = getCamPos(2, 0, Math.PI / 4);
+  const introStartPos = new THREE.Vector3(ep[0], ep[1] + 0.5, ep[2] + earthRadius);
   camera.position.copy(introStartPos);
-  camera.lookAt(0, 0, 0);
+  camera.lookAt(ep[0], 100, ep[2]);
 
   function go(r) {
     if (introActive || trans) return;
@@ -512,7 +513,7 @@ function start() {
     if (introActive) return;
     as += e.deltaY;
     if (Math.abs(as) >= 60) { go(tr + (as > 0 ? 1 : -1)); as = 0; }
-    document.getElementById('scroll-hint')?.classList.toggle('hidden', tr > 0);
+    document.getElementById('scroll-hint')?.classList.toggle('hidden', tr !== 2);
   }, { passive: true });
 
   const cv = renderer.domElement;
@@ -717,7 +718,9 @@ function start() {
     });
 
     if (skyMesh && earthRadius > 0) {
-      const camDist = camera.position.length();
+      const epp = planetDefs[2].pos;
+      const dx = camera.position.x - epp[0], dy = camera.position.y - epp[1], dz = camera.position.z - epp[2];
+      const camDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
       const fadeStart = earthRadius;
       const fadeEnd = earthRadius * 3;
       const d = (camDist - fadeStart) / (fadeEnd - fadeStart);
@@ -729,12 +732,13 @@ function start() {
       const _t = Math.min(elapsed / INTRO_D, 1);
       const s = smoothstep(_t);
       camera.position.lerpVectors(introStartPos, introEndPos, s);
-      camera.lookAt(planetDefs[0].pos[0] * s, planetDefs[0].pos[1] * s, planetDefs[0].pos[2] * s);
+      camera.lookAt(ep[0], 100 * (1 - s), ep[2]);
       if (_t >= 1) {
         introActive = false;
         theta = 0; phi = Math.PI / 4;
+        cr = 2; tr = 2;
         camera.position.copy(introEndPos);
-        camera.lookAt(planetDefs[0].pos[0], planetDefs[0].pos[1], planetDefs[0].pos[2]);
+        camera.lookAt(ep[0], ep[1], ep[2]);
         uiEl.classList.remove('hidden');
         ui();
         document.getElementById('scroll-hint')?.classList.remove('hidden');
