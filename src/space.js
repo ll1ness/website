@@ -4,8 +4,10 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { pages, projectCardHtml } from './content.js';
 
 const N = 8, D = 1000, ORBIT_R = 15, INTRO_D = 3500;
+const AU_UNIT = 1000;
 
 const DIAM = 12756;
 const RATIO = (d) => Math.pow(d / DIAM, 0.4);
@@ -14,7 +16,7 @@ const AU_INCL = [
   [5.2, 310], [9.54, 250], [19.2, 350], [30.1, 170],
 ];
 const AU = (au, i) => {
-  const d = au * 80, a = AU_INCL[i][1] * Math.PI / 180;
+  const d = au * AU_UNIT, a = AU_INCL[i][1] * Math.PI / 180;
   const y = [3, -5, 8, -12, 25, -40, 60, -90][i];
   return [d * Math.cos(a), y, d * Math.sin(a)];
 };
@@ -63,9 +65,9 @@ function completeLoading() {
 }
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x03030a, 200, 4800);
+scene.fog = new THREE.Fog(0x03030a, 200, 90000);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 5000);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 60000);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -105,26 +107,51 @@ function circleTexture() {
 }
 
 function starfield() {
-  const n = 25000, p = new Float32Array(n * 3), cA = new Float32Array(n * 3), s = new Float32Array(n);
+  const n = 18000, p = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) {
-    const r = 500 + Math.random() * 4500, th = Math.random() * 6.28, ph = Math.acos(2 * Math.random() - 1);
-    p[i*3] = r * Math.sin(ph) * Math.cos(th); p[i*3+1] = (Math.random() - 0.5) * 2000; p[i*3+2] = r * Math.sin(ph) * Math.sin(th);
-    s[i] = 0.5 + Math.random() * 3;
-    const b = 0.7 + Math.random() * 0.3;
-    if (Math.random() < 0.1) { cA[i*3]=b*0.8; cA[i*3+1]=b*0.85; cA[i*3+2]=b; }
-    else { cA[i*3]=b; cA[i*3+1]=b; cA[i*3+2]=b; }
+    const r = 12000 + Math.pow(Math.random(), 0.6) * 46000, ph = Math.acos(2 * Math.random() - 1), th = Math.random() * 6.28;
+    p[i*3] = r * Math.sin(ph) * Math.cos(th);
+    p[i*3+1] = r * Math.cos(ph);
+    p[i*3+2] = r * Math.sin(ph) * Math.sin(th);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(p, 3));
-  g.setAttribute('size', new THREE.BufferAttribute(s, 1));
-  g.setAttribute('color', new THREE.BufferAttribute(cA, 3));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({
-    size: 0.6, map: circleTexture(), vertexColors: true, transparent: true, opacity: 0.6,
-    blending: THREE.AdditiveBlending, sizeAttenuation: true, depthWrite: false,
+    size: 1.4, map: circleTexture(), transparent: true, opacity: 0.9,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true, depthWrite: false, color: 0xffffff,
   })));
 }
 
 starfield();
+
+function galaxyField() {
+  const n = 26000, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  const D = 22000, R = 32000;
+  for (let i = 0; i < n; i++) {
+    const dc = Math.pow(Math.random(), 0.6) * R;
+    const a = Math.random() * 6.28;
+    const x = dc * Math.cos(a);
+    const z = -D + dc * Math.sin(a);
+    const y = (Math.random() - 0.5) * (900 + dc * 0.05);
+    pos[i*3] = x; pos[i*3+1] = y; pos[i*3+2] = z;
+    const b = 0.45 + Math.random() * 0.55;
+    if (dc < 13000) { col[i*3]=b; col[i*3+1]=b*0.82; col[i*3+2]=b*0.6; }
+    else if (Math.random() < 0.12) { col[i*3]=b*0.75; col[i*3+1]=b*0.85; col[i*3+2]=b; }
+    else { col[i*3]=b; col[i*3+1]=b; col[i*3+2]=b; }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const pts = new THREE.Points(g, new THREE.PointsMaterial({
+    size: 1.1, map: circleTexture(), vertexColors: true, transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true, depthWrite: false,
+  }));
+  pts.rotation.x = 0.42;
+  pts.rotation.z = -0.22;
+  scene.add(pts);
+}
+
+galaxyField();
 
 function createSkyDome(parent, r) {
   const c = document.createElement('canvas'); c.width = 4; c.height = 256;
@@ -448,6 +475,7 @@ function start() {
   const toSun = new THREE.Vector3().copy(earthPos).negate().normalize();
   let orbitR = ORBIT_R;
   let targetOrbitR = ORBIT_R;
+  let transD = D;
 
   function getCamPos(idx, t, p) {
     const def = planetDefs[idx].pos;
@@ -475,6 +503,7 @@ function start() {
     if (r === tr) return;
     fromPos.copy(camera.position);
     toPos.copy(getCamPos(r, 0, Math.PI / 4));
+    transD = Math.min(Math.max(toPos.distanceTo(fromPos) * 0.015, 1300), 5200);
     ts = performance.now(); trans = true; tr = r;
   }
 
@@ -587,6 +616,23 @@ function start() {
     document.getElementById('modal-title').textContent = proj.name;
     document.getElementById('modal-tagline').textContent = proj.tagline;
     document.getElementById('modal-desc').textContent = proj.description;
+    const gifEl = document.getElementById('modal-gif');
+    const gifImg = document.getElementById('modal-gif-img');
+    const gifEmpty = document.getElementById('modal-gif-empty');
+    if (gifEl) {
+      gifImg.classList.remove('show');
+      gifEmpty.style.display = 'flex';
+      if (proj.gif) {
+        gifImg.onload = () => { gifImg.classList.add('show'); gifEmpty.style.display = 'none'; };
+        gifImg.onerror = () => { gifImg.classList.remove('show'); gifEmpty.style.display = 'flex'; };
+        gifImg.src = proj.gif;
+      } else {
+        gifImg.onload = null;
+        gifImg.onerror = null;
+        gifImg.removeAttribute('src');
+        gifEmpty.style.display = 'flex';
+      }
+    }
     const logoEl = document.getElementById('modal-logo');
     if (proj.logo) { logoEl.innerHTML = `<img src="${proj.logo}" alt="${proj.name}" style="width:48px;height:48px;border-radius:10px;object-fit:cover">`; }
     else { logoEl.textContent = proj.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
@@ -632,12 +678,6 @@ function start() {
   const pageModalContent = document.getElementById('page-modal-content');
   const pageModalClose = pageModal?.querySelector('.page-modal-close');
   const pageModalBg = pageModal?.querySelector('.modal-bg');
-  const pages = [
-    { title: 'll1ness', html: `<p class="overlay-label">ПРИВЕТ, Я</p><h2>ll1ness</h2><p class="overlay-desc">Indy software engineer ✨ Web-developer 📐 Crafting web apps, desktop apps and API 💎 Like to code as hobby 🧬🛡️</p><div class="overlay-stats"><div class="stat-item"><span class="stat-n">16</span><span class="stat-l">Проектов</span></div><div class="stat-item"><span class="stat-n">3</span><span class="stat-l">Пинов</span></div><div class="stat-item"><span class="stat-n">✦</span><span class="stat-l">SparkStudio</span></div></div><div class="overlay-actions"><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button" data-variant="primary">GitHub</a><a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a></div>` },
-    { title: 'Проекты', html: `<p class="overlay-label">ПОРТФОЛИО</p><h2>Проекты</h2><p class="overlay-desc">Мои открытые проекты на GitHub</p><div class="project-list" id="project-cards-page"></div>` },
-    { title: 'ЧаВо', html: `<p class="overlay-label">ЧАВО</p><h2>Часто задаваемые вопросы</h2><p class="overlay-desc">Ответы на популярные вопросы</p><div class="faq-list"><div class="faq-item"><div class="faq-q">Кто ты такой?</div><div class="faq-a">Indy software engineer и web-разработчик. Создаю веб-приложения, десктопные программы и API. Кодинг — моё хобби.</div></div><div class="faq-item"><div class="faq-q">Какие проекты ты делаешь?</div><div class="faq-a">Работаю над TechOne UI (дизайн-фреймворк), Spark Studio (IDE на JavaFX/JPHP), Weather Seeker и другими открытыми проектами на GitHub.</div></div><div class="faq-item"><div class="faq-q">Как с тобой связаться?</div><div class="faq-a">Лучший способ — Discord (виджет на странице контактов). Также можешь написать на GitHub или в Steam.</div></div><div class="faq-item"><div class="faq-q">Ты используешь AI в разработке?</div><div class="faq-a">Да, использую профессиональные AI-инструменты для ускорения разработки, но это не vibecode — каждая строка осмысленна.</div></div><div class="faq-item"><div class="faq-q">Какие технологии ты знаешь?</div><div class="faq-a">Веб: HTML, CSS, JavaScript, Three.js. Бэкенд: PHP, Java, Node.js, Python. Инструменты: Git, Docker, AI-assisted coding.</div></div></div>` },
-    { title: 'Контакты', html: `<p class="overlay-label">КОНТАКТЫ</p><h2>Связь</h2><p class="overlay-desc">Напишите мне</p><div style="margin-bottom:16px"><iframe src="https://discord.com/widget?id=1443358714315800711&theme=dark" width="100%" height="400" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe></div><div class="social-btns"><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button">GitHub</a><a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a><a href="https://steamcommunity.com/id/ll1ness/" target="_blank" rel="noopener" class="to-button">Steam</a><a href="https://orcid.org/0009-0001-2539-7302" target="_blank" rel="noopener" class="to-button">ORCID</a></div>` },
-  ];
 
   function openPage(idx) {
     if (!pageModal || !pageModalContent) return;
@@ -652,7 +692,7 @@ function start() {
           const card = document.createElement('div');
           card.className = 'project-card';
           card.style.cursor = 'pointer';
-          card.innerHTML = '<div class="card-head"><span class="card-icon">' + (proj.icon || '📄') + '</span><h3>' + proj.name + '</h3></div><p>' + (proj.tagline || '') + '</p><div class="card-tags">' + (proj.tags || []).map(t => '<span>' + t + '</span>').join('') + '</div>';
+          card.innerHTML = projectCardHtml(proj);
           card.addEventListener('click', () => { pageModal.classList.remove('open'); openModal(proj.id); });
           cardsEl.appendChild(card);
         });
@@ -702,7 +742,8 @@ function start() {
 
   function smoothstep(t) { return t * t * (3 - 2 * t); }
 
-  const ORBIT_SPEED = [0.00012, 0.00008, 0.00005, 0.000036, 0.00002, 0.000014, 0.000008, 0.000005];
+  const ORBIT_BASE = 0.000025;
+  const ORBIT_SPEED = [0.39, 0.72, 1, 1.52, 5.2, 9.54, 19.2, 30.1].map(a => ORBIT_BASE * Math.pow(1 / a, 1.5));
   const orbitAngle = planetDefs.map((def, i) => {
     const a = AU_INCL[i][1] * Math.PI / 180;
     return a;
@@ -726,7 +767,7 @@ function start() {
     // Orbital motion around Sun
     for (let i = 0; i < N; i++) {
       orbitAngle[i] += ORBIT_SPEED[i];
-      const r = AU_INCL[i][0] * 80;
+      const r = AU_INCL[i][0] * AU_UNIT;
       pivots[i].position.x = r * Math.cos(orbitAngle[i]);
       pivots[i].position.z = r * Math.sin(orbitAngle[i]);
       const pos = planetDefs[i].pos;
@@ -773,7 +814,7 @@ function start() {
       }
     } else if (trans) {
       toPos.copy(getCamPos(tr, 0, Math.PI / 4));
-      const el = performance.now() - ts, _t = Math.min(el / D, 1), s = smoothstep(_t);
+      const el = performance.now() - ts, _t = Math.min(el / transD, 1), s = smoothstep(_t);
       camera.position.lerpVectors(fromPos, toPos, s);
       const cp = planetDefs[cr].pos, tp = planetDefs[tr].pos;
       camTarget.set(
