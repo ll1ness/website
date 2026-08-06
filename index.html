@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ll1ness — инди-разработчик | Веб, десктоп и 3D-портфолио</title>
-  <meta name="description" content="ll1ness — инди-разработчик и web-developer. Открытые проекты на GitHub: TechOne UI, Spark Studio, Weather Seeker и другие. Интерактивное 3D-портфолио на Three.js." />
-  <meta name="keywords" content="ll1ness, инди разработчик, web developer, портфолио, Three.js, TechOne UI, Spark Studio, Weather Seeker, open source, 3D, визитка" />
+  <title>ll1ness — инди-разработчик | Веб, десктоп и открытые проекты</title>
+  <meta name="description" content="ll1ness — инди-разработчик и web-developer. Открытые проекты на GitHub: TechOne UI, Spark Studio, Weather Seeker и другие. Интерактивный сайт на Three.js." />
+  <meta name="keywords" content="ll1ness, инди разработчик, web developer, Three.js, TechOne UI, Spark Studio, Weather Seeker, open source, сайт, визитка" />
   <meta name="author" content="ll1ness" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#03030a" />
   <link rel="canonical" href="https://ll1ness.vercel.app/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="ll1ness" />
-  <meta property="og:title" content="ll1ness — инди-разработчик | Веб, десктоп и 3D-портфолио" />
-  <meta property="og:description" content="Интерактивное 3D-портфолио инди-разработчика ll1ness. Открытые проекты: TechOne UI, Spark Studio, Weather Seeker." />
+  <meta property="og:title" content="ll1ness — инди-разработчик | Веб, десктоп и открытые проекты" />
+  <meta property="og:description" content="Интерактивный сайт инди-разработчика ll1ness. Открытые проекты: TechOne UI, Spark Studio, Weather Seeker." />
   <meta property="og:url" content="https://ll1ness.vercel.app/" />
   <meta property="og:image" content="https://ll1ness.vercel.app/banner.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1050" />
   <meta property="og:image:height" content="495" />
-  <meta property="og:image:alt" content="ll1ness — 3D-портфолио" />
+  <meta property="og:image:alt" content="ll1ness — сайт разработчика" />
   <meta property="og:locale" content="ru_RU" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="ll1ness — инди-разработчик" />
-  <meta name="twitter:description" content="Интерактивное 3D-портфолио инди-разработчика. Открытые проекты на GitHub." />
+  <meta name="twitter:description" content="Интерактивный сайт инди-разработчика. Открытые проекты на GitHub." />
   <meta name="twitter:image" content="https://ll1ness.vercel.app/banner.png" />
   <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/src/style.css" />
@@ -41,6 +41,136 @@
   </div>
 
   <div id="app"></div>
+
+  <div id="mobile-site" class="hidden">
+    <canvas id="m-canvas"></canvas>
+
+    <header class="m-header">
+      <div class="m-brand">ll1ness</div>
+      <div class="v-toggle" id="mobile-toggle">
+        <button type="button" class="v-btn v-pc js-full" title="Полная версия" aria-label="Полная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
+        <button type="button" class="v-btn v-mob active" title="Мобильная версия" aria-label="Мобильная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/></svg></button>
+      </div>
+    </header>
+
+    <div id="m-room-label" class="m-room-label">
+      <span class="m-room-idx">01</span>
+      <span class="m-room-name">Меркурий</span>
+      <span class="m-room-author">by <img src="/assets/AlbaLogo.png" alt="AlbaSpace"> AlbaSpace</span>
+    </div>
+
+    <div class="m-topword">ll1ness</div>
+
+    <section class="m-hero" id="m-hero">
+      <div class="m-reveal">
+        <p class="m-label">ПРИВЕТ, Я</p>
+        <h1>ll1ness</h1>
+        <p class="m-desc">Indy software engineer ✨ Web-developer 📐 Crafting web apps, desktop apps and API 💎</p>
+        <div class="m-hero-actions">
+          <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
+        </div>
+      </div>
+      <div class="m-scroll-hint">Прокрутите вниз</div>
+    </section>
+
+    <section class="m-planet" data-slot="about">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">✦</span>
+        <h2>Солнце</h2>
+        <p>Звезда в центре Солнечной системы. Источник света и тепла для всех планет.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="projects">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">01</span>
+        <h2>Меркурий</h2>
+        <p>Самая близкая к Солнцу планета. День здесь длится дольше года.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="faq">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">02</span>
+        <h2>Венера</h2>
+        <p>Самая горячая планета, окутанная плотной атмосферой из углекислого газа.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="contacts">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">03</span>
+        <h2>Земля</h2>
+        <p>Наш дом. Единственная известная планета, где существует жизнь.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="proj:0">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">04</span>
+        <h2>Марс</h2>
+        <p>Красная планета и цель будущих колонизаций человечества.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="proj:1">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">05</span>
+        <h2>Юпитер</h2>
+        <p>Газовый гигант — самая большая планета Солнечной системы.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="proj:2">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">06</span>
+        <h2>Сатурн</h2>
+        <p>Знаменит своими кольцами изо льда и камня.</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="proj:3">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">07</span>
+        <h2>Уран</h2>
+        <p>Ледяной гигант, который вращается «лёжа на боку».</p>
+      </div>
+    </section>
+
+    <section class="m-planet" data-slot="proj:4">
+      <div class="m-proj m-reveal"></div>
+      <div class="m-planet-info m-reveal">
+        <span class="m-idx">08</span>
+        <h2>Нептун</h2>
+        <p>Самая дальняя планета, где дуют самые быстрые ветры.</p>
+      </div>
+    </section>
+
+    <section class="m-outro">
+      <div class="m-reveal">
+        <h2>Спасибо за внимание</h2>
+        <p>Исследуйте больше моих проектов на GitHub или присоединяйтесь в Discord.</p>
+        <div class="social-btns">
+          <a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button">GitHub</a>
+          <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a>
+          <a href="https://steamcommunity.com/id/ll1ness/" target="_blank" rel="noopener" class="to-button">Steam</a>
+          <a href="https://orcid.org/0009-0001-2539-7302" target="_blank" rel="noopener" class="to-button">ORCID</a>
+        </div>
+        <p style="margin-top:24px;font-size:11px;opacity:.6">Смотрите полную версию сайта — нажмите «Полная версия» вверху.</p>
+      </div>
+    </section>
+
+    <footer class="m-footer">© 2026 ll1ness</footer>
+  </div>
 
   <div id="ui" class="hidden">
     <header id="header">
@@ -66,6 +196,10 @@
         <a href="#" data-page="2">ЧаВо</a>
         <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
       </nav>
+      <div class="v-toggle" id="full-toggle">
+        <button type="button" class="v-btn v-pc active" title="Полная версия" aria-label="Полная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
+        <button type="button" class="v-btn v-mob js-mobile" title="Мобильная версия" aria-label="Мобильная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/></svg></button>
+      </div>
     </header>
 
     <div id="nav-dots">
