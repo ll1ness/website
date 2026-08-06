@@ -641,7 +641,12 @@ function start() {
     ssIndex = 0;
     ssCount = (proj.screenshots && proj.screenshots.length) || 0;
     if (ssCount) {
-      proj.screenshots.forEach(s => { const img = document.createElement('img'); img.src = s; img.alt = ''; ssTrack.appendChild(img); });
+      proj.screenshots.forEach(s => {
+        const img = document.createElement('img');
+        img.src = s; img.alt = '';
+        img.addEventListener('click', () => openLightbox(s));
+        ssTrack.appendChild(img);
+      });
       for (let i = 0; i < ssCount; i++) { const d = document.createElement('span'); d.className = 'ss-dot' + (i === 0 ? ' active' : ''); d.dataset.i = i; ssDots.appendChild(d); }
       ssPrev.classList.toggle('hidden', ssCount <= 1);
       ssNext.classList.toggle('hidden', ssCount <= 1);
@@ -724,6 +729,16 @@ function start() {
   }
   ssPrev?.addEventListener('click', () => ssGo(ssIndex - 1));
   ssNext?.addEventListener('click', () => ssGo(ssIndex + 1));
+
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  lightbox?.querySelector('.lightbox-bg')?.addEventListener('click', () => lightbox.classList.remove('open'));
+  lightbox?.querySelector('.lightbox-close')?.addEventListener('click', () => lightbox.classList.remove('open'));
+  addEventListener('keydown', e => { if (e.key === 'Escape') lightbox?.classList.remove('open'); });
+  function openLightbox(src) {
+    if (lightboxImg) lightboxImg.src = src;
+    lightbox?.classList.add('open');
+  }
   ssDots?.addEventListener('click', (e) => { if (e.target.dataset.i) ssGo(parseInt(e.target.dataset.i)); });
 
   function ui() {
