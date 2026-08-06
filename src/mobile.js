@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { pages, projectCardHtml, projectModalBody } from './content.js';
 
 const VERSION_KEY = 'll1ness-version';
 
@@ -21,22 +22,60 @@ function smoothstep(t) {
   return t * t * (3 - 2 * t);
 }
 
+function easeOutBack(t) {
+  t = Math.min(Math.max(t, 0), 1);
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = 16; c.height = 16;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 16, 16);
+  return new THREE.CanvasTexture(c);
+}
+
 function starfield(scene) {
-  const n = 4000, p = new Float32Array(n * 3), s = new Float32Array(n);
+  const n = 2400, p = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) {
-    const r = 30 + Math.random() * 120, th = Math.random() * 6.28, ph = Math.acos(2 * Math.random() - 1);
-    p[i * 3] = r * Math.sin(ph) * Math.cos(th);
-    p[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th);
-    p[i * 3 + 2] = r * Math.cos(ph);
-    s[i] = 0.3 + Math.random() * 1.6;
+    const r = 80 + Math.pow(Math.random(), 0.6) * 220, ph = Math.acos(2 * Math.random() - 1), th = Math.random() * 6.28;
+    p[i*3] = r * Math.sin(ph) * Math.cos(th);
+    p[i*3+1] = r * Math.cos(ph);
+    p[i*3+2] = r * Math.sin(ph) * Math.sin(th);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(p, 3));
-  g.setAttribute('size', new THREE.BufferAttribute(s, 1));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({
-    size: 0.35, transparent: true, opacity: 0.7, sizeAttenuation: true,
-    depthWrite: false, color: 0xffffff,
+    size: 0.9, map: glowTexture(), transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true, depthWrite: false, color: 0xffffff,
   })));
+
+  const bn = 3200, bp = new Float32Array(bn * 3), bc = new Float32Array(bn * 3);
+  const D = 150, R = 230;
+  for (let i = 0; i < bn; i++) {
+    const dc = Math.pow(Math.random(), 0.6) * R;
+    const a = Math.random() * 6.28;
+    const bx = dc * Math.cos(a);
+    const bz = -D + dc * Math.sin(a);
+    const by = (Math.random() - 0.5) * 6;
+    bp[i*3] = bx; bp[i*3+1] = by; bp[i*3+2] = bz;
+    const b = 0.45 + Math.random() * 0.55;
+    if (dc < 100) { bc[i*3]=b; bc[i*3+1]=b*0.82; bc[i*3+2]=b*0.6; }
+    else { bc[i*3]=b; bc[i*3+1]=b; bc[i*3+2]=b; }
+  }
+  const bg = new THREE.BufferGeometry();
+  bg.setAttribute('position', new THREE.BufferAttribute(bp, 3));
+  bg.setAttribute('color', new THREE.BufferAttribute(bc, 3));
+  const bpts = new THREE.Points(bg, new THREE.PointsMaterial({
+    size: 1.0, map: glowTexture(), vertexColors: true, transparent: true, opacity: 0.8,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true, depthWrite: false,
+  }));
+  bpts.rotation.x = 0.5;
+  scene.add(bpts);
 }
 
 function applySunMaterial(root) {
@@ -119,11 +158,15 @@ export function initMobile() {
 
   starfield(scene);
 
-  const states = PLANETS.map(p => {
+  const states = PLANETS.map((p, i) => {
     const group = new THREE.Group();
     group.visible = false;
     scene.add(group);
-    return { p, group, loaded: false, loading: false, failed: false, root: null, base: [] };
+    const side = i === 0 ? 0 : (i % 2 ? 1 : -1);
+    const tx = i === 0 ? 0 : side * (1.6 + (i % 3) * 0.2);
+    const ty = i === 0 ? -1.1 : 0.4 + (i % 2 ? 0.6 : -0.7);
+    const tz = i === 0 ? -0.2 : -0.7;
+    return { p, group, tx, ty, tz, loaded: false, loading: false, failed: false, root: null, base: [] };
   });
 
   const loader3d = new GLTFLoader();
@@ -183,75 +226,27 @@ export function initMobile() {
   }, { threshold: 0.2 });
   document.querySelectorAll('.m-reveal').forEach(el => io.observe(el));
 
-  const renderers = {
-    about: () => `
-      <p class="overlay-label">ПРИВЕТ, Я</p>
-      <h3 class="m-title">ll1ness</h3>
-      <p class="overlay-desc">Indy software engineer ✨ Web-developer 📐 Crafting web apps, desktop apps and API 💎</p>
-      <div class="overlay-stats">
-        <div class="stat-item"><span class="stat-n">16</span><span class="stat-l">Проектов</span></div>
-        <div class="stat-item"><span class="stat-n">3</span><span class="stat-l">Пинов</span></div>
-        <div class="stat-item"><span class="stat-n">✦</span><span class="stat-l">SparkStudio</span></div>
-      </div>
-      <div class="m-proj-links">
-        <a class="to-button" href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
-        <a class="to-button" href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
-      </div>`,
-    projects: () => `
-      <h3 class="m-title">Проекты</h3>
-      <p class="overlay-desc">Мои открытые проекты на GitHub</p>
-      <div class="project-list" data-cards></div>`,
-    faq: () => `
-      <h3 class="m-title">ЧаВо</h3>
-      <p class="overlay-desc">Часто задаваемые вопросы</p>
-      <div class="faq-list">
-        <div class="faq-item"><div class="faq-q">Кто ты такой?</div><div class="faq-a">Инди-разработчик и web-девелопер. Создаю веб-приложения, десктопные программы и API.</div></div>
-        <div class="faq-item"><div class="faq-q">Какие проекты ты делаешь?</div><div class="faq-a">TechOne UI, Spark Studio (IDE на JavaFX/JPHP), Weather Seeker и другие открытые проекты.</div></div>
-        <div class="faq-item"><div class="faq-q">Как с тобой связаться?</div><div class="faq-a">Discord, GitHub, Telegram или Steam — ссылки на странице контактов.</div></div>
-      </div>`,
-    contacts: () => `
-      <h3 class="m-title">Контакты</h3>
-      <p class="overlay-desc">Напишите мне</p>
-      <div class="social-btns">
-        <a class="to-button" href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
-        <a class="to-button" href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
-        <a class="to-button" href="https://steamcommunity.com/id/ll1ness/" target="_blank" rel="noopener">Steam</a>
-        <a class="to-button" href="https://orcid.org/0009-0001-2539-7302" target="_blank" rel="noopener">ORCID</a>
-      </div>`,
-    proj: (p) => `
-      <div class="m-proj-head">
-        <span class="m-proj-icon">${p.icon || ''}</span>
-        <div><h3>${p.name}</h3><p>${p.tagline || ''}</p></div>
-      </div>
-      <p class="m-proj-desc">${p.description || ''}</p>
-      <div class="m-proj-links">
-        ${(p.downloads || []).map(d => `<a class="to-button" href="${d.url || '#'}" ${d.url && d.url !== '#' ? 'target="_blank" rel="noopener"' : ''}>${d.label || ''}</a>`).join('')}
-      </div>`,
-  };
-
-  function fillCard(p) {
-    const initials = p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    return `<div class="card-head"><span class="card-icon">${p.icon || initials}</span><h3>${p.name}</h3></div><p>${p.tagline || ''}</p>`;
-  }
+  const pageSlots = { about: 0, projects: 1, faq: 2, contacts: 3 };
 
   fetch('/projects.json').then(r => r.json()).then(d => {
     const projs = d.projects || [];
+    const latest = projs.slice(-5);
     document.querySelectorAll('.m-planet').forEach(section => {
       const slot = section.dataset.slot;
       const box = section.querySelector('.m-proj');
       if (!box) return;
       if (slot && slot.indexOf('proj:') === 0) {
-        const p = projs[Number(slot.split(':')[1])];
-        if (p) box.innerHTML = renderers.proj(p);
-      } else if (renderers[slot]) {
-        box.innerHTML = renderers[slot]();
+        const p = latest[Number(slot.split(':')[1])];
+        if (p) box.innerHTML = projectModalBody(p);
+      } else if (pageSlots[slot] !== undefined) {
+        box.innerHTML = pages[pageSlots[slot]].html;
       }
     });
-    document.querySelectorAll('.m-proj .project-list[data-cards]').forEach(list => {
+    document.querySelectorAll('.m-proj .project-list').forEach(list => {
       projs.slice(0, 3).forEach(p => {
         const card = document.createElement('div');
         card.className = 'project-card';
-        card.innerHTML = fillCard(p);
+        card.innerHTML = projectCardHtml(p);
         list.appendChild(card);
       });
     });
@@ -294,17 +289,26 @@ export function initMobile() {
       if (!s.loaded && !s.loading && pos > top - vh && pos < top + vh * 1.6) loadPlanet(i);
       if (!s.loaded) continue;
 
-      const tin = smoothstep(t / 0.35);
-      const tout = 1 - smoothstep((t - 0.65) / 0.35);
-      const v = tin * tout;
+      const enter = smoothstep(t / 0.42);
+      const leave = 1 - smoothstep((t - 0.58) / 0.42);
+      const vis = enter * leave;
       const g = s.group;
-      g.visible = v > 0.005;
+      g.visible = vis > 0.02;
       if (!g.visible) continue;
 
-      g.rotation.y = st * (0.15 + i * 0.04);
-      g.scale.setScalar(0.15 + 0.85 * tin);
-      g.position.y = (1 - tin) * 1.6 + (1 - tout) * -0.5;
-      setGroupOpacity(s.root, v, s.base);
+      const e = easeOutBack(enter);
+      const out = 1 - leave;
+      const dir = s.tx >= 0 ? 1 : -1;
+
+      g.position.x = s.tx - dir * (1 - e) * 2.6 + dir * out * 2.2 + Math.sin(st * 0.6 + i * 2.1) * 0.03;
+      g.position.y = s.ty - (1 - e) * 2.4 + out * 2.0 + Math.sin(st * 0.9 + i * 1.3) * 0.05;
+      g.position.z = s.tz + (1 - e) * 1.4 - out * 0.4;
+
+      g.scale.setScalar((0.2 + 0.8 * e) * (1 + out * 0.2));
+
+      g.rotation.y = st * (0.2 + i * 0.05) + (1 - e) * 1.2;
+      g.rotation.x = (1 - e) * 0.25;
+      g.rotation.z = (1 - e) * 0.5 + out * 0.3;
     }
 
     camera.position.z = 6.5 + Math.sin(st * 0.25) * 0.12;
