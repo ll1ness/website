@@ -1,17 +1,12 @@
 {
-  "name": "ll1ness-space",
+  "name": "ll1ness",
+  "version": "3.0.0",
   "private": true,
-  "version": "1.0.0",
   "type": "module",
+  "description": "Личный сайт ll1ness — чистый статичный сайт на TechOne UI",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "three": "^0.168.0"
-  },
-  "devDependencies": {
-    "vite": "^5.4.0"
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node server.js --check"
   }
 }

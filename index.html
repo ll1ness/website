@@ -1,265 +1,242 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ll1ness — инди-разработчик | Веб, десктоп и открытые проекты</title>
-  <meta name="description" content="ll1ness — инди-разработчик и web-developer. Открытые проекты на GitHub: TechOne UI, Spark Studio, Weather Seeker и другие. Интерактивный сайт на Three.js." />
-  <meta name="keywords" content="ll1ness, инди разработчик, web developer, Three.js, TechOne UI, Spark Studio, Weather Seeker, open source, сайт, визитка" />
-  <meta name="author" content="ll1ness" />
-  <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#03030a" />
-  <link rel="canonical" href="https://ll1ness.vercel.app/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="ll1ness" />
-  <meta property="og:title" content="ll1ness — инди-разработчик | Веб, десктоп и открытые проекты" />
-  <meta property="og:description" content="Интерактивный сайт инди-разработчика ll1ness. Открытые проекты: TechOne UI, Spark Studio, Weather Seeker." />
-  <meta property="og:url" content="https://ll1ness.vercel.app/" />
-  <meta property="og:image" content="https://ll1ness.vercel.app/banner.png" />
-  <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1050" />
-  <meta property="og:image:height" content="495" />
-  <meta property="og:image:alt" content="ll1ness — сайт разработчика" />
-  <meta property="og:locale" content="ru_RU" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ll1ness — инди-разработчик" />
-  <meta name="twitter:description" content="Интерактивный сайт инди-разработчика. Открытые проекты на GitHub." />
-  <meta name="twitter:image" content="https://ll1ness.vercel.app/banner.png" />
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="stylesheet" href="/src/style.css" />
+  <meta name="description" content="Инди-разработчик ll1ness: открытые проекты на GitHub — TechOne UI, Spark Studio, Weather Seeker и другие. Веб, десктоп и API.">
+  <meta name="keywords" content="ll1ness, инди разработчик, web developer, TechOne UI, Spark Studio, Weather Seeker, open source, лендинг">
+  <meta name="author" content="ll1ness">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#030303">
+
+  <link rel="canonical" href="https://ll1ness.vercel.app/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ll1ness">
+  <meta property="og:title" content="ll1ness — инди-разработчик | Открытые проекты">
+  <meta property="og:description" content="Открытые проекты инди-разработчика ll1ness: TechOne UI, Spark Studio, Weather Seeker.">
+  <meta property="og:url" content="https://ll1ness.vercel.app/">
+  <meta property="og:image" content="https://ll1ness.vercel.app/banner.png">
+  <meta property="og:locale" content="ru_RU">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ll1ness — инди-разработчик">
+  <meta name="twitter:description" content="Открытые проекты на GitHub.">
+  <meta name="twitter:image" content="https://ll1ness.vercel.app/banner.png">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "ll1ness",
+    "url": "https://ll1ness.vercel.app/",
+    "jobTitle": "Инди-разработчик",
+    "knowsAbout": ["Web development", "Desktop development", "Open source"],
+    "sameAs": [
+      "https://github.com/ll1ness",
+      "https://orcid.org/0009-0001-2539-7302",
+      "https://steamcommunity.com/id/ll1ness/"
+    ]
+  }
+  </script>
+
+  <script src="techon-ui.min.js?v=2"></script>
+  <link rel="stylesheet" href="site.css">
 </head>
 <body>
-  <div id="loader">
-    <div id="ru-warning" class="ru-warning hidden">
-      <span>Загрузка может быть долгой из-за региональных ограничений. Пожалуйста, подождите.</span>
-      <button class="ru-warning-close">&times;</button>
-    </div>
-    <div class="loader-spinner"></div>
-    <div class="loader-text">Welcome</div>
-    <div class="loader-progress"><div class="loader-bar"></div></div>
-    <div class="loader-logos"><img src="/assets/techone.png" class="loader-logo" alt="TechOne"><img src="/assets/AlbaLogo.png" class="loader-logo" alt="AlbaSpace"></div>
+
+  <!-- === NAV === -->
+  <div class="page">
+    <nav class="nav">
+      <a href="#top" class="nav-brand">
+        <img src="favicon.ico" alt="" style="height:22px;width:22px;border-radius:4px;">
+        ll1ness
+      </a>
+      <ul class="nav-links">
+        <li><a href="#projects">Проекты</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contacts">Контакты</a></li>
+        <li><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="gh">GitHub →</a></li>
+      </ul>
+    </nav>
   </div>
 
-  <div id="app"></div>
-
-  <div id="mobile-site" class="hidden">
-    <canvas id="m-canvas"></canvas>
-
-    <header class="m-header">
-      <div class="m-brand">ll1ness</div>
-      <div class="v-toggle" id="mobile-toggle">
-        <button type="button" class="v-btn v-pc js-full" title="Полная версия" aria-label="Полная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
-        <button type="button" class="v-btn v-mob active" title="Мобильная версия" aria-label="Мобильная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/></svg></button>
+  <!-- === HERO === -->
+  <div class="page" id="top">
+    <section class="hero">
+      <span class="hero-badge">Инди · Open Source</span>
+      <h1>
+        Пишу меньше кода.<br>
+        <span class="gradient">Строю больше.</span>
+      </h1>
+      <p class="hero-sub">
+        Создаю веб и десктоп приложения с открытым исходным кодом: <code>techone-ui</code>, <code>spark-studio</code>, <code>weather-seeker</code> и другие. Кодинг — моё хобби.
+      </p>
+      <div class="hero-actions">
+        <a href="#projects" class="to-button" data-variant="primary">Смотреть проекты</a>
+        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord →</a>
       </div>
-    </header>
-
-    <div id="m-room-label" class="m-room-label">
-      <span class="m-room-idx">01</span>
-      <span class="m-room-name">Меркурий</span>
-      <span class="m-room-author">by <img src="/assets/AlbaLogo.png" alt="AlbaSpace"> AlbaSpace</span>
-    </div>
-
-    <div class="m-topword">ll1ness</div>
-
-    <section class="m-planet" data-slot="about">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">✦</span>
-        <h2>Солнце</h2>
-        <p>Звезда в центре Солнечной системы. Источник света и тепла для всех планет.</p>
+      <div class="hero-meta">
+        <span>⬡ 5 проектов</span>
+        <span>⬡ MIT License</span>
+        <span>⬡ Open Source</span>
+        <span>⬡ Web + Desktop</span>
       </div>
     </section>
 
-    <section class="m-planet" data-slot="projects">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">01</span>
-        <h2>Меркурий</h2>
-        <p>Самая близкая к Солнцу планета. День здесь длится дольше года.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="faq">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">02</span>
-        <h2>Венера</h2>
-        <p>Самая горячая планета, окутанная плотной атмосферой из углекислого газа.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="contacts">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">03</span>
-        <h2>Земля</h2>
-        <p>Наш дом. Единственная известная планета, где существует жизнь.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:0">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">04</span>
-        <h2>Марс</h2>
-        <p>Красная планета и цель будущих колонизаций человечества.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:1">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">05</span>
-        <h2>Юпитер</h2>
-        <p>Газовый гигант — самая большая планета Солнечной системы.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:2">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">06</span>
-        <h2>Сатурн</h2>
-        <p>Знаменит своими кольцами изо льда и камня.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:3">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">07</span>
-        <h2>Уран</h2>
-        <p>Ледяной гигант, который вращается «лёжа на боку».</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:4">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">08</span>
-        <h2>Нептун</h2>
-        <p>Самая дальняя планета, где дуют самые быстрые ветры.</p>
-      </div>
-    </section>
-
-    <section class="m-outro">
-      <div class="m-reveal">
-        <h2>Спасибо за внимание</h2>
-        <p>Исследуйте больше моих проектов на GitHub или присоединяйтесь в Discord.</p>
-        <div class="social-btns">
-          <a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button">GitHub</a>
-          <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a>
-          <a href="https://steamcommunity.com/id/ll1ness/" target="_blank" rel="noopener" class="to-button">Steam</a>
-          <a href="https://orcid.org/0009-0001-2539-7302" target="_blank" rel="noopener" class="to-button">ORCID</a>
+    <!-- === HERO WIDGET: GitHub profile === -->
+    <section class="gh-widget" aria-label="Профиль GitHub">
+      <div class="gh-widget-head">
+        <div class="gh-dots">
+          <span class="gh-dot" style="background:#ff5f57;"></span>
+          <span class="gh-dot" style="background:#febc2e;"></span>
+          <span class="gh-dot" style="background:#28c840;"></span>
         </div>
-        <p style="margin-top:24px;font-size:11px;opacity:.6">Смотрите полную версию сайта — нажмите «Полная версия» вверху.</p>
+        <span class="gh-url">github.com/ll1ness</span>
+        <span class="gh-follow">Follow</span>
       </div>
-    </section>
-
-    <footer class="m-footer">© 2026 ll1ness</footer>
-  </div>
-
-  <div id="ui" class="hidden">
-    <header id="header">
-      <div class="header-brand">
-        <a href="/" class="header-logo"><img src="/favicon.ico" alt="ll1ness" class="logo-img" /> ll1ness</a>
-      </div>
-      <nav class="header-nav">
-        <div class="dropdown" tabindex="0">
-          <a href="#" class="drop-btn">Карта сайта <span class="drop-arrow">▼</span></a>
-            <div class="drop-menu">
-              <a href="#" data-page="0">О</a>
-              <a href="#" data-page="1">Проекты</a>
-              <a href="#" data-page="2">ЧаВо</a>
-              <a href="#" data-page="3">Контакты</a>
+      <div class="gh-body">
+        <div class="gh-profile">
+          <div class="gh-profile-head">
+            <div class="gh-avatar">🎨</div>
+            <div>
+              <div class="gh-name">ll1ness</div>
+              <div class="gh-role">инди-разработчик</div>
             </div>
+          </div>
+          <p class="gh-bio">Создаю веб и десктоп приложения с открытым исходным кодом. Кодинг — хобби.</p>
+          <div class="gh-tags">
+            <span class="to-tag" data-variant="default">HTML</span>
+            <span class="to-tag" data-variant="default">CSS</span>
+            <span class="to-tag" data-variant="default">JS</span>
+            <span class="to-tag" data-variant="default">PHP</span>
+            <span class="to-tag" data-variant="default">Java</span>
+            <span class="to-tag" data-variant="default">Python</span>
+          </div>
+          <div class="gh-stats">
+            <div class="gh-stat"><b>5</b><span>проектов</span></div>
+            <div class="gh-stat"><b>MIT</b><span>лицензия</span></div>
+          </div>
         </div>
-        <div class="dropdown" tabindex="0">
-          <a href="#" class="drop-btn">Продукты <span class="drop-arrow">▼</span></a>
-          <div class="drop-menu drop-menu--cols" id="product-menu"></div>
+        <div class="gh-activity">
+          <div class="gh-activity-title">Публичная активность</div>
+          <div class="gh-grid" id="gh-grid"></div>
+          <div class="gh-repos" id="gh-repos"></div>
         </div>
-        <a href="#" data-page="0">О</a>
-        <a href="#" data-page="3">Контакты</a>
-        <a href="#" data-page="2">ЧаВо</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- === MARQUEE === -->
+  <div class="marquee">
+    <div class="marquee-track" id="marquee-track"></div>
+  </div>
+
+  <!-- === PROJECTS === -->
+  <section class="section" id="projects">
+    <div class="page">
+      <div class="section-header">
+        <span class="eyebrow">проекты</span>
+        <h2>Разработка с открытым исходным кодом.</h2>
+        <p>Продукты, приложения и инструменты, которые я делаю и публикую.</p>
+      </div>
+      <div class="filter-row" id="filter-row"></div>
+      <div class="projects-grid" id="projects-grid">
+        <p style="text-align:center;color:#555;grid-column:1/-1;padding:40px 0;">Загрузка…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- === FAQ === -->
+  <section class="section" id="faq">
+    <div class="page">
+      <div class="section-header">
+        <span class="eyebrow">faq</span>
+        <h2>Частые вопросы.</h2>
+      </div>
+      <div style="max-width:720px;margin:0 auto;" id="faq-list"></div>
+    </div>
+  </section>
+
+  <!-- === CONTACTS === -->
+  <section class="section" id="contacts">
+    <div class="page">
+      <div class="section-header">
+        <span class="eyebrow">контакты</span>
+        <h2>Связаться со мной.</h2>
+        <p>Быстрее всего отвечаю в Discord.</p>
+      </div>
+      <div class="contacts-grid">
+        <div class="contact-card">
+          <div class="contact-card-head">
+            <div class="contact-ico">💬</div>
+            <div>
+              <div class="contact-card-title">Discord</div>
+              <div class="contact-card-sub">Сообщество и личные сообщения</div>
+            </div>
+          </div>
+          <div class="discord-embed">
+            <iframe
+              src="https://discord.com/widget?id=1443358714315800711&theme=dark"
+              allowtransparency="true"
+              frameborder="0"
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+              title="Discord"></iframe>
+          </div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-card-head">
+            <div class="contact-ico">●</div>
+            <div>
+              <div class="contact-card-title">Соцсети</div>
+              <div class="contact-card-sub">Профили и репозитории</div>
+            </div>
+          </div>
+          <div class="social-list" id="social-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- === PROJECT DIALOG === -->
+  <div class="to-dialog-wrapper project-dialog" id="project-dialog">
+    <div class="to-dialog-overlay">
+      <div class="to-dialog">
+        <button class="to-dialog-close" aria-label="Закрыть">&times;</button>
+        <div class="to-dialog-body" id="project-dialog-body"></div>
+        <div class="to-dialog-actions" id="project-dialog-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === LIGHTBOX === -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-bg" id="lightbox-bg"></div>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">✕</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  </div>
+
+  <!-- === FOOTER === -->
+  <button class="to-scroll-top" data-threshold="400" aria-label="Наверх">↑</button>
+
+  <div class="page">
+    <footer class="footer">
+      <span>© 2026 <a href="https://github.com/ll1ness" target="_blank" rel="noopener">ll1ness</a> · MIT</span>
+      <div class="footer-links">
         <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
-      </nav>
-      <div class="v-toggle" id="full-toggle">
-        <button type="button" class="v-btn v-pc active" title="Полная версия" aria-label="Полная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
-        <button type="button" class="v-btn v-mob js-mobile" title="Мобильная версия" aria-label="Мобильная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/></svg></button>
+        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
+        <a href="#top">↑ Top</a>
       </div>
-    </header>
-
-    <div id="nav-dots">
-      <div class="nav-dot active" data-room="0"><span></span></div>
-      <div class="nav-dot" data-room="1"><span></span></div>
-      <div class="nav-dot" data-room="2"><span></span></div>
-      <div class="nav-dot" data-room="3"><span></span></div>
-      <div class="nav-dot" data-room="4"><span></span></div>
-      <div class="nav-dot" data-room="5"><span></span></div>
-      <div class="nav-dot" data-room="6"><span></span></div>
-      <div class="nav-dot" data-room="7"><span></span></div>
-    </div>
-
-    <div id="room-label">
-      <span class="room-idx">03</span>
-      <span class="room-name">Земля</span>
-      <span class="room-author">by <img src="/assets/AlbaLogo.png"> AlbaSpace</span>
-    </div>
-
-    <div id="scroll-hint">
-      <svg width="20" height="32" viewBox="0 0 20 32"><rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" stroke-width="1.5" opacity="0.3" fill="none"/><circle cx="10" cy="10" r="2.5" fill="currentColor" opacity="0.6"><animate attributeName="cy" values="10;18;10" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0.15;0.6" dur="1.8s" repeatCount="indefinite"/></circle></svg>
-    </div>
+    </footer>
   </div>
 
-  <div id="overlays">
-    <div class="room-overlay" data-room="0"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="1"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="2"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="3"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="4"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="5"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="6"><div class="overlay-content"></div></div>
-    <div class="room-overlay" data-room="7"><div class="overlay-content"></div></div>
-  </div>
-
-  <div id="modal" class="modal">
-    <div class="modal-bg"></div>
-    <div class="modal-body">
-      <button class="modal-close" aria-label="Закрыть">✕</button>
-      <div class="modal-header">
-        <div class="modal-logo" id="modal-logo"></div>
-        <div>
-          <h2 class="modal-title" id="modal-title"></h2>
-          <p class="modal-tagline" id="modal-tagline"></p>
-        </div>
-      </div>
-      <div class="modal-gif" id="modal-gif"><img id="modal-gif-img" alt="" /><span class="modal-gif-empty" id="modal-gif-empty">no gif found</span></div>
-      <p class="modal-desc" id="modal-desc"></p>
-      <div class="modal-screenshots" id="modal-screenshots">
-        <div class="ss-track" id="ss-track"></div>
-        <button class="ss-btn ss-prev" id="ss-prev" aria-label="Назад">‹</button>
-        <button class="ss-btn ss-next" id="ss-next" aria-label="Вперёд">›</button>
-        <div class="ss-dots" id="ss-dots"></div>
-        <div class="ss-empty" id="ss-empty">Нет скриншотов</div>
-      </div>
-      <div class="modal-downloads" id="modal-downloads"></div>
-    </div>
-  </div>
-
-  <div id="page-modal" class="modal">
-    <div class="modal-bg"></div>
-    <div class="modal-body page-modal-body">
-      <button class="modal-close page-modal-close" aria-label="Закрыть">✕</button>
-      <div id="page-modal-content"></div>
-    </div>
-  </div>
-
-  <div id="lightbox" class="lightbox">
-    <div class="lightbox-bg"></div>
-    <button class="lightbox-close" aria-label="Закрыть">✕</button>
-    <img class="lightbox-img" id="lightbox-img" alt="" />
-  </div>
-
-  <script type="module" src="/src/main.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

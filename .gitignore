@@ -1,2 +1,5 @@
 node_modules/
-.kilo/
+.next/
+dist/
+*.tsbuildinfo
+next-env.d.ts
