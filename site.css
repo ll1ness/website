@@ -18,12 +18,23 @@
 
 html { scroll-behavior: smooth; }
 
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 body {
   background: #030303;
   background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(255,255,255,.015) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(255,255,255,.01) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(255,255,255,.008) 0%, transparent 50%);
+    radial-gradient(ellipse at 15% 40%, rgba(255, 255, 255, .075) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(255, 255, 255, .06) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(255, 255, 255, .05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, .04) 0%, transparent 45%);
   color: #f0f0f0;
   font-family: 'TechOnCartoon', 'Courier New', monospace;
   -webkit-font-smoothing: antialiased;
@@ -44,18 +55,52 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   z-index: 1;
 }
 
+/* ---------- Top banner ---------- */
+.top-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid #333;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .04);
+}
+.top-banner-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #f0f0f0;
+  background: #f0f0f0;
+  color: #030303;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: 'TechOnNotes', 'Courier New', monospace;
+}
+.top-banner-text {
+  font-size: 13px;
+  color: #aaa;
+  line-height: 1.6;
+}
+.top-banner-text strong { color: #f0f0f0; font-weight: 400; }
+
+@media (max-width: 720px) {
+  .top-banner { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
 /* ---------- Nav ---------- */
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px 0;
-  border-bottom: 1px solid #222;
+  border-bottom: 1px solid transparent;
+  background: transparent;
   position: sticky;
   top: 0;
-  background: rgba(3, 3, 3, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 100;
 }
 .nav-brand {
@@ -86,16 +131,20 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .nav-links .gh:hover { border-color: #ccc; }
 
 /* ---------- Hero ---------- */
-.hero { padding: 90px 0 64px; text-align: center; }
-.hero-badge {
-  display: inline-block;
-  font-size: 12px;
-  color: #888;
-  border: 1px solid #333;
-  border-radius: 20px;
-  padding: 4px 14px;
-  margin-bottom: 24px;
+.hero { padding: 90px 0 64px; text-align: center; position: relative; }
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 720px;
+  height: 360px;
+  background: radial-gradient(ellipse at center, rgba(240, 240, 240, .06) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
 }
+.hero > * { position: relative; z-index: 1; }
 .hero h1 {
   font-size: clamp(36px, 6vw, 60px);
   line-height: 1.15;
@@ -133,13 +182,21 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .hero-meta {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: 10px;
   margin-top: 40px;
   font-size: 13px;
-  color: #666;
+  color: #999;
   flex-wrap: wrap;
 }
-.hero-meta span { display: flex; align-items: center; gap: 6px; }
+.hero-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #222;
+  border-radius: 20px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, .02);
+}
 
 /* ---------- Section ---------- */
 .section { padding: 80px 0; scroll-margin-top: 80px; }
@@ -195,19 +252,28 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .gh-profile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .gh-avatar {
   width: 44px; height: 44px;
-  border-radius: 10px;
+  border-radius: 50%;
   background: #0c0c0c;
   border: 1px solid #333;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .gh-name { font-family: 'TechOnNotes', 'Courier New', monospace; font-size: 16px; letter-spacing: 1px; }
 .gh-role { font-size: 12px; color: #777; }
 .gh-bio { font-size: 13px; color: #999; line-height: 1.6; margin-bottom: 14px; }
 .gh-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-.gh-stats { display: flex; gap: 20px; }
-.gh-stat b { font-family: 'TechOnNotes', 'Courier New', monospace; font-size: 18px; display: block; }
-.gh-stat span { font-size: 12px; color: #777; }
+.gh-tags .to-tag { display: inline-flex; align-items: center; gap: 5px; }
+.ltag { display: inline-flex; align-items: center; }
+.ltag svg { color: #9a9a9a; }
+.gh-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.gh-metrics img {
+  width: 100%;
+  height: auto;
+  border: 1px solid #222;
+  border-radius: 8px;
+  background: #0c0c0c;
+  display: block;
+}
 .gh-activity { padding: 24px; }
 .gh-activity-title {
   font-size: 12px;
@@ -216,15 +282,39 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   letter-spacing: 1px;
   margin-bottom: 14px;
 }
-.gh-grid {
-  display: grid;
-  grid-template-columns: repeat(24, 1fr);
-  gap: 5px;
+.gh-contrib {
+  background: #0c0c0c;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 12px;
   margin-bottom: 18px;
+  overflow-x: auto;
 }
-.gh-cell { aspect-ratio: 1 / 1; border-radius: 4px; background: #1a1a1a; }
-.gh-cell.on { background: #f0f0f0; opacity: 0.9; }
-.gh-cell.soft { background: #f0f0f0; opacity: 0.25; }
+.gh-contrib img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.contrib-loading { font-size: 12px; color: #666; }
+.contrib-grid { display: flex; gap: 3px; min-width: 560px; }
+.contrib-week { display: flex; flex-direction: column; gap: 3px; }
+.contrib-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #1b1b1b;
+}
+.contrib-cell.lvl1 { background: #0e4429; }
+.contrib-cell.lvl2 { background: #006d32; }
+.contrib-cell.lvl3 { background: #26a641; }
+.contrib-cell.lvl4 { background: #39d353; }
+.gh-repo-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 .gh-repos { display: flex; flex-direction: column; gap: 8px; }
 .gh-repo {
   display: flex;
@@ -241,42 +331,6 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .gh-repo-desc { font-size: 12px; color: #777; margin-top: 2px; }
 .gh-repo-lang { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; white-space: nowrap; }
 .lang-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-/* ---------- Marquee ---------- */
-.marquee {
-  border-top: 1px solid #222;
-  border-bottom: 1px solid #222;
-  padding: 18px 0;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-scroll 26s linear infinite;
-  align-items: center;
-}
-.marquee-item {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  font-size: 14px;
-  color: #888;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.marquee-item i {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: #f0f0f0;
-  opacity: 0.4;
-  font-style: normal;
-}
-@keyframes marquee-scroll {
-  to { transform: translateX(-50%); }
-}
 
 /* ---------- Projects ---------- */
 .filter-row {
@@ -309,29 +363,75 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   gap: 16px;
 }
 .project-card {
+  position: relative;
   background: #0a0a0a;
   border: 1px solid #222;
   border-radius: 12px;
   padding: 0;
   cursor: pointer;
   overflow: hidden;
-  transition: border-color .3s, transform .3s;
+  transition: border-color .3s, transform .3s, box-shadow .3s;
   display: flex;
   flex-direction: column;
   text-align: left;
 }
-.project-card:hover { border-color: #555; transform: translateY(-4px); }
+.project-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  pointer-events: none;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .05) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.project-card:hover::before { opacity: 1; }
+.project-card:hover { border-color: #555; transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0, 0, 0, .5); }
 .project-card .to-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.project-thumb {
+.project-carousel { position: relative; width: 100%; height: 190px; overflow: hidden; background: #0c0c0c; flex-shrink: 0; }
+.project-carousel.single .project-carousel-dots { display: none; }
+.project-carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform .5s ease;
+  will-change: transform;
+}
+.project-carousel-slide {
   width: 100%;
-  height: 180px;
+  height: 100%;
+  flex: 0 0 100%;
   object-fit: cover;
   object-position: center;
-  background: #0c0c0c;
+}
+.project-carousel-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 0;
+}
+.project-carousel-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, .28);
+  cursor: pointer;
+  padding: 0;
+  transition: background .25s, width .25s, border-radius .25s;
+}
+.project-carousel-dot:hover { background: rgba(255, 255, 255, .55); }
+.project-carousel-dot.active {
+  width: 18px;
+  border-radius: 4px;
+  background: #f0f0f0;
 }
 .project-thumb-placeholder {
   width: 100%;
-  height: 180px;
+  height: 190px;
   background: #0c0c0c;
   display: flex;
   align-items: center;
@@ -343,25 +443,47 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .project-tags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
 
 /* ---------- Dialog ---------- */
-.project-dialog .to-dialog { max-width: 640px; }
-.project-dialog .to-dialog h2 { font-family: 'TechOnNotes', 'Courier New', monospace; font-weight: 400; margin: 0 0 4px; }
-.project-dialog .to-dialog-tagline { font-size: 13px; color: #888; margin: 0 0 16px; }
+.project-dialog .to-dialog { max-width: 720px; }
+.project-dialog .to-dialog h2 { font-family: 'TechOnNotes', 'Courier New', monospace; font-weight: 400; margin: 0; }
+.project-dialog .to-dialog-tagline { font-size: 13px; color: #888; margin: 4px 0 0; }
 .project-dialog .to-dialog-body { display: flex; flex-direction: column; gap: 16px; max-height: 62vh; overflow-y: auto; }
 .project-dialog .to-dialog-body::-webkit-scrollbar { width: 6px; }
 .project-dialog .to-dialog-body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 999px; }
+
+.pd-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.pd-head-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pd-head-text { min-width: 0; }
 .pd-logo {
-  width: 48px; height: 48px;
+  width: 52px; height: 52px;
   border-radius: 10px;
   object-fit: cover;
   background: #0c0c0c;
   border: 1px solid #222;
+  flex-shrink: 0;
 }
 .pd-gif {
-  width: 100%;
-  height: 140px;
+  width: 120px;
+  height: 90px;
   object-fit: cover;
   border: 1px solid #222;
   border-radius: 8px;
+  flex-shrink: 0;
+}
+.pd-warn {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 176, 0, .35);
+  border-radius: 8px;
+  background: rgba(255, 176, 0, .08);
+  font-size: 13px;
+  color: #f0c060;
+  line-height: 1.6;
 }
 .pd-desc { font-size: 14px; color: #999; line-height: 1.7; }
 .pd-tags { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -372,7 +494,7 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   width: 100%;
   flex-shrink: 0;
   object-fit: cover;
-  max-height: 260px;
+  height: 320px;
   cursor: zoom-in;
 }
 .ss-nav {
@@ -466,21 +588,40 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   gap: 16px;
 }
 .contact-card {
+  position: relative;
   background: #0a0a0a;
   border: 1px solid #222;
   border-radius: 12px;
   padding: 24px;
+  transition: border-color .3s, transform .3s, box-shadow .3s;
 }
+.contact-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  pointer-events: none;
+  background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .04) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.contact-card:hover::before { opacity: 1; }
+.contact-card:hover { border-color: #444; transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
 .contact-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 .contact-ico {
   width: 44px; height: 44px;
-  border-radius: 8px;
-  background: #0c0c0c;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%);
   border: 1px solid #333;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  transition: border-color .3s, box-shadow .3s;
+}
+.contact-card:hover .contact-ico {
+  border-color: #666;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 8px 24px rgba(0,0,0,.4);
 }
 .contact-card-title { font-size: 15px; }
 .contact-card-sub { font-size: 12px; color: #777; margin-top: 2px; }
@@ -533,6 +674,5 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   .hero { padding: 60px 0 40px; }
   .section { padding: 48px 0; }
   .hero-meta { flex-direction: column; align-items: center; gap: 8px; }
-  .gh-grid { grid-template-columns: repeat(12, 1fr); }
   .project-dialog .to-dialog { max-width: 92vw; }
 }

@@ -52,6 +52,18 @@
 </head>
 <body>
 
+  <!-- === BANNER === -->
+  <div class="page">
+    <div class="top-banner">
+      <span class="top-banner-badge">Важно</span>
+      <p class="top-banner-text">
+        Пока не вышел первый проект Spark Studio 17, всем участникам Discord-сервера выдадим самую редкую роль после владельца сервера - <strong>@│・「 ХОКАГЕ 」 ﹒⁺</strong>.
+        Роль невозможно получить после выхода Spark Studio 17.
+        Если вы не получили роль, создайте обращение в саппорт через <strong>⁠﹕🎲﹒ticket﹒</strong> и ожидайте ответа от модераторов.
+      </p>
+    </div>
+  </div>
+
   <!-- === NAV === -->
   <div class="page">
     <nav class="nav">
@@ -71,7 +83,6 @@
   <!-- === HERO === -->
   <div class="page" id="top">
     <section class="hero">
-      <span class="hero-badge">Инди · Open Source</span>
       <h1>
         Пишу меньше кода.<br>
         <span class="gradient">Строю больше.</span>
@@ -84,10 +95,10 @@
         <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord →</a>
       </div>
       <div class="hero-meta">
-        <span>⬡ 5 проектов</span>
-        <span>⬡ MIT License</span>
-        <span>⬡ Open Source</span>
-        <span>⬡ Web + Desktop</span>
+        <span>5 проектов</span>
+        <span>MIT License</span>
+        <span>Open Source</span>
+        <span>Web + Desktop</span>
       </div>
     </section>
 
@@ -105,7 +116,7 @@
       <div class="gh-body">
         <div class="gh-profile">
           <div class="gh-profile-head">
-            <div class="gh-avatar">🎨</div>
+            <img class="gh-avatar" src="https://avatars.githubusercontent.com/u/218509268?v=4" alt="ll1ness">
             <div>
               <div class="gh-name">ll1ness</div>
               <div class="gh-role">инди-разработчик</div>
@@ -113,36 +124,31 @@
           </div>
           <p class="gh-bio">Создаю веб и десктоп приложения с открытым исходным кодом. Кодинг — хобби.</p>
           <div class="gh-tags">
-            <span class="to-tag" data-variant="default">HTML</span>
-            <span class="to-tag" data-variant="default">CSS</span>
-            <span class="to-tag" data-variant="default">JS</span>
-            <span class="to-tag" data-variant="default">PHP</span>
-            <span class="to-tag" data-variant="default">Java</span>
-            <span class="to-tag" data-variant="default">Python</span>
+            <span class="to-tag" data-variant="default"><span class="ltag" data-l="html"></span>HTML</span>
+            <span class="to-tag" data-variant="default"><span class="ltag" data-l="css"></span>CSS</span>
+            <span class="to-tag" data-variant="default"><span class="ltag" data-l="js"></span>JS</span>
+            <span class="to-tag" data-variant="default"><span class="ltag" data-l="php"></span>PHP</span>
+            <span class="to-tag" data-variant="default"><span class="ltag" data-l="java"></span>Java</span>
+            <span class="to-tag" data-variant="default"><span class="ltag" data-l="python"></span>Python</span>
           </div>
-          <div class="gh-stats">
-            <div class="gh-stat"><b>5</b><span>проектов</span></div>
-            <div class="gh-stat"><b>MIT</b><span>лицензия</span></div>
+          <div class="gh-metrics">
+            <img src="https://raw.githubusercontent.com/ll1ness/ll1ness/legacy/metrics-activity.svg" alt="Metrics activity">
+            <img src="https://raw.githubusercontent.com/ll1ness/ll1ness/legacy/metrics-community.svg" alt="Metrics community">
           </div>
         </div>
         <div class="gh-activity">
           <div class="gh-activity-title">Публичная активность</div>
-          <div class="gh-grid" id="gh-grid"></div>
+          <div class="gh-contrib" id="gh-contrib"></div>
           <div class="gh-repos" id="gh-repos"></div>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- === MARQUEE === -->
-  <div class="marquee">
-    <div class="marquee-track" id="marquee-track"></div>
-  </div>
-
   <!-- === PROJECTS === -->
   <section class="section" id="projects">
     <div class="page">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="eyebrow">проекты</span>
         <h2>Разработка с открытым исходным кодом.</h2>
         <p>Продукты, приложения и инструменты, которые я делаю и публикую.</p>
@@ -157,7 +163,7 @@
   <!-- === FAQ === -->
   <section class="section" id="faq">
     <div class="page">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="eyebrow">faq</span>
         <h2>Частые вопросы.</h2>
       </div>
@@ -168,13 +174,13 @@
   <!-- === CONTACTS === -->
   <section class="section" id="contacts">
     <div class="page">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="eyebrow">контакты</span>
         <h2>Связаться со мной.</h2>
         <p>Быстрее всего отвечаю в Discord.</p>
       </div>
       <div class="contacts-grid">
-        <div class="contact-card">
+        <div class="contact-card reveal">
           <div class="contact-card-head">
             <div class="contact-ico">💬</div>
             <div>
@@ -191,7 +197,7 @@
               title="Discord"></iframe>
           </div>
         </div>
-        <div class="contact-card">
+        <div class="contact-card reveal">
           <div class="contact-card-head">
             <div class="contact-ico">●</div>
             <div>

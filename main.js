@@ -31,12 +31,19 @@
   ];
 
   var REPOS = [
-    { icon: '🎨', name: 'techone-ui', lang: 'CSS · TS', desc: 'Дизайн-фреймворк' },
-    { icon: '⚡', name: 'spark-studio', lang: 'Java · JPHP', desc: 'IDE для десктопа' },
-    { icon: '🌤️', name: 'weather-seeker', lang: 'JS · API', desc: 'Погода на 16 дней' }
+    { logo: '/assets/techone.png', name: 'techone-ui', lang: 'CSS · TS', desc: 'Дизайн-фреймворк' },
+    { logo: '/assets/sparkstudio.png', name: 'spark-studio', lang: 'Java · JPHP', desc: 'IDE для десктопа' },
+    { logo: '/assets/weatherseeker.png', name: 'weather-seeker', lang: 'JS · API', desc: 'Погода на 16 дней' }
   ];
 
-  var LANG_DOTS = ['#f1e05a', '#b07219', '#3572A5'];
+  var LANG_SVGS = {
+    html: 'M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z',
+    css: 'M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.41l.213 2.622 10.125.002-.255 2.716h-6.64l.24 2.573h6.182l-.366 3.523-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.288l5.373-1.53L18.59 4.414z',
+    js: 'M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z',
+    php: 'M7.01 10.207h-.944l-.515 2.648h.838c.556 0 .97-.105 1.242-.314.272-.21.455-.559.55-1.049.092-.47.05-.802-.124-.995-.175-.193-.523-.29-1.047-.29zM12 5.688C5.373 5.688 0 8.514 0 12s5.373 6.313 12 6.313S24 15.486 24 12c0-3.486-5.373-6.312-12-6.312zm-3.26 7.451c-.261.25-.575.438-.917.551-.336.108-.765.164-1.285.164H5.357l-.327 1.681H3.652l1.23-6.326h2.65c.797 0 1.378.209 1.744.628.366.418.476 1.002.33 1.752a2.836 2.836 0 0 1-.305.847c-.143.255-.33.49-.561.703zm4.024.715l.543-2.799c.063-.318.039-.536-.068-.651-.107-.116-.336-.174-.687-.174H11.46l-.704 3.625H9.388l1.23-6.327h1.367l-.327 1.682h1.218c.767 0 1.295.134 1.586.401s.378.7.263 1.299l-.572 2.944h-1.389zm7.597-2.265a2.782 2.782 0 0 1-.305.847c-.143.255-.33.49-.561.703a2.44 2.44 0 0 1-.917.551c-.336.108-.765.164-1.286.164h-1.18l-.327 1.682h-1.378l1.23-6.326h2.649c.797 0 1.378.209 1.744.628.366.417.477 1.001.331 1.751zM17.766 10.207h-.943l-.516 2.648h.838c.557 0 .971-.105 1.242-.314.272-.21.455-.559.551-1.049.092-.47.049-.802-.125-.995s-.524-.29-1.047-.29z',
+    java: 'M11.915 0 11.7.215C9.515 2.4 7.47 6.39 6.046 10.483c-1.064 1.024-3.633 2.81-3.711 3.551-.093.87 1.746 2.611 1.55 3.235-.198.625-1.304 1.408-1.014 1.939.1.188.823.011 1.277-.491a13.389 13.389 0 0 0-.017 2.14c.076.906.27 1.668.643 2.232.372.563.956.911 1.667.911.397 0 .727-.114 1.024-.264.298-.149.571-.33.91-.5.68-.34 1.634-.666 3.53-.604 1.903.062 2.872.39 3.559.704.687.314 1.15.664 1.925.664.767 0 1.395-.336 1.807-.9.412-.563.631-1.33.72-2.24.06-.623.055-1.32 0-2.066.454.45 1.117.604 1.213.424.29-.53-.816-1.314-1.013-1.937-.198-.624 1.642-2.366 1.549-3.236-.08-.748-2.707-2.568-3.748-3.586C16.428 6.374 14.308 2.394 12.13.215zm.175 6.038a2.95 2.95 0 0 1 2.943 2.942 2.95 2.95 0 0 1-2.943 2.943A2.95 2.95 0 0 1 9.148 8.98a2.95 2.95 0 0 1 2.942-2.942zM8.685 7.983a3.515 3.515 0 0 0-.145.997c0 1.951 1.6 3.55 3.55 3.55 1.95 0 3.55-1.598 3.55-3.55 0-.329-.046-.648-.132-.951.334.095.64.208.915.336a42.699 42.699 0 0 1 2.042 5.829c.678 2.545 1.01 4.92.846 6.607-.082.844-.29 1.51-.606 1.94-.315.431-.713.651-1.315.651-.593 0-.932-.27-1.673-.61-.741-.338-1.825-.694-3.792-.758-1.974-.064-3.073.293-3.821.669-.375.188-.659.373-.911.5s-.466.2-.752.2c-.53 0-.876-.209-1.16-.64-.285-.43-.474-1.101-.545-1.948-.141-1.693.176-4.069.823-6.614a43.155 43.155 0 0 1 1.934-5.783c.348-.167.749-.31 1.192-.425zm-3.382 4.362a.216.216 0 0 1 .13.031c-.166.56-.323 1.116-.463 1.665a33.849 33.849 0 0 0-.547 2.555 3.9 3.9 0 0 0-.2-.39c-.58-1.012-.914-1.642-1.16-2.08.315-.24 1.679-1.755 2.24-1.781zm13.394.01c.562.027 1.926 1.543 2.24 1.783-.246.438-.58 1.068-1.16 2.08a4.428 4.428 0 0 0-.163.309 32.354 32.354 0 0 0-.562-2.49 40.579 40.579 0 0 0-.482-1.652.216.216 0 0 1 .127-.03z',
+    python: 'M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.36.12-.39.2-.38.24-.4.26-.42.3-.4.32-.42.34-.39.35-.4.36-.36.37-.36.36-.34.35-.34.32-.32.3-.3.26-.27.22-.24.18-.21.13-.18.09-.15.05-.12.02-.09.01-.06v-1.25l.08-.4.15-.34.23-.3.3-.28.36-.26.43-.24.48-.22.55-.2.6-.18.66-.16.72-.13.78-.1.84-.07.9-.04zM9.66 5.34l-1.04-.02.05 1.08h.99l.01-1.06z'
+  };
 
   var FAQ = [
     {
@@ -70,53 +77,83 @@
     return node;
   }
 
-  function buildGhCells() {
-    var cells = [];
-    var seed = 42;
-    var rand = function () {
-      seed = (seed * 16807) % 2147483647;
-      return seed / 2147483647;
-    };
-    for (var i = 0; i < 144; i++) {
-      var r = rand();
-      cells.push(r > 0.72 ? 'on' : r > 0.45 ? 'soft' : '');
-    }
-    return cells;
+  function injectLangLogos() {
+    document.querySelectorAll('.ltag').forEach(function (t) {
+      var lang = t.dataset.l;
+      var path = LANG_SVGS[lang];
+      if (!path) return;
+      t.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="' + path + '"/></svg>';
+    });
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function renderContrib() {
+    var box = document.getElementById('gh-contrib');
+    if (!box) return;
+    box.innerHTML = '<span class="contrib-loading">Загрузка…</span>';
+    fetch('https://github-contributions-api.jogruber.de/v4/ll1ness?y=last')
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+      .then(function (d) {
+        var map = {};
+        (d.contributions || []).forEach(function (c) {
+          map[c.date] = c.count || 0;
+        });
+
+        var end = new Date();
+        end.setHours(0, 0, 0, 0);
+        var start = new Date(end);
+        start.setDate(start.getDate() - 370);
+        while (start.getDay() !== 0) start.setDate(start.getDate() - 1);
+
+        var grid = el('div', 'contrib-grid');
+        var cur = new Date(start);
+        var week = null;
+        while (cur <= end) {
+          if (cur.getDay() === 0) {
+            week = el('div', 'contrib-week');
+            grid.appendChild(week);
+          }
+          var key = cur.getFullYear() + '-' + pad2(cur.getMonth() + 1) + '-' + pad2(cur.getDate());
+          var n = map[key] || 0;
+          var lvl = n === 0 ? 0 : n < 3 ? 1 : n < 6 ? 2 : n < 9 ? 3 : 4;
+          var cell = el('div', 'contrib-cell lvl' + lvl);
+          cell.title = key + ': ' + n + ' коммитов';
+          week.appendChild(cell);
+          cur.setDate(cur.getDate() + 1);
+        }
+        box.innerHTML = '';
+        box.appendChild(grid);
+      })
+      .catch(function () {
+        box.innerHTML = '<img src="https://ghchart.rshah.org/ll1ness" alt="Вклад за последний год">';
+      });
   }
 
   function renderGhWidget() {
-    var grid = document.getElementById('gh-grid');
-    if (grid) {
-      buildGhCells().forEach(function (c) {
-        grid.appendChild(el('span', 'gh-cell ' + c));
-      });
-    }
     var repos = document.getElementById('gh-repos');
     if (repos) {
-      REPOS.forEach(function (r, i) {
+      REPOS.forEach(function (r) {
         var row = el('div', 'gh-repo');
-        var left = el('div', '', r.icon + ' <div><div class="gh-repo-name">' + r.name + '</div><div class="gh-repo-desc">' + r.desc + '</div></div>');
+        var left = el('div', '');
+        var logo = el('img', 'gh-repo-logo');
+        logo.src = r.logo;
+        logo.alt = r.name;
+        var meta = el('div', '');
+        meta.appendChild(el('div', 'gh-repo-name', r.name));
+        meta.appendChild(el('div', 'gh-repo-desc', r.desc));
+        left.appendChild(logo);
+        left.appendChild(meta);
         left.style.display = 'flex';
         left.style.alignItems = 'center';
-        left.style.gap = '8px';
+        left.style.gap = '10px';
         var lang = el('div', 'gh-repo-lang');
-        lang.innerHTML = '<span class="lang-dot" style="background:' + LANG_DOTS[i % LANG_DOTS.length] + ';"></span>' + r.lang;
+        lang.innerHTML = '<span class="lang-dot"></span>' + r.lang;
         row.appendChild(left);
         row.appendChild(lang);
         repos.appendChild(row);
       });
     }
-  }
-
-  function renderMarquee() {
-    var track = document.getElementById('marquee-track');
-    if (!track) return;
-    var items = ['Open-source.', 'Community-driven.', 'Indie-made.'];
-    var seq = items.concat(items);
-    seq.forEach(function (t) {
-      var it = el('span', 'marquee-item', t + ' <i></i>');
-      track.appendChild(it);
-    });
   }
 
   function renderFilters() {
@@ -138,20 +175,85 @@
     });
   }
 
+  function buildCarousel(p) {
+    var slides = (p.screenshots || []).slice();
+    if (!slides.length && p.gif) slides.push(p.gif);
+    if (!slides.length) return null;
+
+    var wrap = el('div', 'project-carousel' + (slides.length < 2 ? ' single' : ''));
+    var track = el('div', 'project-carousel-track');
+    slides.forEach(function (src, i) {
+      var img = el('img', 'project-carousel-slide');
+      img.src = src;
+      img.alt = p.name + ' — ' + (i === 0 && p.gif && !p.screenshots.length ? 'анимация' : 'скриншот ' + (i + 1));
+      img.loading = 'eager';
+      img.decoding = 'async';
+      img.draggable = false;
+      track.appendChild(img);
+    });
+    wrap.appendChild(track);
+
+    var dots = el('div', 'project-carousel-dots');
+    slides.forEach(function (_, i) {
+      var d = el('button', 'project-carousel-dot' + (i === 0 ? ' active' : ''));
+      d.type = 'button';
+      d.dataset.index = i;
+      d.addEventListener('click', function (e) { e.stopPropagation(); go(i); });
+      dots.appendChild(d);
+    });
+    wrap.appendChild(dots);
+
+    var idx = 0;
+    var timer = null;
+    var visible = false;
+    var hover = false;
+
+    function go(i) {
+      idx = (i + slides.length) % slides.length;
+      track.style.transform = 'translateX(-' + idx * 100 + '%)';
+      dots.querySelectorAll('.project-carousel-dot').forEach(function (d, j) {
+        d.classList.toggle('active', j === idx);
+      });
+    }
+
+    function next() { go(idx + 1); }
+
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+    function start() {
+      if (timer || slides.length < 2) return;
+      timer = setInterval(next, 3000);
+    }
+
+    wrap.addEventListener('mouseenter', function () { hover = true; stop(); });
+    wrap.addEventListener('mouseleave', function () { hover = false; if (visible && slides.length > 1) start(); });
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          visible = en.isIntersecting;
+          if (visible && !hover) start();
+          else if (!visible) stop();
+        });
+      }, { threshold: 0.25 });
+      io.observe(wrap);
+    } else {
+      visible = true;
+      start();
+    }
+
+    return wrap;
+  }
+
   function projectCard(p) {
     var card = el('div', 'project-card');
     card.dataset.id = p.id;
 
-    if (p.screenshots && p.screenshots.length) {
-      var img = el('img', 'project-thumb');
-      img.src = p.screenshots[0];
-      img.alt = p.name;
-      img.loading = 'lazy';
-      img.onerror = function () { img.style.display = 'none'; };
-      card.appendChild(img);
+    var carousel = buildCarousel(p);
+    if (carousel) {
+      card.appendChild(carousel);
     } else {
-      var ph = el('div', 'project-thumb-placeholder', p.icon || '📄');
-      card.appendChild(ph);
+      card.appendChild(el('div', 'project-thumb-placeholder', p.icon || '📄'));
     }
 
     var body = el('div', 'to-card-body');
@@ -183,7 +285,14 @@
       grid.appendChild(el('p', '', 'Пока пусто.'));
       return;
     }
-    list.forEach(function (p) { grid.appendChild(projectCard(p)); });
+    list.forEach(function (p) {
+      var c = projectCard(p);
+      c.classList.add('reveal');
+      grid.appendChild(c);
+    });
+    requestAnimationFrame(function () {
+      grid.querySelectorAll('.reveal').forEach(function (n) { n.classList.add('in'); });
+    });
   }
 
   /* ---------- Dialog ---------- */
@@ -214,12 +323,22 @@
 
     var parts = [];
 
+    var head = '<div class="pd-head">';
+    head += '<div class="pd-head-main">';
     if (p.logo) {
-      parts.push('<img class="pd-logo" src="' + p.logo + '" alt="' + p.name + '">');
+      head += '<img class="pd-logo" src="' + p.logo + '" alt="' + p.name + '">';
     }
-
+    head += '<div class="pd-head-text"><h2>' + p.name + '</h2>';
+    head += '<p class="to-dialog-tagline">' + p.tagline + '</p></div>';
+    head += '</div>';
     if (p.gif) {
-      parts.push('<img class="pd-gif" src="' + p.gif + '" alt="' + p.name + ' — анимация">');
+      head += '<img class="pd-gif" src="' + p.gif + '" alt="' + p.name + ' — анимация">';
+    }
+    head += '</div>';
+    parts.push(head);
+
+    if (p.warn) {
+      parts.push('<div class="pd-warn">' + p.warn + '</div>');
     }
 
     parts.push('<div class="pd-desc">' + p.description + '</div>');
@@ -234,10 +353,6 @@
     }
 
     dialogBody.innerHTML = parts.join('');
-
-    var title = el('h2', '', p.name);
-    dialogBody.insertBefore(title, dialogBody.firstChild);
-    dialogBody.insertBefore(el('p', 'to-dialog-tagline', p.tagline), dialogBody.firstChild.nextSibling);
 
     dialogActions.innerHTML = '';
     if (p.downloads && p.downloads.length) {
@@ -382,14 +497,52 @@
     if (window.toui && window.toui.init) window.toui.init();
   }
 
+  /* ---------- Decor (Once UI style) ---------- */
+
+  function initSpotlight() {
+    ['pointermove', 'pointerleave'].forEach(function (evt) {
+      document.addEventListener(evt, function (e) {
+        var card = e.target.closest ? e.target.closest('.project-card, .contact-card') : null;
+        if (!card) return;
+        var r = card.getBoundingClientRect();
+        if (evt === 'pointerleave' || (e.clientX === 0 && e.clientY === 0)) {
+          card.style.setProperty('--mx', '50%');
+          card.style.setProperty('--my', '50%');
+          return;
+        }
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
+  function initReveal() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(function (n) { n.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(function (n) { io.observe(n); });
+  }
+
   /* ---------- Boot ---------- */
 
   function boot() {
     renderGhWidget();
-    renderMarquee();
+    injectLangLogos();
+    renderContrib();
     renderSocials();
     renderFaq();
     bindLightbox();
+    initSpotlight();
+    initReveal();
 
     fetch(DATA_URL)
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })

@@ -28,6 +28,25 @@ const MIME = {
   '.xml': 'application/xml; charset=utf-8',
 };
 
+if (process.argv.includes('--check')) {
+  const REQUIRED = ['index.html', 'site.css', 'main.js', 'techon-ui.min.js', 'projects.json', 'favicon.ico'];
+  (async () => {
+    const missing = [];
+    for (const f of REQUIRED) {
+      try { await stat(join(ROOT, f)); } catch { missing.push(f); }
+    }
+    if (missing.length) {
+      console.error('Missing files:', missing.join(', '));
+      process.exit(1);
+    }
+    console.log('Static build OK — all required files present.');
+    process.exit(0);
+  })();
+} else {
+  startServer();
+}
+
+function startServer() {
 const server = createServer(async (req, res) => {
   try {
     let pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
@@ -62,3 +81,4 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`ll1ness static server → http://localhost:${PORT}`);
 });
+}
