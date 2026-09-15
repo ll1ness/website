@@ -52,18 +52,6 @@
 </head>
 <body>
 
-  <!-- === BANNER === -->
-  <div class="page">
-    <div class="top-banner">
-      <span class="top-banner-badge">Важно</span>
-      <p class="top-banner-text">
-        Пока не вышел первый проект Spark Studio 17, всем участникам Discord-сервера выдадим самую редкую роль после владельца сервера - <strong>@│・「 ХОКАГЕ 」 ﹒⁺</strong>.
-        Роль невозможно получить после выхода Spark Studio 17.
-        Если вы не получили роль, создайте обращение в саппорт через <strong>⁠﹕🎲﹒ticket﹒</strong> и ожидайте ответа от модераторов.
-      </p>
-    </div>
-  </div>
-
   <!-- === NAV === -->
   <div class="page">
     <nav class="nav">
@@ -92,7 +80,7 @@
       </p>
       <div class="hero-actions">
         <a href="#projects" class="to-button" data-variant="primary">Смотреть проекты</a>
-        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord →</a>
+        <a href="https://t.me/ll1ness" target="_blank" rel="noopener" class="to-button">Telegram →</a>
       </div>
       <div class="hero-meta">
         <span>5 проектов</span>
@@ -145,18 +133,31 @@
     </section>
   </div>
 
-  <!-- === PROJECTS === -->
-  <section class="section" id="projects">
+  <!-- === ПРОЕКТЫ === -->
+  <section class="section portfolio-section" id="projects">
     <div class="page">
       <div class="section-header reveal">
-        <span class="eyebrow">проекты</span>
-        <h2>Разработка с открытым исходным кодом.</h2>
-        <p>Продукты, приложения и инструменты, которые я делаю и публикую.</p>
+        <h2 class="portfolio-title"><span class="pf-liness">линесс</span> <span class="pf-accent">аркейд</span></h2>
       </div>
-      <div class="filter-row" id="filter-row"></div>
-      <div class="projects-grid" id="projects-grid">
-        <p style="text-align:center;color:#555;grid-column:1/-1;padding:40px 0;">Загрузка…</p>
+      <div class="projects-grid" data-line="arcade"></div>
+    </div>
+  </section>
+
+  <section class="section portfolio-section">
+    <div class="page">
+      <div class="section-header reveal">
+        <h2 class="portfolio-title"><span class="pf-liness">линесс</span> <span class="pf-accent">проджект</span></h2>
       </div>
+      <div class="projects-grid" data-line="project"></div>
+    </div>
+  </section>
+
+  <section class="section portfolio-section">
+    <div class="page">
+      <div class="section-header reveal">
+        <h2 class="portfolio-title"><span class="pf-liness">линесс</span> <span class="pf-accent">десктоп</span></h2>
+      </div>
+      <div class="projects-grid" data-line="desktop"></div>
     </div>
   </section>
 
@@ -211,17 +212,6 @@
     </div>
   </section>
 
-  <!-- === PROJECT DIALOG === -->
-  <div class="to-dialog-wrapper project-dialog" id="project-dialog">
-    <div class="to-dialog-overlay">
-      <div class="to-dialog">
-        <button class="to-dialog-close" aria-label="Закрыть">&times;</button>
-        <div class="to-dialog-body" id="project-dialog-body"></div>
-        <div class="to-dialog-actions" id="project-dialog-actions"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- === LIGHTBOX === -->
   <div class="lightbox" id="lightbox">
     <div class="lightbox-bg" id="lightbox-bg"></div>
@@ -236,11 +226,39 @@
     <footer class="footer">
       <span>© 2026 <a href="https://github.com/ll1ness" target="_blank" rel="noopener">ll1ness</a> · MIT</span>
       <div class="footer-links">
+        <a href="dev" class="footer-dev">Для разработчиков</a>
         <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
         <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
         <a href="#top">↑ Top</a>
       </div>
     </footer>
+  </div>
+
+  <!-- === SUPPORT CHAT === -->
+  <div class="chat-widget" id="chat-widget">
+    <section class="chat-panel" id="chat-panel" role="dialog" aria-label="Чат с поддержкой" aria-hidden="true">
+      <header class="chat-head">
+        <div class="chat-head-main">
+          <span class="chat-avatar" aria-hidden="true">💬</span>
+          <div>
+            <div class="chat-title">Поддержка</div>
+            <div class="chat-sub"><span class="chat-dot" aria-hidden="true"></span>отвечаем в Discord</div>
+          </div>
+        </div>
+        <button class="chat-close" id="chat-close" type="button" aria-label="Закрыть чат">&times;</button>
+      </header>
+      <div class="chat-body" id="chat-body" aria-live="polite"></div>
+      <form class="chat-input-row" id="chat-form">
+        <input class="chat-input" id="chat-input" type="text" placeholder="Написать сообщение…" autocomplete="off" maxlength="500">
+        <button class="chat-send" type="submit" aria-label="Отправить">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </form>
+    </section>
+    <button class="chat-launcher" id="chat-launcher" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-panel" aria-label="Открыть чат поддержки">
+      <svg class="chat-ico-open" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.9 2 11.7c0 2.8 1.5 5.2 3.9 6.8L5 22l4.4-1.8c.8.2 1.7.3 2.6.3 5.5 0 10-3.9 10-8.7S17.5 3 12 3z"/></svg>
+      <svg class="chat-ico-close" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>
   </div>
 
   <script src="main.js"></script>

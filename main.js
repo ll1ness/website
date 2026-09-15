@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var DATA_URL = 'projects.json';
+  var DATA_URL = document.body.dataset.project ? '../projects.json' : 'projects.json';
 
   var SOCIALS = [
     {
@@ -27,7 +27,7 @@
       href: 'https://orcid.org/0009-0001-2539-7302',
       icon: 'or',
       path: 'M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947s-.422.947-.947.947-.947-.431-.947-.947.422-.947.947-.947zm-.948 3.11h1.888v10.454H6.421V7.488zm3.175 0h2.078c2.401 0 3.945 1.661 3.945 3.918 0 2.257-1.544 3.919-3.945 3.919h-.978v2.617h-1.1V7.488zm1.1 1.178v5.481h.87c1.944 0 2.868-1.142 2.868-2.741 0-1.598-.924-2.74-2.868-2.74h-.87z'
-    }
+    },
   ];
 
   var REPOS = [
@@ -68,7 +68,7 @@
     }
   ];
 
-  var state = { projects: [], cats: [], activeCat: 'all' };
+  var state = { projects: [] };
 
   function el(tag, cls, html) {
     var node = document.createElement(tag);
@@ -156,22 +156,24 @@
     }
   }
 
-  function renderFilters() {
-    var row = document.getElementById('filter-row');
-    if (!row) return;
-    var chips = [{ id: 'all', label: 'Все' }].concat(state.cats);
-    chips.forEach(function (c) {
-      var chip = el('button', 'filter-chip' + (c.id === state.activeCat ? ' active' : ''), c.label);
-      chip.type = 'button';
-      chip.dataset.cat = c.id;
-      chip.addEventListener('click', function () {
-        state.activeCat = c.id;
-        row.querySelectorAll('.filter-chip').forEach(function (b) {
-          b.classList.toggle('active', b.dataset.cat === state.activeCat);
-        });
-        renderProjects();
+  function renderProjects() {
+    var grids = document.querySelectorAll('.projects-grid[data-line]');
+    grids.forEach(function (grid) {
+      var line = grid.dataset.line;
+      grid.innerHTML = '';
+      var list = state.projects.filter(function (p) { return p.line === line; });
+      if (!list.length) {
+        grid.appendChild(el('p', 'line-empty', 'Скоро'));
+        return;
+      }
+      list.forEach(function (p) {
+        var c = projectCard(p);
+        c.classList.add('reveal');
+        grid.appendChild(c);
       });
-      row.appendChild(chip);
+    });
+    requestAnimationFrame(function () {
+      document.querySelectorAll('.projects-grid .reveal').forEach(function (n) { n.classList.add('in'); });
     });
   }
 
@@ -260,192 +262,150 @@
     body.appendChild(el('div', 'project-title', (p.icon || '📄') + ' ' + p.name));
     body.appendChild(el('div', 'project-tagline', p.tagline));
 
-    if (p.tags && p.tags.length) {
-      var tags = el('div', 'project-tags');
-      p.tags.forEach(function (t) {
-        tags.appendChild(el('span', 'to-tag', t));
-      });
-      body.appendChild(tags);
+    if (p.page) {
+      var btn = el('a', 'project-btn', 'Подробнее <span aria-hidden="true">→</span>');
+      btn.href = p.page;
+      btn.addEventListener('click', function (e) { e.stopPropagation(); });
+      body.appendChild(btn);
     }
     card.appendChild(body);
 
-    card.addEventListener('click', function () { openProjectDialog(p.id); });
+    card.addEventListener('click', function () {
+      if (p.page) window.location.href = p.page;
+    });
     return card;
   }
 
-  function renderProjects() {
-    var grid = document.getElementById('projects-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    var list = state.activeCat === 'all'
-      ? state.projects
-      : state.projects.filter(function (p) { return p.cat === state.activeCat; });
+  /* ---------- Standalone project page (Steam-like) ---------- */
 
-    if (!list.length) {
-      grid.appendChild(el('p', '', 'Пока пусто.'));
-      return;
-    }
-    list.forEach(function (p) {
-      var c = projectCard(p);
-      c.classList.add('reveal');
-      grid.appendChild(c);
-    });
-    requestAnimationFrame(function () {
-      grid.querySelectorAll('.reveal').forEach(function (n) { n.classList.add('in'); });
-    });
-  }
-
-  /* ---------- Dialog ---------- */
-
-  var dialog = null;
-  var dialogBody = null;
-  var dialogActions = null;
-  var lightboxEl = null;
-
-  function getDialog() {
-    if (dialog) return;
-    dialog = document.getElementById('project-dialog');
-    dialogBody = document.getElementById('project-dialog-body');
-    dialogActions = document.getElementById('project-dialog-actions');
-    lightboxEl = document.getElementById('lightbox');
-  }
-
-  function closeDialog() {
-    if (!dialog) return;
-    dialog.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  function openProjectDialog(id) {
-    getDialog();
-    var p = state.projects.find(function (x) { return x.id === id; });
-    if (!p || !dialogBody) return;
-
-    var parts = [];
-
-    var head = '<div class="pd-head">';
-    head += '<div class="pd-head-main">';
-    if (p.logo) {
-      head += '<img class="pd-logo" src="' + p.logo + '" alt="' + p.name + '">';
-    }
-    head += '<div class="pd-head-text"><h2>' + p.name + '</h2>';
-    head += '<p class="to-dialog-tagline">' + p.tagline + '</p></div>';
-    head += '</div>';
-    if (p.gif) {
-      head += '<img class="pd-gif" src="' + p.gif + '" alt="' + p.name + ' — анимация">';
-    }
-    head += '</div>';
-    parts.push(head);
-
-    if (p.warn) {
-      parts.push('<div class="pd-warn">' + p.warn + '</div>');
-    }
-
-    parts.push('<div class="pd-desc">' + p.description + '</div>');
-
-    if (p.screenshots && p.screenshots.length) {
-      parts.push(renderShots(p));
-    }
-
-    if (p.tags && p.tags.length) {
-      var tags = '<div class="pd-tags">' + p.tags.map(function (t) { return '<span>#' + t + '</span>'; }).join('') + '</div>';
-      parts.push(tags);
-    }
-
-    dialogBody.innerHTML = parts.join('');
-
-    dialogActions.innerHTML = '';
-    if (p.downloads && p.downloads.length) {
-      p.downloads.forEach(function (d) {
-        if (!d.url || d.url === '#') return;
-        var a = document.createElement('a');
-        a.className = 'to-button';
-        a.href = d.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.textContent = d.label + ' →';
-        dialogActions.appendChild(a);
+  function buildShots(p) {
+    var slides = (p.screenshots || []).slice();
+    if (!slides.length) return '';
+    var html = '<div class="pp-shots">';
+    html += '<img class="pp-shot-main" src="' + slides[0] + '" alt="' + p.name + ' — скриншот" data-src="' + slides[0] + '">';
+    if (slides.length > 1) {
+      html += '<div class="pp-shots-thumbs">';
+      slides.forEach(function (s, i) {
+        html += '<img class="pp-thumb' + (i === 0 ? ' active' : '') + '" src="' + s + '" alt="Скриншот ' + (i + 1) + '" data-index="' + i + '" loading="lazy">';
       });
+      html += '</div>';
     }
-
-    bindShotsNav();
-    dialog.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function renderShots(p) {
-    var shots = p.screenshots;
-    var html = '<div class="pd-shots">';
-    html += '<div class="ss-track" id="ss-track">';
-    shots.forEach(function (src, i) {
-      html += '<img src="' + src + '" alt="' + p.name + ' — скриншот ' + (i + 1) + '" data-src="' + src + '">';
-    });
-    html += '</div>';
-    if (shots.length > 1) {
-      html += '<button class="ss-nav prev" id="ss-prev" aria-label="Назад">‹</button>';
-      html += '<button class="ss-nav next" id="ss-next" aria-label="Вперёд">›</button>';
-    }
-    html += '</div>';
-    html += '<div class="ss-dots" id="ss-dots">';
-    shots.forEach(function (_, i) {
-      html += '<button class="ss-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '" aria-label="Скриншот ' + (i + 1) + '"></button>';
-    });
     html += '</div>';
     return html;
   }
 
-  var ssIndex = 0;
-  function bindShotsNav() {
-    var track = document.getElementById('ss-track');
-    if (!track) return;
-    var imgs = track.querySelectorAll('img');
-    var count = imgs.length;
-    ssIndex = 0;
-
-    var setIndex = function (i) {
-      ssIndex = (i + count) % count;
-      track.style.transform = 'translateX(-' + ssIndex * 100 + '%)';
-      var dots = document.getElementById('ss-dots');
-      if (dots) {
-        dots.querySelectorAll('.ss-dot').forEach(function (d, j) {
-          d.classList.toggle('active', j === ssIndex);
+  function bindShots(p) {
+    var main = document.querySelector('.pp-shot-main');
+    if (!main) return;
+    main.addEventListener('click', function () { openLightbox(main.dataset.src); });
+    document.querySelectorAll('.pp-thumb').forEach(function (t) {
+      t.addEventListener('click', function () {
+        var src = p.screenshots[parseInt(t.dataset.index, 10)];
+        if (!src) return;
+        main.src = src;
+        main.dataset.src = src;
+        document.querySelectorAll('.pp-thumb').forEach(function (x) {
+          x.classList.toggle('active', x === t);
         });
-      }
-    };
-
-    var prev = document.getElementById('ss-prev');
-    var next = document.getElementById('ss-next');
-    if (prev) prev.addEventListener('click', function (e) { e.stopPropagation(); setIndex(ssIndex - 1); });
-    if (next) next.addEventListener('click', function (e) { e.stopPropagation(); setIndex(ssIndex + 1); });
-
-    var dots = document.getElementById('ss-dots');
-    if (dots) {
-      dots.querySelectorAll('.ss-dot').forEach(function (d) {
-        d.addEventListener('click', function () { setIndex(parseInt(d.dataset.index, 10)); });
-      });
-    }
-
-    imgs.forEach(function (img) {
-      img.addEventListener('click', function () {
-        openLightbox(img.dataset.src);
       });
     });
+  }
+
+  function readProjectData() {
+    var node = document.getElementById('project-data');
+    if (!node) return null;
+    try {
+      return JSON.parse(node.textContent);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function renderProjectPage(p) {
+    var root = document.getElementById('project-page');
+    if (!root) return;
+    if (!p) {
+      root.innerHTML = '<p style="color:#666;">Проект не найден.</p>';
+      return;
+    }
+
+    var dls = (p.downloads || []).filter(function (d) { return d.url && d.url !== '#'; });
+
+    var html = '';
+
+    html += '<nav class="pp-breadcrumb"><a href="/">ll1ness</a> <span>›</span> <a href="/#projects">Проекты</a> <span>›</span> <span>' + p.name + '</span></nav>';
+
+    html += '<header class="pp-banner">';
+    if (p.logo) {
+      html += '<img class="pp-banner-logo" src="' + p.logo + '" alt="">';
+    } else {
+      html += '<div class="pp-banner-logo placeholder">' + (p.icon || '📄') + '</div>';
+    }
+    html += '<div class="pp-banner-main">';
+    html += '<h1 class="pp-banner-title">' + p.name + '</h1>';
+    html += '<p class="pp-banner-tagline">' + p.tagline + '</p>';
+    html += '<span class="pp-banner-badge' + (p.warn ? '' : ' soon') + '">' + (p.warn ? '⚙ Ранний доступ' : 'Open Source') + '</span>';
+    html += '</div>';
+    html += '</header>';
+
+    html += '<div class="pp-layout">';
+
+    html += '<div class="pp-main">';
+    html += '<section><h2 class="pp-block-title">О проекте</h2><div class="pp-about"><p>' + p.description + '</p></div></section>';
+    if (p.warn) html += '<div class="pp-warn">' + p.warn + '</div>';
+    if (p.screenshots && p.screenshots.length) {
+      html += '<section><h2 class="pp-block-title">Медиа</h2>' + buildShots(p) + '</section>';
+    }
+    html += '</div>';
+
+    html += '<aside class="pp-side">';
+
+    html += '<div class="pp-side-box">';
+    html += '<h3>Доступно</h3>';
+    html += '<div class="pp-price">Бесплатно<small>Open Source · MIT</small></div>';
+    dls.forEach(function (d, i) {
+      html += '<a class="pp-dl' + (i > 0 ? ' sec' : '') + '" href="' + d.url + '" target="_blank" rel="noopener">' + d.label + ' →</a>';
+    });
+    html += '<div class="pp-meta-row"><span>Разработчик</span><b>ll1ness</b></div>';
+    html += '<div class="pp-meta-row"><span>Лицензия</span><b>MIT</b></div>';
+    html += '<div class="pp-meta-row"><span>Статус</span><b>Открытый</b></div>';
+    html += '</div>';
+
+    if (p.tags && p.tags.length) {
+      html += '<div class="pp-side-box"><h3>Теги</h3><div class="pp-tags">' + p.tags.map(function (t) { return '<span class="pp-tag">' + t + '</span>'; }).join('') + '</div></div>';
+    }
+
+    if (dls.length) {
+      html += '<div class="pp-side-box"><h3>Ссылки</h3><div class="pp-side-links">';
+      dls.forEach(function (d) {
+        html += '<a class="pp-side-link" href="' + d.url + '" target="_blank" rel="noopener"><span>' + d.label + '</span><span class="arr">→</span></a>';
+      });
+      html += '<a class="pp-side-link" href="/"><span>На главный сайт</span><span class="arr">→</span></a>';
+      html += '</div></div>';
+    }
+
+    html += '</aside>';
+    html += '</div>';
+
+    root.innerHTML = html;
+    if (p.screenshots && p.screenshots.length) bindShots(p);
   }
 
   /* ---------- Lightbox ---------- */
 
   function openLightbox(src) {
-    getDialog();
-    if (!lightboxEl) return;
     var img = document.getElementById('lightbox-img');
+    var box = document.getElementById('lightbox');
+    if (!img || !box) return;
     img.src = src;
-    lightboxEl.classList.add('open');
+    box.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
   function closeLightbox() {
-    if (!lightboxEl) return;
-    lightboxEl.classList.remove('open');
+    var box = document.getElementById('lightbox');
+    if (!box) return;
+    box.classList.remove('open');
     document.body.style.overflow = '';
   }
 
@@ -455,10 +415,7 @@
     if (bg) bg.addEventListener('click', closeLightbox);
     if (close) close.addEventListener('click', closeLightbox);
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeLightbox();
-        closeDialog();
-      }
+      if (e.key === 'Escape') closeLightbox();
     });
   }
 
@@ -532,9 +489,122 @@
     document.querySelectorAll('.reveal').forEach(function (n) { io.observe(n); });
   }
 
+  /* ---------- Support chat ---------- */
+
+  var CHAT_CHANNELS = [
+    { label: 'Discord · обращение в саппорт', hint: '🎲﹒ticket', href: 'https://discord.gg/nEcnZKQuCf' },
+    { label: 'GitHub Issues', hint: 'репозитории', href: 'https://github.com/ll1ness' },
+    { label: 'Steam', hint: 'личные сообщения', href: 'https://steamcommunity.com/id/ll1ness/' }
+  ];
+
+  function initSupportChat() {
+    var widget = document.getElementById('chat-widget');
+    var launcher = document.getElementById('chat-launcher');
+    var panel = document.getElementById('chat-panel');
+    var closeBtn = document.getElementById('chat-close');
+    var body = document.getElementById('chat-body');
+    var form = document.getElementById('chat-form');
+    var input = document.getElementById('chat-input');
+    if (!widget || !launcher || !panel || !closeBtn || !body || !form || !input) return;
+
+    var booted = false;
+
+    function msg(text, who) {
+      var m = el('div', 'msg ' + who);
+      m.textContent = text;
+      body.appendChild(m);
+      body.scrollTop = body.scrollHeight;
+      return m;
+    }
+
+    function welcome() {
+      if (booted) return;
+      booted = true;
+      msg('Привет! Живой оператор здесь не отвечает — быстрее всего создать обращение в Discord. Выбери способ связи:', 'bot');
+      var wrap = el('div', 'chat-channels');
+      CHAT_CHANNELS.forEach(function (c) {
+        var a = el('a', 'chat-channel');
+        a.href = c.href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.innerHTML = '<span>' + c.label + '</span><span class="arr">' + c.hint + ' →</span>';
+        wrap.appendChild(a);
+      });
+      body.appendChild(wrap);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function setOpen(open) {
+      widget.classList.toggle('open', open);
+      launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
+      launcher.setAttribute('aria-label', open ? 'Закрыть чат поддержки' : 'Открыть чат поддержки');
+      panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (open) {
+        welcome();
+        setTimeout(function () { input.focus(); }, 250);
+      }
+    }
+
+    launcher.addEventListener('click', function () {
+      setOpen(!widget.classList.contains('open'));
+    });
+    closeBtn.addEventListener('click', function () { setOpen(false); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && widget.classList.contains('open')) setOpen(false);
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var text = input.value.trim();
+      if (!text) return;
+      msg(text, 'user');
+      input.value = '';
+
+      function fallback() {
+        msg('Не удалось скопировать автоматически. Скопируй текст вручную и вставь его в обращение в Discord — ⁠﹕🎲﹒ticket﹒.', 'bot');
+      }
+      setTimeout(function () {
+        try {
+          navigator.clipboard.writeText(text).then(
+            function () {
+              msg('Сообщение скопировано в буфер обмена. Вставь его в обращение в Discord — ⁠﹕🎲﹒ticket﹒, и модераторы ответят.', 'bot');
+            },
+            fallback
+          );
+        } catch (err) {
+          fallback();
+        }
+      }, 350);
+    });
+  }
+
   /* ---------- Boot ---------- */
 
   function boot() {
+    var isProject = !!document.body.dataset.project;
+
+    if (isProject) {
+      bindLightbox();
+      var embedded = readProjectData();
+      if (embedded) {
+        renderProjectPage(embedded);
+        return;
+      }
+      var slug = document.body.dataset.project;
+      fetch(DATA_URL)
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+        .then(function (d) {
+          var p = (d.projects || []).find(function (x) { return x.id === slug; });
+          renderProjectPage(p);
+        })
+        .catch(function () {
+          var root = document.getElementById('project-page');
+          if (root) root.innerHTML = '<p style="color:#666;">Не удалось загрузить проект.</p>';
+        });
+      return;
+    }
+
     renderGhWidget();
     injectLangLogos();
     renderContrib();
@@ -543,30 +613,19 @@
     bindLightbox();
     initSpotlight();
     initReveal();
+    initSupportChat();
 
     fetch(DATA_URL)
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
       .then(function (d) {
-        state.cats = d.categories || [];
         state.projects = d.projects || [];
-        renderFilters();
         renderProjects();
       })
       .catch(function () {
-        var grid = document.getElementById('projects-grid');
-        if (grid) grid.innerHTML = '<p style="text-align:center;color:#555;grid-column:1/-1;">Не удалось загрузить проекты.</p>';
+        document.querySelectorAll('.projects-grid[data-line]').forEach(function (grid) {
+          grid.innerHTML = '<p class="line-empty">Не удалось загрузить проекты.</p>';
+        });
       });
-
-    var dialogEl = document.getElementById('project-dialog');
-    if (dialogEl) {
-      dialogEl.querySelectorAll('.to-dialog-close').forEach(function (b) {
-        b.addEventListener('click', closeDialog);
-      });
-      var overlay = dialogEl.querySelector('.to-dialog-overlay');
-      if (overlay) overlay.addEventListener('click', function (e) {
-        if (e.target === overlay) closeDialog();
-      });
-    }
   }
 
   if (document.readyState === 'loading') {

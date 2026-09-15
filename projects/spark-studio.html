@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark Studio — ll1ness</title>
+  <meta name="description" content="Spark Studio — открытая IDE для создания десктопных программ на JavaFX и JPHP.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#030303">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/icon.png">
+
+  <script src="../techon-ui.min.js?v=2"></script>
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body data-project="spark-studio">
+
+  <!-- === NAV === -->
+  <div class="page">
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <img src="/favicon.ico" alt="" style="height:22px;width:22px;border-radius:4px;">
+        ll1ness
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#projects">Проекты</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#contacts">Контакты</a></li>
+        <li><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="gh">GitHub →</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- === CONTENT === -->
+  <div class="page">
+    <main class="project-page" id="project-page">Загрузка…</main>
+  </div>
+
+  <!-- === FOOTER === -->
+  <div class="page">
+    <footer class="footer">
+      <span>© 2026 <a href="https://github.com/ll1ness" target="_blank" rel="noopener">ll1ness</a> · MIT</span>
+      <div class="footer-links">
+        <a href="/dev" class="footer-dev">Для разработчиков</a>
+        <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- === LIGHTBOX === -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-bg" id="lightbox-bg"></div>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">✕</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  </div>
+
+  <script id="project-data" type="application/json">
+    {
+      "id": "spark-studio",
+      "name": "Spark Studio",
+      "cat": "soft",
+      "line": "desktop",
+      "icon": "⚡",
+      "tags": ["PHP", "Java", "JavaFX"],
+      "tagline": "Open-source IDE для создания десктопных программ на JavaFX и JPHP",
+      "warn": "⚠️ Spark Studio 17 ещё не вышел. Версии, доступные в репозитории, находятся в раннем доступе.",
+      "gif": "/assets/spark_anim.gif",
+      "description": "Spark Studio — среда разработки для быстрого создания десктопных приложений. Базируется на DevelNext, использует JPHP и JavaFX. Поддерживает визуальный редактор форм, плагины и расширения через Spark Store.",
+      "logo": "/assets/sparkstudio.png",
+      "screenshots": ["/assets/spark1.webp", "/assets/spark2.webp", "/assets/spark3.webp", "/assets/spark4.webp"],
+      "downloads": [
+        { "label": "GitHub", "url": "https://github.com/ll1ness/spark-studio" },
+        { "label": "Spark Store", "url": "https://github.com/ll1ness/spark-store" }
+      ]
+    }
+  </script>
+
+  <script src="../main.js"></script>
+</body>
+</html>

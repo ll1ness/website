@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Seeker — ll1ness</title>
+  <meta name="description" content="Weather Seeker — веб-приложение для просмотра погоды на 16 дней по всему миру.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#030303">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/icon.png">
+
+  <script src="../techon-ui.min.js?v=2"></script>
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body data-project="weather-seeker">
+
+  <!-- === NAV === -->
+  <div class="page">
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <img src="/favicon.ico" alt="" style="height:22px;width:22px;border-radius:4px;">
+        ll1ness
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#projects">Проекты</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#contacts">Контакты</a></li>
+        <li><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="gh">GitHub →</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- === CONTENT === -->
+  <div class="page">
+    <main class="project-page" id="project-page">Загрузка…</main>
+  </div>
+
+  <!-- === FOOTER === -->
+  <div class="page">
+    <footer class="footer">
+      <span>© 2026 <a href="https://github.com/ll1ness" target="_blank" rel="noopener">ll1ness</a> · MIT</span>
+      <div class="footer-links">
+        <a href="/dev" class="footer-dev">Для разработчиков</a>
+        <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- === LIGHTBOX === -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-bg" id="lightbox-bg"></div>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">✕</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  </div>
+
+  <script id="project-data" type="application/json">
+    {
+      "id": "weather-seeker",
+      "name": "Weather Seeker",
+      "cat": "soft",
+      "line": "project",
+      "icon": "🌤️",
+      "tags": ["JavaScript", "API"],
+      "tagline": "Web-приложение для просмотра погоды на 16 дней по всему миру",
+      "gif": "/assets/seeker_anim.gif",
+      "description": "Weather Seeker — простое и удобное веб-приложение для отслеживания погоды. Показывает прогноз на 16 дней, текущие условия, скорость ветра, влажность и другие метеоданные для любой точки мира.",
+      "logo": "/assets/weatherseeker.png",
+      "screenshots": ["/assets/weather1.webp", "/assets/weather2.webp", "/assets/weather3.webp"],
+      "downloads": [
+        { "label": "GitHub", "url": "https://github.com/ll1ness/weather-seeker" },
+        { "label": "Сайт", "url": "https://weather-seeker.vercel.app" }
+      ]
+    }
+  </script>
+
+  <script src="../main.js"></script>
+</body>
+</html>

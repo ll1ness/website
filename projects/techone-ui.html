@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechOne UI — ll1ness</title>
+  <meta name="description" content="TechOne UI — открытый дизайн-фреймворк для создания веб-приложений на HTML, CSS и JS.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#030303">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/icon.png">
+
+  <script src="../techon-ui.min.js?v=2"></script>
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body data-project="techone-ui">
+
+  <!-- === NAV === -->
+  <div class="page">
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <img src="/favicon.ico" alt="" style="height:22px;width:22px;border-radius:4px;">
+        ll1ness
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#projects">Проекты</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#contacts">Контакты</a></li>
+        <li><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="gh">GitHub →</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- === CONTENT === -->
+  <div class="page">
+    <main class="project-page" id="project-page">Загрузка…</main>
+  </div>
+
+  <!-- === FOOTER === -->
+  <div class="page">
+    <footer class="footer">
+      <span>© 2026 <a href="https://github.com/ll1ness" target="_blank" rel="noopener">ll1ness</a> · MIT</span>
+      <div class="footer-links">
+        <a href="/dev" class="footer-dev">Для разработчиков</a>
+        <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- === LIGHTBOX === -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-bg" id="lightbox-bg"></div>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">✕</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  </div>
+
+  <script id="project-data" type="application/json">
+    {
+      "id": "techone-ui",
+      "name": "TechOne UI",
+      "cat": "soft",
+      "line": "project",
+      "icon": "🎨",
+      "tags": ["HTML", "CSS", "JS"],
+      "tagline": "Open-source design framework для создания приложений на веб-технологиях",
+      "gif": "/assets/techone_anim.gif",
+      "description": "TechOne UI — это открытый дизайн-фреймворк для создания современных веб-приложений. Включает компоненты, сетки, типографику и тёмную тему. Разработан с нуля с фокусом на минимализм и производительность.",
+      "logo": "/assets/techone.png",
+      "screenshots": ["/assets/techone1.webp", "/assets/techone2.webp", "/assets/techone3.webp"],
+      "downloads": [
+        { "label": "GitHub", "url": "https://github.com/ll1ness/techone-ui" },
+        { "label": "Демо", "url": "https://techoneui.vercel.app/" }
+      ]
+    }
+  </script>
+
+  <script src="../main.js"></script>
+</body>
+</html>
