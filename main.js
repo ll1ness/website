@@ -102,9 +102,11 @@
         while (start.getDay() !== 0) start.setDate(start.getDate() - 1);
 
         var grid = el('div', 'contrib-grid');
+        var endPad = new Date(end);
+        endPad.setDate(endPad.getDate() + (6 - end.getDay()));
         var cur = new Date(start);
         var week = null;
-        while (cur <= end) {
+        while (cur <= endPad) {
           if (cur.getDay() === 0) {
             week = el('div', 'contrib-week');
             grid.appendChild(week);
@@ -215,6 +217,20 @@
       return c ? c.offsetWidth : 0;
     }
 
+    function labelWidth(text) {
+      var probe = document.createElement('span');
+      probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;white-space:nowrap;top:0;left:0;';
+      var cs = getComputedStyle(label);
+      probe.style.font = cs.font;
+      probe.style.letterSpacing = cs.letterSpacing;
+      probe.style.fontWeight = cs.fontWeight;
+      probe.textContent = text;
+      document.body.appendChild(probe);
+      var w = probe.offsetWidth;
+      probe.parentNode.removeChild(probe);
+      return w;
+    }
+
     function render() {
       var lineCards = lineIndexes();
       var abs = lineCards.length ? lineCards[idx] : 0;
@@ -263,7 +279,18 @@
         currentLine = targetLine;
         var lineCards = lineIndexes();
         idx = lineCards.length ? Math.floor(lineCards.length / 2) : 0;
+
+        var oldW = label.offsetWidth || 0;
+        label.style.width = oldW + 'px';
+
         render();
+
+        var targetDef = INDEX_LINES.find(function (l) { return l.id === targetLine; });
+        var newW = targetDef ? labelWidth(targetDef.label) : oldW;
+        void label.offsetWidth;
+        if (newW !== oldW) label.style.width = newW + 'px';
+        setTimeout(function () { label.style.width = ''; }, 340);
+
         label.classList.remove('swap');
       }, 240);
 
