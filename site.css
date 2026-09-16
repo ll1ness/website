@@ -354,7 +354,7 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   padding: 4px 10px;
 }
 .gh-follow { font-size: 12px; color: #888; }
-.gh-body { display: grid; grid-template-columns: 1.1fr 1.4fr; }
+.gh-body { display: grid; grid-template-columns: 1fr 1fr; }
 .gh-profile { padding: 24px; border-right: 1px solid #222; }
 .gh-profile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .gh-avatar {
@@ -403,6 +403,8 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .gh-metrics img {
   width: 100%;
   min-width: 0;
+  max-height: 200px;
+  object-fit: contain;
   border: 1px solid #222;
   border-radius: 8px;
   background: #0c0c0c;
