@@ -142,7 +142,7 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   aspect-ratio: auto;
 }
 .hero > * { position: relative; z-index: 2; }
-.hero > .hero-contrib { z-index: 1; }
+.hero > .hero-contrib { position: absolute; z-index: 1; }
 .hero h1 {
   font-size: clamp(36px, 6vw, 60px);
   line-height: 1.15;
