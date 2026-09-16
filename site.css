@@ -891,14 +891,14 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 /* ---------- Contacts ---------- */
 .contacts-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.35fr 1fr;
   gap: 16px;
 }
 .contact-card {
   position: relative;
   background: #0a0a0a;
   border: 1px solid #222;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 24px;
   transition: border-color .3s, transform .3s, box-shadow .3s;
 }
@@ -906,18 +906,29 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   pointer-events: none;
   background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .04) 0%, transparent 65%);
   opacity: 0;
   transition: opacity .3s;
 }
+.contact-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, .14), transparent);
+  pointer-events: none;
+}
 .contact-card:hover::before { opacity: 1; }
 .contact-card:hover { border-color: #444; transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
 .contact-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.contact-card-info { flex: 1 1 auto; min-width: 0; }
 .contact-ico {
   width: 44px; height: 44px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%);
   border: 1px solid #333;
   display: flex;
@@ -932,27 +943,77 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 }
 .contact-card-title { font-size: 15px; }
 .contact-card-sub { font-size: 12px; color: #777; margin-top: 2px; }
+.contact-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #7ee787;
+  border: 1px solid rgba(126, 231, 135, .3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  flex-shrink: 0;
+}
+.contact-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #3fb950;
+  position: relative;
+}
+.contact-status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid rgba(63, 185, 80, .5);
+  animation: contact-pulse 2s ease-out infinite;
+}
+@keyframes contact-pulse {
+  0% { transform: scale(.6); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
 .discord-embed {
   width: 100%;
   min-height: 320px;
   border: 1px solid #222;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
 }
-.discord-embed iframe { width: 100%; height: 320px; border: 0; display: block; }
+.discord-embed iframe { width: 100%; height: 340px; border: 0; display: block; }
 .social-list { display: flex; flex-direction: column; gap: 8px; }
 .social-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 10px 12px;
   border: 1px solid #222;
-  border-radius: 8px;
-  transition: border-color .3s, background .3s;
+  border-radius: 10px;
+  transition: border-color .3s, background .3s, transform .3s;
 }
-.social-item:hover { border-color: #555; background: #0c0c0c; }
-.social-item-left { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-.social-item-arrow { color: #888; font-size: 14px; }
+.social-item:hover {
+  border-color: var(--brand, #555);
+  background: #0c0c0c;
+  transform: translateX(3px);
+}
+.social-item-left { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.social-ico {
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--brand-soft, rgba(255, 255, 255, .05));
+  color: var(--brand, #ccc);
+  border: 1px solid rgba(255, 255, 255, .1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow .3s;
+}
+.social-item:hover .social-ico { box-shadow: 0 0 16px var(--brand-soft, transparent); }
+.social-item-arrow { color: #888; font-size: 14px; transition: transform .3s, color .3s; }
+.social-item:hover .social-item-arrow { transform: translateX(3px); color: var(--brand, #ccc); }
 
 /* ---------- Footer ---------- */
 .footer {
