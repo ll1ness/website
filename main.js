@@ -83,10 +83,8 @@
   function pad2(n) { return n < 10 ? '0' + n : '' + n; }
 
   function renderContrib() {
-    var box = document.getElementById('gh-contrib');
     var heroBox = document.getElementById('hero-contrib');
-    if (!box && !heroBox) return;
-    if (box) box.innerHTML = '<span class="contrib-loading">Загрузка…</span>';
+    if (!heroBox) return;
     fetch('https://github-contributions-api.jogruber.de/v4/ll1ness?y=last')
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
       .then(function (d) {
@@ -122,14 +120,7 @@
         }
         var statCommits = document.getElementById('stat-commits');
         if (statCommits) statCommits.textContent = total;
-        if (box) {
-          box.innerHTML = '';
-          box.appendChild(grid.cloneNode(true));
-        }
-        if (heroBox) heroBox.appendChild(grid);
-      })
-      .catch(function () {
-        if (box) box.innerHTML = '<img src="https://ghchart.rshah.org/ll1ness" alt="Вклад за последний год">';
+        heroBox.appendChild(grid);
       });
   }
 
@@ -138,19 +129,24 @@
     var statRepos = document.getElementById('stat-repos');
     var statFollowers = document.getElementById('stat-followers');
     if (!statStars && !statRepos && !statFollowers) return;
+    if (statRepos) statRepos.textContent = '14';
+    if (statStars) statStars.textContent = '25';
+    if (statFollowers) statFollowers.textContent = '1';
     Promise.all([
       fetch('https://api.github.com/users/ll1ness').then(function (r) { return r.ok ? r.json() : null; }),
       fetch('https://api.github.com/users/ll1ness/repos?per_page=100&sort=stars').then(function (r) { return r.ok ? r.json() : []; })
     ])
       .then(function (res) {
         var user = res[0];
-        if (user) {
+        if (user && user.public_repos != null) {
           if (statRepos) statRepos.textContent = user.public_repos;
           if (statFollowers) statFollowers.textContent = user.followers;
         }
-        var stars = 0;
-        (res[1] || []).forEach(function (r) { stars += r.stargazers_count || 0; });
-        if (statStars) statStars.textContent = stars;
+        if (Array.isArray(res[1]) && res[1].length) {
+          var stars = 0;
+          res[1].forEach(function (r) { stars += r.stargazers_count || 0; });
+          if (statStars) statStars.textContent = stars;
+        }
       })
       .catch(function () {});
   }
