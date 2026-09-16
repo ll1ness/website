@@ -30,12 +30,6 @@
     },
   ];
 
-  var REPOS = [
-    { logo: '/assets/techone.png', name: 'techone-ui', lang: 'CSS · TS', desc: 'Дизайн-фреймворк' },
-    { logo: '/assets/sparkstudio.png', name: 'spark-studio', lang: 'Java · JPHP', desc: 'IDE для десктопа' },
-    { logo: '/assets/weatherseeker.png', name: 'weather-seeker', lang: 'JS · API', desc: 'Погода на 16 дней' }
-  ];
-
   var LANG_SVGS = {
     html: 'M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z',
     css: 'M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.41l.213 2.622 10.125.002-.255 2.716h-6.64l.24 2.573h6.182l-.366 3.523-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.288l5.373-1.53L18.59 4.414z',
@@ -90,8 +84,9 @@
 
   function renderContrib() {
     var box = document.getElementById('gh-contrib');
-    if (!box) return;
-    box.innerHTML = '<span class="contrib-loading">Загрузка…</span>';
+    var heroBox = document.getElementById('hero-contrib');
+    if (!box && !heroBox) return;
+    if (box) box.innerHTML = '<span class="contrib-loading">Загрузка…</span>';
     fetch('https://github-contributions-api.jogruber.de/v4/ll1ness?y=last')
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
       .then(function (d) {
@@ -99,6 +94,8 @@
         (d.contributions || []).forEach(function (c) {
           map[c.date] = c.count || 0;
         });
+
+        var total = 0;
 
         var end = new Date();
         end.setHours(0, 0, 0, 0);
@@ -116,44 +113,46 @@
           }
           var key = cur.getFullYear() + '-' + pad2(cur.getMonth() + 1) + '-' + pad2(cur.getDate());
           var n = map[key] || 0;
+          total += n;
           var lvl = n === 0 ? 0 : n < 3 ? 1 : n < 6 ? 2 : n < 9 ? 3 : 4;
           var cell = el('div', 'contrib-cell lvl' + lvl);
           cell.title = key + ': ' + n + ' коммитов';
           week.appendChild(cell);
           cur.setDate(cur.getDate() + 1);
         }
-        box.innerHTML = '';
-        box.appendChild(grid);
+        var statCommits = document.getElementById('stat-commits');
+        if (statCommits) statCommits.textContent = total;
+        if (box) {
+          box.innerHTML = '';
+          box.appendChild(grid.cloneNode(true));
+        }
+        if (heroBox) heroBox.appendChild(grid);
       })
       .catch(function () {
-        box.innerHTML = '<img src="https://ghchart.rshah.org/ll1ness" alt="Вклад за последний год">';
+        if (box) box.innerHTML = '<img src="https://ghchart.rshah.org/ll1ness" alt="Вклад за последний год">';
       });
   }
 
-  function renderGhWidget() {
-    var repos = document.getElementById('gh-repos');
-    if (repos) {
-      REPOS.forEach(function (r) {
-        var row = el('div', 'gh-repo');
-        var left = el('div', '');
-        var logo = el('img', 'gh-repo-logo');
-        logo.src = r.logo;
-        logo.alt = r.name;
-        var meta = el('div', '');
-        meta.appendChild(el('div', 'gh-repo-name', r.name));
-        meta.appendChild(el('div', 'gh-repo-desc', r.desc));
-        left.appendChild(logo);
-        left.appendChild(meta);
-        left.style.display = 'flex';
-        left.style.alignItems = 'center';
-        left.style.gap = '10px';
-        var lang = el('div', 'gh-repo-lang');
-        lang.innerHTML = '<span class="lang-dot"></span>' + r.lang;
-        row.appendChild(left);
-        row.appendChild(lang);
-        repos.appendChild(row);
-      });
-    }
+  function renderGhStats() {
+    var statStars = document.getElementById('stat-stars');
+    var statRepos = document.getElementById('stat-repos');
+    var statFollowers = document.getElementById('stat-followers');
+    if (!statStars && !statRepos && !statFollowers) return;
+    Promise.all([
+      fetch('https://api.github.com/users/ll1ness').then(function (r) { return r.ok ? r.json() : null; }),
+      fetch('https://api.github.com/users/ll1ness/repos?per_page=100&sort=stars').then(function (r) { return r.ok ? r.json() : []; })
+    ])
+      .then(function (res) {
+        var user = res[0];
+        if (user) {
+          if (statRepos) statRepos.textContent = user.public_repos;
+          if (statFollowers) statFollowers.textContent = user.followers;
+        }
+        var stars = 0;
+        (res[1] || []).forEach(function (r) { stars += r.stargazers_count || 0; });
+        if (statStars) statStars.textContent = stars;
+      })
+      .catch(function () {});
   }
 
   function renderProjects() {
@@ -175,6 +174,143 @@
     requestAnimationFrame(function () {
       document.querySelectorAll('.projects-grid .reveal').forEach(function (n) { n.classList.add('in'); });
     });
+  }
+
+  var INDEX_LINES = [
+    { id: 'project', label: 'проджект' },
+    { id: 'arcade', label: 'аркейд' }
+  ];
+
+  function renderProjectsCarousel() {
+    var viewer = document.getElementById('projects-viewer');
+    var track = document.getElementById('projects-track');
+    var label = document.getElementById('pf-line-label');
+    if (!viewer || !track || !label) return;
+
+    var slots = [];
+    INDEX_LINES.forEach(function (line) {
+      var list = state.projects.filter(function (p) { return p.line === line.id; });
+      if (!list.length) {
+        slots.push({ line: line.id, empty: true, icon: '🚧', name: 'Скоро', tagline: 'Раздел в разработке' });
+      } else {
+        list.forEach(function (p) { slots.push({ line: line.id, empty: false, card: p }); });
+      }
+    });
+    if (!slots.length) return;
+
+    var currentLine = INDEX_LINES[0].id;
+    var idx = 0;
+
+    function lineIndexes() {
+      var out = [];
+      slots.forEach(function (s, i) {
+        if (s.line === currentLine) out.push(i);
+      });
+      return out;
+    }
+
+    function cardGap() {
+      var g = parseFloat(getComputedStyle(track).gap);
+      return isNaN(g) ? 28 : g;
+    }
+
+    function cardWidth() {
+      var c = track.children[0];
+      return c ? c.offsetWidth : 0;
+    }
+
+    function render() {
+      var lineCards = lineIndexes();
+      var abs = lineCards.length ? lineCards[idx] : 0;
+      var x = (viewer.clientWidth / 2) - (cardWidth() / 2) - abs * (cardWidth() + cardGap());
+      track.style.transform = 'translateX(' + x + 'px)';
+      var line = INDEX_LINES.find(function (l) { return l.id === currentLine; });
+      if (line) label.textContent = line.label;
+
+      Array.prototype.slice.call(track.children).forEach(function (c, i) {
+        c.classList.remove('is-active', 'is-side', 'is-hidden');
+        if (slots[i].line !== currentLine) {
+          c.classList.add('is-hidden');
+          return;
+        }
+        var li = lineCards.indexOf(i);
+        if (li === idx) {
+          c.classList.add('is-active');
+        } else if (lineCards.length > 1 && (li === (idx - 1 + lineCards.length) % lineCards.length || li === (idx + 1) % lineCards.length)) {
+          c.classList.add('is-side');
+        }
+      });
+    }
+
+    function go(absIndex) {
+      var lineCards = lineIndexes();
+      var li = lineCards.indexOf(absIndex);
+      if (li < 0) return;
+      idx = li;
+      render();
+    }
+
+    var switching = false;
+
+    function lineStep(dir) {
+      if (switching) return;
+      var li = INDEX_LINES.findIndex(function (l) { return l.id === currentLine; });
+      if (li < 0) return;
+      var targetLine = INDEX_LINES[(li + dir + INDEX_LINES.length) % INDEX_LINES.length].id;
+      if (targetLine === currentLine) return;
+
+      switching = true;
+      viewer.classList.add('is-switching');
+      label.classList.add('swap');
+
+      setTimeout(function () {
+        currentLine = targetLine;
+        var lineCards = lineIndexes();
+        idx = lineCards.length ? Math.floor(lineCards.length / 2) : 0;
+        render();
+        label.classList.remove('swap');
+      }, 240);
+
+      setTimeout(function () {
+        viewer.classList.remove('is-switching');
+        switching = false;
+      }, 520);
+    }
+
+    slots.forEach(function (slot, i) {
+      var card;
+      if (slot.empty) {
+        card = el('div', 'project-card pv-empty');
+        card.appendChild(el('div', 'project-thumb-placeholder', slot.icon));
+        var b = el('div', 'to-card-body');
+        b.appendChild(el('div', 'project-title', slot.icon + ' ' + slot.name));
+        b.appendChild(el('div', 'project-tagline', slot.tagline));
+        card.appendChild(b);
+      } else {
+        card = projectCard(slot.card, {
+          activate: function () {
+            if (lineIndexes()[idx] === i) {
+              if (slot.card.page) window.location.href = slot.card.page;
+            } else {
+              go(i);
+            }
+          }
+        });
+      }
+      card.dataset.slot = i;
+      track.appendChild(card);
+    });
+
+    var lineCards = lineIndexes();
+    idx = lineCards.length ? Math.floor(lineCards.length / 2) : 0;
+
+    var prev = document.getElementById('pf-prev');
+    var next = document.getElementById('pf-next');
+    if (prev) prev.addEventListener('click', function () { lineStep(-1); });
+    if (next) next.addEventListener('click', function () { lineStep(1); });
+
+    window.addEventListener('resize', render);
+    render();
   }
 
   function buildCarousel(p) {
@@ -247,7 +383,8 @@
     return wrap;
   }
 
-  function projectCard(p) {
+  function projectCard(p, opts) {
+    opts = opts || {};
     var card = el('div', 'project-card');
     card.dataset.id = p.id;
 
@@ -271,6 +408,10 @@
     card.appendChild(body);
 
     card.addEventListener('click', function () {
+      if (opts.activate) {
+        opts.activate(card);
+        return;
+      }
       if (p.page) window.location.href = p.page;
     });
     return card;
@@ -605,9 +746,9 @@
       return;
     }
 
-    renderGhWidget();
     injectLangLogos();
     renderContrib();
+    renderGhStats();
     renderSocials();
     renderFaq();
     bindLightbox();
@@ -620,6 +761,7 @@
       .then(function (d) {
         state.projects = d.projects || [];
         renderProjects();
+        renderProjectsCarousel();
       })
       .catch(function () {
         document.querySelectorAll('.projects-grid[data-line]').forEach(function (grid) {

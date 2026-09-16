@@ -71,6 +71,7 @@
   <!-- === HERO === -->
   <div class="page" id="top">
     <section class="hero">
+      <div class="hero-contrib" id="hero-contrib" aria-hidden="true"></div>
       <h1>
         Пишу меньше кода.<br>
         <span class="gradient">Строю больше.</span>
@@ -119,15 +120,16 @@
             <span class="to-tag" data-variant="default"><span class="ltag" data-l="java"></span>Java</span>
             <span class="to-tag" data-variant="default"><span class="ltag" data-l="python"></span>Python</span>
           </div>
-          <div class="gh-metrics">
-            <img src="https://raw.githubusercontent.com/ll1ness/ll1ness/legacy/metrics-activity.svg" alt="Metrics activity">
-            <img src="https://raw.githubusercontent.com/ll1ness/ll1ness/legacy/metrics-community.svg" alt="Metrics community">
+          <div class="gh-stats">
+            <div class="gh-stat"><b id="stat-commits">–</b><span>коммитов / год</span></div>
+            <div class="gh-stat"><b id="stat-stars">–</b><span>звёзд</span></div>
+            <div class="gh-stat"><b id="stat-repos">–</b><span>репозиториев</span></div>
+            <div class="gh-stat"><b id="stat-followers">–</b><span>фолловеров</span></div>
           </div>
         </div>
         <div class="gh-activity">
           <div class="gh-activity-title">Публичная активность</div>
           <div class="gh-contrib" id="gh-contrib"></div>
-          <div class="gh-repos" id="gh-repos"></div>
         </div>
       </div>
     </section>
@@ -137,27 +139,18 @@
   <section class="section portfolio-section" id="projects">
     <div class="page">
       <div class="section-header reveal">
-        <h2 class="portfolio-title"><span class="pf-liness">линесс</span> <span class="pf-accent">аркейд</span></h2>
+        <div class="portfolio-switch">
+          <button class="pf-nav pf-prev" id="pf-prev" aria-label="Предыдущий раздел">←</button>
+          <h2 class="portfolio-title">
+            <span class="pf-liness">линесс</span>
+            <span class="pf-accent" id="pf-line-label">проджект</span>
+          </h2>
+          <button class="pf-nav pf-next" id="pf-next" aria-label="Следующий раздел">→</button>
+        </div>
       </div>
-      <div class="projects-grid" data-line="arcade"></div>
-    </div>
-  </section>
-
-  <section class="section portfolio-section">
-    <div class="page">
-      <div class="section-header reveal">
-        <h2 class="portfolio-title"><span class="pf-liness">линесс</span> <span class="pf-accent">проджект</span></h2>
+      <div class="projects-viewer reveal" id="projects-viewer">
+        <div class="projects-track" id="projects-track"></div>
       </div>
-      <div class="projects-grid" data-line="project"></div>
-    </div>
-  </section>
-
-  <section class="section portfolio-section">
-    <div class="page">
-      <div class="section-header reveal">
-        <h2 class="portfolio-title"><span class="pf-liness">линесс</span> <span class="pf-accent">десктоп</span></h2>
-      </div>
-      <div class="projects-grid" data-line="desktop"></div>
     </div>
   </section>
 

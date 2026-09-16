@@ -114,8 +114,8 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background: radial-gradient(ellipse 640px 400px at 50% 46%, rgba(10, 10, 12, .78) 0%, transparent 68%);
+  z-index: 1;
+  background: radial-gradient(ellipse 640px 400px at 50% 46%, rgba(10, 10, 12, .86) 0%, transparent 68%);
   pointer-events: none;
 }
 .hero-contrib {
@@ -126,13 +126,13 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   justify-content: center;
   overflow: hidden;
   pointer-events: none;
-  opacity: .42;
+  opacity: .38;
 }
 .hero-contrib .contrib-grid {
   min-width: 0;
   padding: 0 6vw;
-  mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 26%, #000 84%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 26%, #000 84%, transparent 100%);
 }
 .hero-contrib .contrib-week { flex: 0 0 auto; }
 .hero-contrib .contrib-cell {
@@ -372,14 +372,27 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .gh-tags .to-tag { display: inline-flex; align-items: center; gap: 5px; }
 .ltag { display: inline-flex; align-items: center; }
 .ltag svg { color: #9a9a9a; }
-.gh-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.gh-metrics img {
-  width: 100%;
-  height: auto;
+.gh-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.gh-stat {
   border: 1px solid #222;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #0c0c0c;
+  padding: 12px 14px;
+}
+.gh-stat b {
   display: block;
+  font-family: 'TechOnNotes', 'Courier New', monospace;
+  font-size: 20px;
+  color: #f0f0f0;
+  line-height: 1.2;
+}
+.gh-stat span {
+  display: block;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-top: 4px;
 }
 .gh-activity { padding: 24px; }
 .gh-activity-title {
