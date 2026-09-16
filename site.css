@@ -299,7 +299,9 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 
 #pf-line-label {
   display: inline-block;
-  transition: opacity .25s ease, transform .25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: width .3s cubic-bezier(0.4, 0, 0.2, 1), opacity .25s ease, transform .25s ease;
 }
 #pf-line-label.swap { opacity: 0; transform: translateY(8px); }
 
@@ -396,14 +398,15 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 }
 .gh-metrics {
   padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 .gh-metrics img {
   width: 100%;
   min-width: 0;
-  max-height: 200px;
+  height: 100%;
+  max-height: 300px;
   object-fit: contain;
   border: 1px solid #222;
   border-radius: 8px;
@@ -986,6 +989,7 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 }
 @media (max-width: 540px) {
   .hero-contrib .contrib-cell { width: 8px; height: 8px; }
+  .gh-metrics { grid-template-columns: 1fr; }
 }
 
 /* ---------- Support chat ---------- */
