@@ -29,7 +29,13 @@ export default async function handler(req, res) {
     }
     await dbUpsert('chat_rate', { sid: sid, ts: Date.now() }, 'sid');
 
-    const sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name,closed_at&sid=eq.' + e(sid));
+    let sess = null;
+    try {
+      sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name,closed_at&sid=eq.' + e(sid));
+    } catch (err1) {
+      // миграция с closed_at ещё не применена в БД — работаем без функционала закрытия
+      sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name&sid=eq.' + e(sid));
+    }
     let thread = sess && sess.length ? sess[0].thread_id : null;
     let name = sess && sess.length ? sess[0].guest_name : null;
     const closed = sess && sess.length ? sess[0].closed_at : null;
