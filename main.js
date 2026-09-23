@@ -940,12 +940,6 @@
 
   /* ---------- Support chat ---------- */
 
-  var CHAT_CHANNELS = [
-    { labelKey: 'chat.ch1.label', hintKey: 'chat.ch1.hint', href: 'https://discord.gg/nEcnZKQuCf' },
-    { label: 'GitHub Issues', hintKey: 'chat.ch2.hint', href: 'https://github.com/ll1ness' },
-    { label: 'Steam', hintKey: 'chat.ch3.hint', href: 'https://steamcommunity.com/id/ll1ness/' }
-  ];
-
   function initSupportChat() {
     var widget = document.getElementById('chat-widget');
     var launcher = document.getElementById('chat-launcher');
@@ -1006,18 +1000,6 @@
       if (booted) return;
       booted = true;
       msg(T('chat.greeting'), 'bot');
-      var wrap = el('div', 'chat-channels');
-      CHAT_CHANNELS.forEach(function (c) {
-        var a = el('a', 'chat-channel');
-        a.href = c.href;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        var lab = c.labelKey ? T(c.labelKey) : c.label;
-        var hint = c.hintKey ? T(c.hintKey) : c.hint;
-        a.innerHTML = '<span>' + lab + '</span><span class="arr">' + hint + ' →</span>';
-        wrap.appendChild(a);
-      });
-      body.appendChild(wrap);
       body.scrollTop = body.scrollHeight;
     }
 
@@ -1136,6 +1118,9 @@
         stopPolling();
       }
     }
+
+    // глобальная функция — чтобы hero-кнопка «Telegram» открывала чат
+    window.openChat = function () { setOpen(true); };
 
     launcher.addEventListener('click', function () {
       setOpen(!widget.classList.contains('open'));

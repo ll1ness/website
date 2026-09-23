@@ -48,8 +48,8 @@
   </script>
 
   <script src="techon-ui.min.js?v=2"></script>
-  <script src="i18n.js?v=6"></script>
-  <link rel="stylesheet" href="site.css?v=24">
+  <script src="i18n.js?v=7"></script>
+  <link rel="stylesheet" href="site.css?v=25">
 </head>
 <body>
 
@@ -86,7 +86,7 @@
       <h1>ll1ness.</h1>
       <div class="hero-actions">
         <a href="#projects" class="to-button" data-variant="primary" data-i18n="hero.cta">Смотреть проекты</a>
-        <a href="https://t.me/ll1ness" target="_blank" rel="noopener" class="to-button" data-i18n="hero.telegram">Telegram →</a>
+        <button type="button" class="to-button" data-i18n="hero.telegram" onclick="window.openChat && window.openChat()">Telegram →</button>
       </div>
       <div class="scroll-hint" aria-hidden="true">
         <span class="scroll-mouse"><span class="scroll-wheel"></span></span>
@@ -209,12 +209,11 @@
             </div>
           </div>
           <div class="discord-embed">
-            <iframe
-              src="https://discord.com/widget?id=1443358714315800711&theme=dark"
-              allowtransparency="true"
-              frameborder="0"
-              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-              title="Discord"></iframe>
+            <a class="discord-link" href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">
+              <span class="discord-link-title">Discord</span>
+              <span class="discord-link-sub">discord.gg/nEcnZKQuCf</span>
+              <span class="discord-link-arrow">Открыть →</span>
+            </a>
           </div>
         </div>
         <div class="contact-card reveal">
@@ -258,7 +257,7 @@
           <span class="chat-avatar" aria-hidden="true">💬</span>
           <div>
             <div class="chat-title" data-i18n="chat.title">Поддержка</div>
-            <div class="chat-sub"><span class="chat-dot" aria-hidden="true"></span><span data-i18n="chat.sub">отвечаем в Discord</span></div>
+            <div class="chat-sub"><span class="chat-dot" aria-hidden="true"></span><span data-i18n="chat.sub">Отвечаю в течении 12ч - 1 день</span></div>
           </div>
         </div>
         <button class="chat-close" id="chat-close" type="button" data-i18n-aria="chat.closeAria">&times;</button>
@@ -277,6 +276,6 @@
     </button>
   </div>
 
-  <script src="main.js?v=21"></script>
+  <script src="main.js?v=22"></script>
 </body>
 </html>

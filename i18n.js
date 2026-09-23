@@ -71,7 +71,7 @@
 
       'chat.aria.panel': 'Чат с поддержкой',
       'chat.title': 'Поддержка',
-      'chat.sub': 'отвечаем в Discord',
+      'chat.sub': 'Отвечаю в течении 12ч - 1 день',
       'chat.closeAria': 'Закрыть чат',
       'chat.inputPh': 'Написать сообщение…',
       'chat.openAria': 'Открыть чат поддержки',
@@ -83,10 +83,6 @@
       'chat.ratingSkip': 'Позже',
       'chat.rateThanks': 'Спасибо за оценку! Новое сообщение откроет новую тему.',
       'chat.rateErr': 'Не удалось отправить оценку. Напиши сообщение — поддержка ответит в новой теме.',
-      'chat.ch1.label': 'Discord · обращение в саппорт',
-      'chat.ch1.hint': '🎲﹒ticket',
-      'chat.ch2.hint': 'репозитории',
-      'chat.ch3.hint': 'личные сообщения',
 
       'dev.eyebrow': 'инструменты',
       'dev.title': 'Софт для разработчиков.',
@@ -182,7 +178,7 @@
 
       'chat.aria.panel': 'Support chat',
       'chat.title': 'Support',
-      'chat.sub': 'we reply on Discord',
+      'chat.sub': 'I reply within 12 hours - 1 day',
       'chat.closeAria': 'Close chat',
       'chat.inputPh': 'Type a message…',
       'chat.openAria': 'Open support chat',
@@ -194,10 +190,6 @@
       'chat.ratingSkip': 'Later',
       'chat.rateThanks': 'Thanks for your rating! A new message will open a new topic.',
       'chat.rateErr': "Couldn't send the rating. Write a message — support will reply in a new topic.",
-      'chat.ch1.label': 'Discord · support ticket',
-      'chat.ch1.hint': '🎲﹒ticket',
-      'chat.ch2.hint': 'repositories',
-      'chat.ch3.hint': 'direct messages',
 
       'dev.eyebrow': 'tools',
       'dev.title': 'Software for developers.',
