@@ -1001,6 +1001,16 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   font-weight: 700;
 }
 .steam-btn.primary:hover { background: #ffffff; border-color: #ffffff; }
+.steam-btn.disabled,
+.steam-btn.disabled:hover,
+.steam-btn.primary.disabled,
+.steam-btn.primary.disabled:hover {
+  background: #151515;
+  border-color: #2a2a2a;
+  color: #555;
+  cursor: not-allowed;
+}
+.steam-btn.disabled:active { transform: none; }
 .steam-open {
   margin-top: 2px;
   font-size: 11px;

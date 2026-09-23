@@ -816,17 +816,19 @@
     var sideBox = el('div', 'steam-side-box');
     var warn = enField(p, 'warnEn') || p.warn;
     if (warn) sideBox.appendChild(el('div', 'steam-warn', warn));
-    var hasDesktop = p.desktopDownloads && p.desktopDownloads.length && !p.downloadDisabled;
-    if (hasDesktop) {
-      var db = el('button', 'steam-btn primary', T('project.downloadBtn') + ' →');
+    var hasDownloads = p.desktopDownloads && p.desktopDownloads.length;
+    if (hasDownloads) {
+      var dlDisabled = !!p.downloadDisabled;
+      var db = el('button', 'steam-btn primary' + (dlDisabled ? ' disabled' : ''), T('project.downloadBtn') + ' →');
       db.type = 'button';
-      db.addEventListener('click', function () { openDesktopModal(p, db); });
+      db.disabled = dlDisabled;
+      if (!dlDisabled) db.addEventListener('click', function () { openDesktopModal(p, db); });
       sideBox.appendChild(db);
     }
     if (p.downloads && p.downloads.length) {
       p.downloads.forEach(function (d, i) {
         if (!d.url || d.url === '#') return;
-        var a = el('a', 'steam-btn' + ((!hasDesktop && i === 0) ? ' primary' : ''), dlLabel(d.label) + ' →');
+        var a = el('a', 'steam-btn' + ((!hasDownloads && i === 0) ? ' primary' : ''), dlLabel(d.label) + ' →');
         a.href = d.url;
         a.target = '_blank';
         a.rel = 'noopener';
