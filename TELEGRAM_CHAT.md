@@ -91,20 +91,46 @@ end;
 $$;
 ```
 
-**Миграция — опциональная.** Базовое закрытие тем работает и без неё
+**Миграции — опциональные.** Базовое закрытие тем работает и без них
 (событие «закрыто» передаётся служебным текстом `\u0001closed\u0001`, а новая
-тема создаётся по разрыву привязки). Миграция нужна, чтобы тема закрытия
-помечалась колонкой `closed_at` и оценки сохранялись в таблицу:
+тема создаётся по разрыву привязки).
+
+1. Колонка `closed_at` — только для аналитики, на работу чата не влияет:
 
 ```sql
 alter table chat_sessions add column if not exists closed_at bigint;
-alter table chat_messages add column if not exists kind text;
-create table if not exists chat_ratings (
-  id bigint generated always as identity primary key,
-  sid text not null,
-  score int not null,
-  ts bigint not null
-);
+```
+
+2. Автоудаление сообщений закрытых диалогов через 30 дней. Без этой функции
+старые сообщения скрываются в виджете сразу, но остаются в БД до ручной очистки.
+Функция вызывается лениво из `api/chat/poll.js` (раз в сутки, без cron):
+
+```sql
+create or replace function cleanup_closed_messages(days int default 30)
+returns bigint
+language plpgsql
+as $$
+declare
+  cutoff bigint;
+  deleted bigint := 0;
+  rc bigint;
+  r record;
+begin
+  cutoff := (extract(epoch from now())::bigint - days * 86400) * 1000;
+  for r in
+    select sid, max(id) as mid
+    from chat_messages
+    where text = E'\x01closed\x01'
+    group by sid
+  loop
+    delete from chat_messages
+    where sid = r.sid and id <= r.mid and ts < cutoff;
+    get diagnostics rc = row_count;
+    deleted := deleted + rc;
+  end loop;
+  return deleted;
+end;
+$$;
 ```
 
 ### 4. Vercel: переменные окружения
@@ -137,10 +163,14 @@ node scripts/set-webhook.js https://ll1ness.vercel.app/api/chat/webhook
 
 ### 6. Тест
 
-Открой `https://ll1ness.vercel.app` → чат → напиши → в группе появится тема
+Открой `https://ll1ness.vercel.app` → чат → перед первым сообщением нужно
+принять политику конфиденциальности (кнопки «Принять»/«Отклонить» в виджете,
+текст политики открывается модалом на сайте) → напиши → в группе появится тема
 **«Гость #1»** → просто напиши в тему (без reply) → сообщение прилетит в виджет.
-Напиши в теме `/end` (от имени админа) → тема закроется, у гостя появится уведомление и окно
-оценки; после оценки новое сообщение гостя создаст новую тему.
+Напиши в теме `/end` (от имени админа) → тема закроется, у гостя из чата
+удалятся все сообщения — останется только уведомление о закрытии; новое
+сообщение гостя создаст новую тему. Из БД сообщения закрытого диалога
+автоматически удаляются через 30 дней (миграция 2).
 
 ## Контракт API
 
@@ -148,16 +178,13 @@ node scripts/set-webhook.js https://ll1ness.vercel.app/api/chat/webhook
   `sid` — UUID-подобный (8–64 символа), `text` — 1–500 символов.
   Если тему поддержка закрыла — следующий запрос создаёт **новую** тему «Гость #N».
 - `GET /api/chat/poll?sid=...&lastId=...` → `{ok: true, messages: [{id, text, ts}]}`.
-  Сообщение со служебным текстом `\u0001closed\u0001` (или `kind: "closed"`
-  после миграции) — поддержка закрыла тему: виджет показывает закрытие
-  + окно оценки.
-- `POST /api/chat/rate` `{sid, score}` (1–5) — оценка после закрытия; сохраняется
-  в `chat_ratings` и дублируется в общую тему форума группы.
+  Сообщение со служебным текстом `\u0001closed\u0001` — поддержка закрыла тему:
+  виджет очищает чат и показывает только уведомление о закрытии.
 - `POST /api/chat/webhook` — только от Telegram, проверяет
   `X-Telegram-Bot-Api-Secret-Token`. Понимает обычные сообщения в темах
   и команду `/end`: админ пишет её в теме гостя → тема закрывается
-  (жестко через `closeForumTopic`) и гость получает уведомление + окно оценки.
-  Для не-админов команда игнорируется.
+  (жёстко через `closeForumTopic`), гость получает уведомление, его старые
+  сообщения в чате удаляются. Для не-админов команда игнорируется.
 
 ## Безопасность
 

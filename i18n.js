@@ -79,10 +79,16 @@
       'chat.greeting': 'Привет! Сообщение уйдёт в мой Telegram, отвечу прямо здесь 👇',
       'chat.sendErr': 'Не удалось отправить — проверь соединение и попробуй ещё раз.',
       'chat.closed': 'Поддержка закрыла тему. Спасибо за обращение!',
-      'chat.ratingTitle': 'Оцени работу поддержки',
-      'chat.ratingSkip': 'Позже',
-      'chat.rateThanks': 'Спасибо за оценку! Новое сообщение откроет новую тему.',
-      'chat.rateErr': 'Не удалось отправить оценку. Напиши сообщение — поддержка ответит в новой теме.',
+
+      'consent.intro': 'Перед отправкой сообщения ознакомьтесь с политикой конфиденциальности.',
+      'consent.link': 'Политика конфиденциальности',
+      'consent.accept': 'Принять',
+      'consent.decline': 'Отклонить',
+      'consent.declined': 'Без согласия с политикой сообщения не отправляются.',
+
+      'privacy.title': 'Политика конфиденциальности',
+      'privacy.close': 'Закрыть',
+      'privacy.text': 'Чат анонимен. Мы не запрашиваем имя, почту или телефон. Обращение идентифицируется только случайным идентификатором сессии, который хранится локально в вашем браузере.\n\nЧто хранится: текст сообщений и ответы поддержки. Сообщения пересылаются в супергруппу Telegram как тема «Гость #N» — их видят только администраторы поддержки. Сторонним сервисам данные не передаются.\n\nУдаление: когда поддержка закрывает тему, все сообщения диалога удаляются из вашего чата — остаётся только уведомление о закрытии. Из базы данных сообщения закрытого диалога автоматически удаляются через 30 дней после закрытия темы.\n\nСогласие: отправляя сообщение, вы принимаете эту политику. Отозвать согласие можно, очистив данные сайта в настройках браузера — после этого чат снова запросит согласие.\n\nПроект открытый: исходный код доступен на GitHub (github.com/ll1ness).',
 
       'dev.eyebrow': 'инструменты',
       'dev.title': 'Софт для разработчиков.',
@@ -186,10 +192,16 @@
       'chat.greeting': "Hi! Your message will go to my Telegram — I'll reply right here 👇",
       'chat.sendErr': "Couldn't send — check your connection and try again.",
       'chat.closed': 'Support closed this topic. Thanks for reaching out!',
-      'chat.ratingTitle': 'Rate the support',
-      'chat.ratingSkip': 'Later',
-      'chat.rateThanks': 'Thanks for your rating! A new message will open a new topic.',
-      'chat.rateErr': "Couldn't send the rating. Write a message — support will reply in a new topic.",
+
+      'consent.intro': 'Please review the privacy policy before sending a message.',
+      'consent.link': 'Privacy policy',
+      'consent.accept': 'Accept',
+      'consent.decline': 'Decline',
+      'consent.declined': 'Messages cannot be sent without accepting the privacy policy.',
+
+      'privacy.title': 'Privacy Policy',
+      'privacy.close': 'Close',
+      'privacy.text': 'This chat is anonymous. We do not ask for your name, email or phone number. Your request is identified only by a random session id stored locally in your browser.\n\nWhat we store: message texts and support replies. Messages are forwarded to a Telegram supergroup as a topic "Guest #N" — visible only to support admins. Data is not shared with third parties.\n\nDeletion: when support closes a topic, all conversation messages are removed from your chat — only the closing notice remains. Database messages of a closed conversation are deleted automatically 30 days after the topic is closed.\n\nConsent: by sending a message you accept this policy. You can withdraw consent by clearing site data in your browser settings — the chat will ask for consent again.\n\nThis is an open-source project: code is available on GitHub (github.com/ll1ness).',
 
       'dev.eyebrow': 'tools',
       'dev.title': 'Software for developers.',

@@ -951,6 +951,7 @@
     if (!widget || !launcher || !panel || !closeBtn || !body || !form || !input) return;
 
     input.placeholder = T('chat.inputPh');
+    input.disabled = !consented();
 
     // кнопка чата занимает место стрелки «наверх», пока та скрыта
     var toTop = document.querySelector('.to-scroll-top');
@@ -1000,6 +1001,8 @@
       if (booted) return;
       booted = true;
       msg(T('chat.greeting'), 'bot');
+      if (wasClosed()) msg(T('chat.closed'), 'bot');
+      if (!consented()) renderConsent();
       body.scrollTop = body.scrollHeight;
     }
 
@@ -1009,8 +1012,7 @@
         if (!m || m.id <= lastMsgId) continue;
         lastMsgId = m.id;
         if (m.kind === 'closed' || m.text === '\u0001closed\u0001') {
-          msg(T('chat.closed'), 'bot');
-          openRating();
+          onClosed();
           continue;
         }
         if (!m.text) continue;
@@ -1038,60 +1040,92 @@
       if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     }
 
-    // ── окно оценки поддержки (после закрытия темы) ──
-    var ratingModal = null;
+    // ── политика конфиденциальности: согласие + модал на сайте ──
+    var CONSENT_KEY = 'll1chat.consent';
+    var privacyModal = null;
 
-    function openRating() {
-      if (ratingModal && ratingModal.parentNode) return;
-      input.disabled = true;
-      ratingModal = el('div', 'rating-modal');
-      var box = el('div', 'rating-box');
-      var title = el('div', 'rating-title');
-      title.textContent = T('chat.ratingTitle');
+    function consented() {
+      try { return localStorage.getItem(CONSENT_KEY) === '1'; } catch (err) { return false; }
+    }
+
+    function closedKey() { return 'll1chat.closed.' + sessionId(); }
+
+    function wasClosed() {
+      try { return localStorage.getItem(closedKey()) === '1'; } catch (err) { return false; }
+    }
+
+    function renderConsent() {
+      var box = el('div', 'consent-box');
+      var text = el('p', 'consent-text');
+      text.textContent = T('consent.intro');
+      box.appendChild(text);
+      var policy = el('button', 'consent-link');
+      policy.type = 'button';
+      policy.textContent = T('consent.link');
+      policy.addEventListener('click', function () { showPrivacy(); });
+      box.appendChild(policy);
+      var actions = el('div', 'consent-actions');
+      var accept = el('button', 'consent-btn consent-accept');
+      accept.type = 'button';
+      accept.textContent = T('consent.accept');
+      accept.addEventListener('click', function () {
+        try { localStorage.setItem(CONSENT_KEY, '1'); } catch (err) {}
+        if (box.parentNode) box.parentNode.removeChild(box);
+        input.disabled = false;
+        input.focus();
+      });
+      actions.appendChild(accept);
+      var decline = el('button', 'consent-btn consent-decline');
+      decline.type = 'button';
+      decline.textContent = T('consent.decline');
+      decline.addEventListener('click', function () {
+        text.textContent = T('consent.declined');
+        input.disabled = true;
+      });
+      actions.appendChild(decline);
+      box.appendChild(actions);
+      body.appendChild(box);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function showPrivacy() {
+      if (privacyModal && privacyModal.parentNode) return;
+      privacyModal = el('div', 'privacy-modal');
+      var box = el('div', 'privacy-box');
+      var title = el('div', 'privacy-title');
+      title.textContent = T('privacy.title');
       box.appendChild(title);
-      var stars = el('div', 'rating-stars');
-      for (var s = 1; s <= 5; s++) {
-        (function (score) {
-          var b = el('button', 'rating-star');
-          b.type = 'button';
-          b.textContent = '★';
-          b.setAttribute('aria-label', score + '/5');
-          b.addEventListener('click', function () { submitRating(score); });
-          stars.appendChild(b);
-        })(s);
+      var content = el('div', 'privacy-content');
+      content.textContent = T('privacy.text');
+      box.appendChild(content);
+      var closeBtn2 = el('button', 'privacy-close');
+      closeBtn2.type = 'button';
+      closeBtn2.textContent = T('privacy.close');
+      closeBtn2.addEventListener('click', function () { closePrivacy(); });
+      box.appendChild(closeBtn2);
+      privacyModal.appendChild(box);
+      privacyModal.addEventListener('click', function (ev) {
+        if (ev.target === privacyModal) closePrivacy();
+      });
+      document.body.appendChild(privacyModal);
+    }
+
+    function closePrivacy() {
+      if (privacyModal && privacyModal.parentNode) privacyModal.parentNode.removeChild(privacyModal);
+      privacyModal = null;
+    }
+
+    // политика открывается и снаружи виджета — как модал на сайте
+    window.openPrivacy = function () { showPrivacy(); };
+
+    // поддержка закрыла тему: очищаем чат, остаётся только уведомление о закрытии
+    function onClosed() {
+      var nodes = body.querySelectorAll('.msg, .chat-channels');
+      for (var i = nodes.length - 1; i >= 0; i--) {
+        if (nodes[i].parentNode) nodes[i].parentNode.removeChild(nodes[i]);
       }
-      box.appendChild(stars);
-      var skip = el('button', 'rating-skip');
-      skip.type = 'button';
-      skip.textContent = T('chat.ratingSkip');
-      skip.addEventListener('click', function () { closeRating(); });
-      box.appendChild(skip);
-      ratingModal.appendChild(box);
-      ratingModal.addEventListener('click', function (ev) {
-        if (ev.target === ratingModal) closeRating();
-      });
-      document.body.appendChild(ratingModal);
-    }
-
-    function closeRating() {
-      if (ratingModal && ratingModal.parentNode) ratingModal.parentNode.removeChild(ratingModal);
-      ratingModal = null;
-      input.disabled = false;
-      if (widget.classList.contains('open')) input.focus();
-    }
-
-    function submitRating(score) {
-      fetch('/api/chat/rate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sid: sessionId(), score: score })
-      }).then(function () {
-        msg(T('chat.rateThanks'), 'bot');
-        closeRating();
-      }).catch(function () {
-        msg(T('chat.rateErr'), 'bot');
-        closeRating();
-      });
+      msg(T('chat.closed'), 'bot');
+      try { localStorage.setItem(closedKey(), '1'); } catch (err) {}
     }
 
     function send(text) {
