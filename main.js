@@ -1008,7 +1008,7 @@
         var m = list[i];
         if (!m || m.id <= lastMsgId) continue;
         lastMsgId = m.id;
-        if (m.kind === 'closed') {
+        if (m.kind === 'closed' || m.text === '\u0001closed\u0001') {
           msg(T('chat.closed'), 'bot');
           openRating();
           continue;
