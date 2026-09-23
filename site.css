@@ -1155,12 +1155,16 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .chat-widget {
   position: fixed;
   right: 30px;
-  bottom: 92px;
+  bottom: 30px;
   z-index: 1100;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 14px;
+  transition: bottom .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.chat-widget.chat-lifted {
+  bottom: 92px;
 }
 .chat-launcher {
   width: 50px;
@@ -1350,10 +1354,11 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .chat-send:hover { opacity: .85; }
 
 @media (max-width: 720px) {
-  .chat-widget { right: 16px; bottom: 84px; }
+  .chat-widget { right: 16px; bottom: 30px; }
+  .chat-widget.chat-lifted { right: 16px; bottom: 84px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .chat-panel, .chat-launcher { transition: none; transform: none; }
+  .chat-panel, .chat-launcher, .chat-widget { transition: none; transform: none; }
 }
 
 /* Модал «Варианты установки» — десктоп-сборки проектов */

@@ -958,6 +958,16 @@
 
     input.placeholder = T('chat.inputPh');
 
+    // кнопка чата занимает место стрелки «наверх», пока та скрыта
+    var toTop = document.querySelector('.to-scroll-top');
+    function syncChatLift() {
+      var lifted = !!(toTop && toTop.classList.contains('visible'));
+      widget.classList.toggle('chat-lifted', lifted);
+    }
+    window.addEventListener('scroll', syncChatLift, { passive: true });
+    window.addEventListener('resize', syncChatLift, { passive: true });
+    syncChatLift();
+
     var booted = false;
 
     function msg(text, who) {
