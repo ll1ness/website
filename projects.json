@@ -46,6 +46,7 @@
     },
     {
       "id": "spark-studio",
+      "downloadDisabled": true,
       "name": "Spark Studio 17",
       "license": "MIT",
       "cat": "project",
