@@ -1011,6 +1011,12 @@
       return T('chat.err.server');
     }
 
+    // автоподгонка высоты многострочного поля (Enter — отправить, Shift+Enter — перенос)
+    function autosize() {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    }
+
     // Сессия гостя — UUID в localStorage; по ней в Telegram создаётся тема «Гость #N».
     function sessionId() {
       if (sid) return sid;
@@ -1267,6 +1273,7 @@
       if (open) {
         welcome();
         startPolling();
+        autosize();
         setTimeout(function () { input.focus(); }, 250);
       } else {
         stopPolling();
@@ -1293,12 +1300,14 @@
       clearErr();
       msg(text, 'user');
       input.value = '';
+      autosize();
       send(text).then(function () {
         clearErr();
         // успешная отправка после /end = новая тема: убираем плашку закрытия
         try { localStorage.removeItem(closedKey()); } catch (err) {}
       }).catch(function (err) {
         input.value = text;
+        autosize();
         if (err && err.body && err.body.code === 'captcha') {
           // токен капчи протух (живёт ~5 минут) — рисуем виджет заново
           renderCaptcha();
@@ -1309,7 +1318,18 @@
       });
     });
 
-    input.addEventListener('input', clearErr);
+    input.addEventListener('input', function () {
+      clearErr();
+      autosize();
+    });
+
+    // Enter — отправить, Shift+Enter — новая строка
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!input.disabled) form.requestSubmit();
+      }
+    });
   }
 
   /* ---------- Boot ---------- */
