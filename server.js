@@ -59,16 +59,30 @@ const server = createServer(async (req, res) => {
     }
 
     let body;
+    let servedPath = filePath;
     try {
       body = await readFile(filePath);
     } catch {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end('404 Not Found');
-      return;
+      // Clean URLs: /dev -> dev.html, /project -> project.html
+      body = null;
+      if (!extname(filePath)) {
+        const htmlPath = filePath + '.html';
+        if (htmlPath.startsWith(ROOT)) {
+          try {
+            body = await readFile(htmlPath);
+            servedPath = htmlPath;
+          } catch { /* keep 404 */ }
+        }
+      }
+      if (!body) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('404 Not Found');
+        return;
+      }
     }
 
     res.writeHead(200, {
-      'Content-Type': MIME[extname(filePath).toLowerCase()] || 'application/octet-stream',
+      'Content-Type': MIME[extname(servedPath).toLowerCase()] || 'application/octet-stream',
       'Cache-Control': 'no-cache',
     });
     res.end(body);
