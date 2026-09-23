@@ -120,9 +120,9 @@
       'dl.Сайт': 'Сайт',
       'dl.GitHub': 'GitHub',
 
-      'title.index': 'll1ness — инди-разработчик | Веб, десктоп и открытые проекты',
-      'title.dev': 'll1ness — Для разработчиков | Инструменты и софт',
-      'title.project': 'll1ness — проект'
+      'title.index': 'll1ness',
+      'title.dev': 'll1ness Дев',
+      'title.project': 'll1ness Проджект'
     },
 
     en: {
@@ -240,9 +240,9 @@
       'dl.Сайт': 'Website',
       'dl.GitHub': 'GitHub',
 
-      'title.index': 'll1ness — indie developer | Web, desktop & open-source projects',
-      'title.dev': 'll1ness — For developers | Tools & software',
-      'title.project': 'll1ness — project'
+      'title.index': 'll1ness',
+      'title.dev': 'll1ness dev',
+      'title.project': 'll1ness projects'
     }
   };
 
