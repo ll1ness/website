@@ -1024,8 +1024,14 @@
     function renderIncoming(list) {
       for (var i = 0; i < list.length; i++) {
         var m = list[i];
-        if (!m || !m.text || m.id <= lastMsgId) continue;
+        if (!m || m.id <= lastMsgId) continue;
         lastMsgId = m.id;
+        if (m.kind === 'closed') {
+          msg(T('chat.closed'), 'bot');
+          openRating();
+          continue;
+        }
+        if (!m.text) continue;
         msg(m.text, 'bot');
       }
       try {
@@ -1048,6 +1054,62 @@
 
     function stopPolling() {
       if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    // ── окно оценки поддержки (после закрытия темы) ──
+    var ratingModal = null;
+
+    function openRating() {
+      if (ratingModal && ratingModal.parentNode) return;
+      input.disabled = true;
+      ratingModal = el('div', 'rating-modal');
+      var box = el('div', 'rating-box');
+      var title = el('div', 'rating-title');
+      title.textContent = T('chat.ratingTitle');
+      box.appendChild(title);
+      var stars = el('div', 'rating-stars');
+      for (var s = 1; s <= 5; s++) {
+        (function (score) {
+          var b = el('button', 'rating-star');
+          b.type = 'button';
+          b.textContent = '★';
+          b.setAttribute('aria-label', score + '/5');
+          b.addEventListener('click', function () { submitRating(score); });
+          stars.appendChild(b);
+        })(s);
+      }
+      box.appendChild(stars);
+      var skip = el('button', 'rating-skip');
+      skip.type = 'button';
+      skip.textContent = T('chat.ratingSkip');
+      skip.addEventListener('click', function () { closeRating(); });
+      box.appendChild(skip);
+      ratingModal.appendChild(box);
+      ratingModal.addEventListener('click', function (ev) {
+        if (ev.target === ratingModal) closeRating();
+      });
+      document.body.appendChild(ratingModal);
+    }
+
+    function closeRating() {
+      if (ratingModal && ratingModal.parentNode) ratingModal.parentNode.removeChild(ratingModal);
+      ratingModal = null;
+      input.disabled = false;
+      if (widget.classList.contains('open')) input.focus();
+    }
+
+    function submitRating(score) {
+      fetch('/api/chat/rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sid: sessionId(), score: score })
+      }).then(function () {
+        msg(T('chat.rateThanks'), 'bot');
+        closeRating();
+      }).catch(function () {
+        msg(T('chat.rateErr'), 'bot');
+        closeRating();
+      });
     }
 
     function send(text) {
@@ -1086,6 +1148,7 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (input.disabled) return;
       var text = input.value.trim();
       if (!text) return;
       msg(text, 'user');
