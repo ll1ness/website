@@ -15,7 +15,6 @@
       "name": "TechOne UI",
       "license": "MIT",
       "cat": "project",
-      "icon": "🎨",
       "tags": [
         "HTML",
         "CSS",
@@ -33,14 +32,12 @@
         "/assets/techone3.webp"
       ],
       "requirements": [
-        { "label": "Платформа", "value": "Веб · все современные браузеры" },
-        { "label": "Версия", "value": "ES2017+" },
-        { "label": "Стили", "value": "CSS подключается автоматически" }
+        { "label": "Платформа", "value": "Chromium, Firefox" },
+        { "label": "Версия", "value": "ES2017+" }
       ],
       "requirementsEn": [
-        { "label": "Platform", "value": "Web · all modern browsers" },
-        { "label": "Version", "value": "ES2017+" },
-        { "label": "Styles", "value": "CSS is included automatically" }
+        { "label": "Platform", "value": "Chromium, Firefox" },
+        { "label": "Version", "value": "ES2017+" }
       ],
       "downloads": [
         { "label": "GitHub", "url": "https://github.com/ll1ness/techone-ui" },
@@ -49,10 +46,9 @@
     },
     {
       "id": "spark-studio",
-      "name": "Spark Studio",
+      "name": "Spark Studio 17",
       "license": "MIT",
       "cat": "project",
-      "icon": "⚡",
       "tags": [
         "PHP",
         "Java",
@@ -63,8 +59,8 @@
       "warn": "⚠️ Spark Studio 17 ещё не вышел. Версии, доступные в репозитории, находятся в раннем доступе.",
       "warnEn": "⚠️ Spark Studio 17 hasn't been released yet. Versions available in the repository are early access.",
       "gif": "/assets/spark_anim.gif",
-      "description": "Spark Studio — среда разработки для быстрого создания десктопных приложений. Базируется на DevelNext, использует JPHP и JavaFX. Поддерживает визуальный редактор форм, плагины и расширения через Spark Store.",
-      "descriptionEn": "Spark Studio is a development environment for quickly building desktop applications. Built on DevelNext, it uses JPHP and JavaFX. It supports a visual form editor, plugins and extensions via Spark Store.",
+      "description": "Spark Studio — среда разработки для быстрого создания десктопных приложений. Базируется на DevelNext, использует JPHP и JavaFX. Поддерживает плагины и расширения через Spark Store.",
+      "descriptionEn": "Spark Studio is a development environment for quickly building desktop applications. Built on DevelNext, it uses JPHP and JavaFX. It supports plugins and extensions via Spark Store (Just in Spark Studio 18).",
       "logo": "/assets/sparkstudio.png",
       "screenshots": [
         "/assets/spark1.webp",
@@ -83,8 +79,7 @@
         { "label": "RAM", "value": "from 1 GB" }
       ],
       "downloads": [
-        { "label": "GitHub", "url": "https://github.com/ll1ness/spark-studio" },
-        { "label": "Spark Store", "url": "https://github.com/ll1ness/spark-store" }
+        { "label": "GitHub", "url": "https://github.com/ll1ness/spark-studio" }
       ]
     },
     {
@@ -92,7 +87,6 @@
       "name": "Weather Seeker",
       "license": "MIT",
       "cat": "project",
-      "icon": "🌤️",
       "tags": [
         "JavaScript",
         "API"
@@ -109,14 +103,14 @@
         "/assets/weather3.webp"
       ],
       "requirements": [
-        { "label": "Платформа", "value": "Веб · desktop и мобильные" },
-        { "label": "Браузер", "value": "любой современный" },
-        { "label": "Сеть", "value": "нужно соединение с интернетом" }
+        { "label": "Платформа", "value": "Все веб-совместимые софты" },
+        { "label": "Браузер", "value": "Chromium, Firefox" },
+        { "label": "Сеть", "value": "Широкополосное подключение к интернету" }
       ],
       "requirementsEn": [
-        { "label": "Platform", "value": "Web · desktop and mobile" },
-        { "label": "Browser", "value": "any modern browser" },
-        { "label": "Network", "value": "internet connection required" }
+        { "label": "Platform", "value": "All web-compatible programs" },
+        { "label": "Browser", "value": "Chromium, Firefox" },
+        { "label": "Network", "value": "Wide-channel connection to the internet" }
       ],
       "downloads": [
         { "label": "GitHub", "url": "https://github.com/ll1ness/weather-seeker" },
