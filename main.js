@@ -1147,14 +1147,18 @@
     // политика открывается и снаружи виджета — как модал на сайте
     window.openPrivacy = function () { showPrivacy(); };
 
-    // поддержка закрыла тему: очищаем чат, остаётся только уведомление о закрытии
+    // поддержка закрыла тему: очищаем чат, остаётся только уведомление о закрытии,
+    // инпут блокируется; после перезагрузки страницы согласие с политикой
+    // запрашивается заново (CONSENT_KEY сбрасывается)
     function onClosed() {
       var nodes = body.querySelectorAll('.msg, .chat-channels');
       for (var i = nodes.length - 1; i >= 0; i--) {
         if (nodes[i].parentNode) nodes[i].parentNode.removeChild(nodes[i]);
       }
       msg(T('chat.closed'), 'bot');
+      input.disabled = true;
       try { localStorage.setItem(closedKey(), '1'); } catch (err) {}
+      try { localStorage.removeItem(CONSENT_KEY); } catch (err) {}
     }
 
     // ── Cloudflare Turnstile: капча после согласия с политикой ──
