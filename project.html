@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="title.project">ll1ness — проект</title>
+  <meta name="description" content="Страница проекта с открытым исходным кодом от ll1ness.">
+  <meta name="author" content="ll1ness">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#030303">
+
+  <link rel="canonical" href="https://ll1ness.vercel.app/project">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ll1ness">
+  <meta property="og:title" content="ll1ness — проект">
+  <meta property="og:url" content="https://ll1ness.vercel.app/project">
+  <meta property="og:locale" content="ru_RU">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+
+  <script src="techon-ui.min.js?v=2"></script>
+  <script src="i18n.js?v=1"></script>
+  <link rel="stylesheet" href="site.css?v=19">
+</head>
+<body data-page="project">
+
+  <!-- === NAV === -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <img src="favicon.ico" alt="" style="height:22px;width:22px;border-radius:4px;">
+        ll1ness
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#projects" data-i18n="nav.projects">Проекты</a></li>
+        <li><a href="/#faq" data-i18n="nav.faq">FAQ</a></li>
+        <li><a href="/#contacts" data-i18n="nav.contacts">Контакты</a></li>
+        <li><a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="gh" data-i18n="nav.github">GitHub →</a></li>
+      </ul>
+      <div class="lang-switch" role="group" data-i18n-aria="nav.aria">
+        <button class="lang-btn" data-lang="ru" type="button" aria-label="Русский" title="Русский" data-i18n-title="lang.ru" data-i18n-aria="lang.ru" aria-pressed="false">
+          <svg viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="24" height="16" rx="2" fill="#fff"/><rect y="5.33" width="24" height="5.34" fill="#0039A6"/><rect y="10.67" width="24" height="5.33" fill="#D52B1E"/></svg>
+        </button>
+        <button class="lang-btn" data-lang="en" type="button" aria-label="English" title="English" data-i18n-title="lang.en" data-i18n-aria="lang.en" aria-pressed="false">
+          <svg viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="24" height="16" fill="#fff"/><rect y="0" width="24" height="1.23" fill="#B22234"/><rect y="2.46" width="24" height="1.23" fill="#B22234"/><rect y="4.92" width="24" height="1.23" fill="#B22234"/><rect y="7.38" width="24" height="1.23" fill="#B22234"/><rect y="9.85" width="24" height="1.23" fill="#B22234"/><rect y="12.31" width="24" height="1.23" fill="#B22234"/><rect y="14.77" width="24" height="1.23" fill="#B22234"/><rect width="9.6" height="8.62" fill="#3C3B6E"/><g fill="#fff"><circle cx="0.9" cy="1.23" r="0.8"/><circle cx="2.9" cy="1.23" r="0.8"/><circle cx="4.9" cy="1.23" r="0.8"/><circle cx="6.9" cy="1.23" r="0.8"/><circle cx="8.9" cy="1.23" r="0.8"/><circle cx="1.9" cy="3.38" r="0.8"/><circle cx="3.9" cy="3.38" r="0.8"/><circle cx="5.9" cy="3.38" r="0.8"/><circle cx="7.9" cy="3.38" r="0.8"/><circle cx="0.9" cy="5.53" r="0.8"/><circle cx="2.9" cy="5.53" r="0.8"/><circle cx="4.9" cy="5.53" r="0.8"/><circle cx="6.9" cy="5.53" r="0.8"/><circle cx="8.9" cy="5.53" r="0.8"/><circle cx="1.9" cy="7.68" r="0.8"/><circle cx="3.9" cy="7.68" r="0.8"/><circle cx="5.9" cy="7.68" r="0.8"/><circle cx="7.9" cy="7.68" r="0.8"/></g></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- === PROJECT === -->
+  <main>
+    <section class="section">
+      <div class="page devs-top">
+        <div id="project-root">
+          <p class="projects-empty" data-i18n="projects.loading">Загрузка…</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- === FOOTER === -->
+  <button class="to-scroll-top" data-threshold="400" data-i18n-aria="top.aria">↑</button>
+
+  <div class="page">
+    <footer class="footer">
+      <div class="footer-brand">
+        <span>© 2026 <a href="https://github.com/ll1ness" target="_blank" rel="noopener">ll1ness</a> · MIT</span>
+        <a href="//www.dmca.com/Protection/Status.aspx?ID=e262185b-2231-4381-969c-949b9401fb88" title="DMCA.com Protection Status" class="dmca-badge"><img src="/assets/dmca-badge.png" alt="DMCA.com Protection Status"></a>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener">Discord</a>
+        <a href="/" data-i18n="foot.home">← На главную</a>
+      </div>
+    </footer>
+  </div>
+  <script src="https://images.dmca.com/Badges/DMCABadgeHelper.min.js"></script>
+
+  <script src="main.js?v=14"></script>
+</body>
+</html>
