@@ -80,6 +80,14 @@
       ],
       "downloads": [
         { "label": "GitHub", "url": "https://github.com/ll1ness/spark-studio" }
+      ],
+      "desktopDownloads": [
+        { "os": "Windows", "arch": "x64", "url": "https://github.com/ll1ness/spark-studio/releases" },
+        { "os": "Windows", "arch": "ARM64", "url": "https://github.com/ll1ness/spark-studio/releases" },
+        { "os": "Linux", "arch": "x64", "url": "https://github.com/ll1ness/spark-studio/releases" },
+        { "os": "Linux", "arch": "ARM64", "url": "https://github.com/ll1ness/spark-studio/releases" },
+        { "os": "macOS", "arch": "Apple Silicon", "url": "https://github.com/ll1ness/spark-studio/releases" },
+        { "os": "macOS", "arch": "Intel", "url": "https://github.com/ll1ness/spark-studio/releases" }
       ]
     },
     {

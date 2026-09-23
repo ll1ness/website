@@ -1345,3 +1345,84 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 @media (prefers-reduced-motion: reduce) {
   .chat-panel, .chat-launcher { transition: none; transform: none; }
 }
+
+/* Модал «Варианты установки» — десктоп-сборки проектов */
+body.modal-open { overflow: hidden; }
+.steam-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.steam-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .68);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.steam-modal.open .steam-modal-backdrop { opacity: 1; }
+.steam-modal-box {
+  position: relative;
+  width: min(440px, 100%);
+  background: #0b0b0b;
+  border: 1px solid #2d2d2d;
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .55);
+  padding: 22px;
+  opacity: 0;
+  transform: translateY(14px) scale(.98);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.steam-modal.open .steam-modal-box { opacity: 1; transform: none; }
+.steam-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #333;
+  background: #151515;
+  color: #f0f0f0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.steam-modal-close:hover { border-color: #f0f0f0; color: #f0f0f0; }
+.steam-modal-title {
+  font-size: 20px;
+  letter-spacing: .5px;
+  font-family: 'TechOnNotes', 'Courier New', monospace;
+  font-weight: 400;
+  padding-right: 30px;
+}
+.steam-modal-sub { color: #8a8a8a; margin: 6px 0 16px; font-size: 13px; }
+.steam-modal-list { display: flex; flex-direction: column; gap: 8px; }
+.steam-modal-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  background: #111;
+  color: #f0f0f0;
+  text-decoration: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+.steam-modal-opt:hover { border-color: #f0f0f0; background: #16181f; }
+.steam-modal-os { font-weight: 600; }
+.steam-modal-arch { color: #8a8a8a; flex: 1; }
+.steam-modal-arrow { color: #f0f0f0; }
+@media (prefers-reduced-motion: reduce) {
+  .steam-modal-box, .steam-modal-backdrop { transition: none; transform: none; }
+}
+@media (max-width: 720px) {
+  .steam-modal-box { padding: 18px; }
+}

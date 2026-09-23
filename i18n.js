@@ -92,6 +92,10 @@
       'dev.spark.desc': 'Spark Store — репозиторий и магазин расширений для Spark Studio. Позволяет устанавливать, обновлять и управлять плагинами прямо из IDE. Все расширения с открытым исходным кодом.',
 
       'project.crumb': '← Все проекты',
+      'project.desktopBtn': 'Установить',
+      'project.modalTitle': 'Варианты установки · {name}',
+      'project.modalSub': 'Выберите свою платформу',
+      'project.modalClose': 'Закрыть',
       'project.license': 'Под защитой лицензии {L}',
       'project.about': 'О проекте',
       'project.req': 'Системные требования',
@@ -195,6 +199,10 @@
       'dev.spark.desc': 'Spark Store is a repository and extension marketplace for Spark Studio. Install, update and manage plugins right from the IDE. All extensions are open source.',
 
       'project.crumb': '← All projects',
+      'project.desktopBtn': 'Install',
+      'project.modalTitle': 'Install options · {name}',
+      'project.modalSub': 'Choose your platform',
+      'project.modalClose': 'Close',
       'project.license': 'Protected under the {L} license',
       'project.about': 'About',
       'project.req': 'System requirements',

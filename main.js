@@ -666,8 +666,72 @@
       });
   }
 
+  /* Модал «Варианты установки» для десктоп-сборок */
+  function openDesktopModal(p, trigger) {
+    var old = document.querySelector('.steam-modal');
+    if (old) old.remove();
+
+    var modal = el('div', 'steam-modal');
+    var back = el('div', 'steam-modal-backdrop');
+    var box = el('div', 'steam-modal-box');
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', T('project.modalTitle', { name: p.name }));
+
+    var close = el('button', 'steam-modal-close', '×');
+    close.type = 'button';
+    close.setAttribute('aria-label', T('project.modalClose'));
+
+    var title = el('div', 'steam-modal-title', T('project.modalTitle', { name: p.name }));
+    var sub = el('div', 'steam-modal-sub', T('project.modalSub'));
+
+    var list = el('div', 'steam-modal-list');
+    p.desktopDownloads.forEach(function (o) {
+      if (!o.url || o.url === '#') return;
+      var a = el('a', 'steam-modal-opt');
+      a.href = o.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.appendChild(el('span', 'steam-modal-os', o.os));
+      a.appendChild(el('span', 'steam-modal-arch', o.arch));
+      a.appendChild(el('span', 'steam-modal-arrow', '→'));
+      list.appendChild(a);
+    });
+
+    box.appendChild(close);
+    box.appendChild(title);
+    box.appendChild(sub);
+    box.appendChild(list);
+    modal.appendChild(back);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+    document.body.classList.add('modal-open');
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.classList.remove('modal-open');
+      document.removeEventListener('keydown', onKey, true);
+      setTimeout(function () { modal.remove(); }, 180);
+      if (trigger && trigger.focus) trigger.focus();
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { closeModal(); e.preventDefault(); }
+    }
+    back.addEventListener('click', closeModal);
+    close.addEventListener('click', closeModal);
+    document.addEventListener('keydown', onKey, true);
+
+    requestAnimationFrame(function () { modal.classList.add('open'); });
+    setTimeout(function () {
+      var f = box.querySelector('.steam-modal-close') || list.firstChild;
+      if (f && f.focus) f.focus();
+    }, 30);
+  }
+
   function renderProjectPage(root, p) {
     document.title = p.name + ' — ll1ness';
+    var old = document.querySelector('.steam-modal');
+    if (old) { old.remove(); document.body.classList.remove('modal-open'); }
     var box = el('div', 'steam');
 
     // хлебные крошки
@@ -752,10 +816,17 @@
     var sideBox = el('div', 'steam-side-box');
     var warn = enField(p, 'warnEn') || p.warn;
     if (warn) sideBox.appendChild(el('div', 'steam-warn', warn));
+    var hasDesktop = p.desktopDownloads && p.desktopDownloads.length;
+    if (hasDesktop) {
+      var db = el('button', 'steam-btn primary', T('project.desktopBtn') + ' →');
+      db.type = 'button';
+      db.addEventListener('click', function () { openDesktopModal(p, db); });
+      sideBox.appendChild(db);
+    }
     if (p.downloads && p.downloads.length) {
       p.downloads.forEach(function (d, i) {
         if (!d.url || d.url === '#') return;
-        var a = el('a', 'steam-btn' + (i === 0 ? ' primary' : ''), dlLabel(d.label) + ' →');
+        var a = el('a', 'steam-btn' + ((!hasDesktop && i === 0) ? ' primary' : ''), dlLabel(d.label) + ' →');
         a.href = d.url;
         a.target = '_blank';
         a.rel = 'noopener';
