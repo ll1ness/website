@@ -1,32 +1,55 @@
-// POST /api/chat/send  { sid, text }
+// POST /api/chat/send  { sid, text, captcha }
 // Первое сообщение сессии создаёт в супергруппе-форуме тему «Гость #N».
 // Если прошлую тему поддержка закрыла командой /end (привязка thread>sid удалена) —
 // следующий вопрос уходит в НОВУЮ тему. Работает и без колонки closed_at.
+// Ошибки возвращаются с кодом для человеческого отображения в виджете:
+//   bad (400), captcha (403), rate_limit (429), no_chat (500),
+//   busy/timeout/thread/server (502).
 import { telegram, dbSelect, dbInsert, dbDelete, dbUpsert, dbRpc, readBody, sendJson, SID_RE } from '../../lib/tg.js';
 
 const RATE_MS = 2000; // не чаще одного сообщения в 2 секунды на сессию
 const e = encodeURIComponent;
+const TURNSTILE_VERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+// Капча Cloudflare Turnstile. Включена, когда задан TURNSTILE_SECRET_KEY;
+// без него (до настройки) пропускаем, чтобы не ломать чат.
+async function verifyTurnstile(token) {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  if (!secretKey) return true;
+  if (!token) return false;
+  const form = new URLSearchParams();
+  form.set('secret', secretKey);
+  form.set('response', token);
+  const res = await fetch(TURNSTILE_VERIFY, { method: 'POST', body: form });
+  const data = await res.json().catch(() => null);
+  return !!(data && data.success === true);
+}
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return sendJson(res, 405, { ok: false, error: 'method' });
+  if (req.method !== 'POST') return sendJson(res, 405, { ok: false, error: 'method', code: 'bad' });
 
   let body;
   try { body = JSON.parse((await readBody(req)) || '{}'); }
-  catch (err) { return sendJson(res, 400, { ok: false, error: 'bad json' }); }
+  catch (err) { return sendJson(res, 400, { ok: false, error: 'bad json', code: 'bad' }); }
 
   const sid = String(body.sid || '').trim();
   const text = String(body.text || '').trim();
-  if (!SID_RE.test(sid)) return sendJson(res, 400, { ok: false, error: 'bad sid' });
-  if (!text || text.length > 500) return sendJson(res, 400, { ok: false, error: 'bad text' });
+  if (!SID_RE.test(sid)) return sendJson(res, 400, { ok: false, error: 'bad sid', code: 'bad' });
+  if (!text || text.length > 500) return sendJson(res, 400, { ok: false, error: 'bad text', code: 'bad' });
+
+  // капча проверяется до троттлинга: неудачная попытка не съедает «слот» отправки
+  let captchaOk = false;
+  try { captchaOk = await verifyTurnstile(String(body.captcha || '')); } catch (errC) { captchaOk = false; }
+  if (!captchaOk) return sendJson(res, 403, { ok: false, error: 'captcha', code: 'captcha' });
 
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!chatId) return sendJson(res, 500, { ok: false, error: 'no chat' });
+  if (!chatId) return sendJson(res, 500, { ok: false, error: 'no chat', code: 'no_chat' });
 
   try {
     // throttle: не чаще одного сообщения в 2 секунды на сессию
     const rl = await dbSelect('chat_rate', 'select=ts&sid=eq.' + e(sid));
     if (rl && rl.length && Date.now() - Number(rl[0].ts) < RATE_MS) {
-      return sendJson(res, 429, { ok: false, error: 'slow down' });
+      return sendJson(res, 429, { ok: false, error: 'slow down', code: 'rate_limit' });
     }
     await dbUpsert('chat_rate', { sid: sid, ts: Date.now() }, 'sid');
 
@@ -65,6 +88,11 @@ export default async function handler(req, res) {
     });
     return sendJson(res, 200, { ok: true });
   } catch (err) {
-    return sendJson(res, 502, { ok: false, error: String(err.message || err) });
+    const msg = String(err.message || err);
+    let code = 'server';
+    if (/Telegram .*?(Too Many Requests|retry after)/i.test(msg)) code = 'busy';
+    else if (/timed?\s?out|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN/i.test(msg)) code = 'timeout';
+    else if (/message thread not found|thread not found|chat not found/i.test(msg)) code = 'thread';
+    return sendJson(res, 502, { ok: false, error: msg, code: code });
   }
 }

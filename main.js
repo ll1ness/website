@@ -948,7 +948,9 @@
     var body = document.getElementById('chat-body');
     var form = document.getElementById('chat-form');
     var input = document.getElementById('chat-input');
-    if (!widget || !launcher || !panel || !closeBtn || !body || !form || !input) return;
+    var errBox = document.getElementById('chat-error');
+    var captchaBox = document.getElementById('chat-captcha');
+    if (!widget || !launcher || !panel || !closeBtn || !body || !form || !input || !errBox) return;
 
     var CONSENT_KEY = 'll1chat.consent';
     var privacyModal = null;
@@ -983,6 +985,32 @@
       return m;
     }
 
+    // ошибки отправки: показываем красным под инпутом, а не сообщением в чате
+    function showErr(text) {
+      errBox.textContent = text;
+      errBox.hidden = false;
+    }
+
+    function clearErr() {
+      errBox.hidden = true;
+      errBox.textContent = '';
+    }
+
+    function sendErrorText(err) {
+      var code = err && err.body && err.body.code;
+      switch (code) {
+        case 'rate_limit': return T('chat.err.slow');
+        case 'busy': return T('chat.err.busy');
+        case 'thread': return T('chat.err.thread');
+        case 'timeout': return T('chat.err.network');
+        case 'no_chat': return T('chat.err.unavailable');
+      }
+      if (err && err.status === 429) return T('chat.err.slow');
+      if (err && err.status === 500) return T('chat.err.unavailable');
+      if (!err || err.status === undefined) return T('chat.err.network');
+      return T('chat.err.server');
+    }
+
     // Сессия гостя — UUID в localStorage; по ней в Telegram создаётся тема «Гость #N».
     function sessionId() {
       if (sid) return sid;
@@ -1005,7 +1033,8 @@
       booted = true;
       msg(T('chat.greeting'), 'bot');
       if (wasClosed()) msg(T('chat.closed'), 'bot');
-      if (!consented()) renderConsent();
+      if (consented()) renderCaptcha();
+      else renderConsent();
       body.scrollTop = body.scrollHeight;
     }
 
@@ -1072,8 +1101,7 @@
       accept.addEventListener('click', function () {
         try { localStorage.setItem(CONSENT_KEY, '1'); } catch (err) {}
         if (box.parentNode) box.parentNode.removeChild(box);
-        input.disabled = false;
-        input.focus();
+        renderCaptcha();
       });
       actions.appendChild(accept);
       var decline = el('button', 'consent-btn consent-decline');
@@ -1129,14 +1157,101 @@
       try { localStorage.setItem(closedKey(), '1'); } catch (err) {}
     }
 
+    // ── Cloudflare Turnstile: капча после согласия с политикой ──
+    // Токен шлём с каждым сообщением; сервер проверяет его через siteverify.
+    // Пока на сервере не задан TURNSTILE_SECRET_KEY — капча отключена
+    // (конфиг вернёт пустой sitekey), и чат работает как раньше.
+    var captchaToken = null;
+    var captchaEl = null;
+    var turnstileBooted = false;
+    var turnstileWaiters = [];
+    var captchaDisabled = false;
+
+    function loadTurnstile(cb) {
+      if (window.turnstile) { cb(); return; }
+      turnstileWaiters.push(cb);
+      if (turnstileBooted) return;
+      turnstileBooted = true;
+      var s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      s.async = true;
+      s.onload = function () {
+        var w = turnstileWaiters.slice();
+        turnstileWaiters.length = 0;
+        for (var i = 0; i < w.length; i++) w[i]();
+      };
+      document.head.appendChild(s);
+    }
+
+    function onCaptchaToken(token) {
+      captchaToken = token;
+      input.disabled = false;
+      if (captchaBox) captchaBox.hidden = true;
+      clearErr();
+      input.focus();
+    }
+
+    function onCaptchaExpired() {
+      captchaToken = null;
+      input.disabled = true;
+      if (captchaBox) captchaBox.hidden = false;
+    }
+
+    function renderCaptcha() {
+      if (captchaDisabled) { input.disabled = false; return; }
+      if (!captchaBox) { input.disabled = false; return; }
+      captchaToken = null;
+      input.disabled = true;
+      captchaBox.hidden = false;
+      loadTurnstile(function () {
+        fetch('/api/chat/config', { cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (cfg) {
+            if (!cfg || !cfg.sitekey) {
+              // капча не настроена — не блокируем чат
+              captchaDisabled = true;
+              captchaBox.hidden = true;
+              input.disabled = false;
+              return;
+            }
+            try { if (captchaEl) window.turnstile.remove(captchaEl); } catch (err) {}
+            captchaBox.innerHTML = '';
+            var label = document.createElement('div');
+            label.className = 'chat-captcha-label';
+            label.textContent = T('chat.captchaIntro');
+            captchaBox.appendChild(label);
+            captchaEl = window.turnstile.render(captchaBox, {
+              sitekey: cfg.sitekey,
+              theme: 'dark',
+              callback: onCaptchaToken,
+              'expired-callback': onCaptchaExpired,
+              'error-callback': onCaptchaExpired
+            });
+          })
+          .catch(function () {
+            // конфиг недоступен — пускаем без капчи (не вешаем чат на капчу)
+            captchaDisabled = true;
+            captchaBox.hidden = true;
+            input.disabled = false;
+          });
+      });
+    }
+
     function send(text) {
       return fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sid: sessionId(), text: text })
+        body: JSON.stringify({ sid: sessionId(), text: text, captcha: captchaToken || '' })
       }).then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
+        return r.json().catch(function () { return null; }).then(function (data) {
+          if (!r.ok) {
+            var e2 = new Error('HTTP ' + r.status);
+            e2.status = r.status;
+            e2.body = data;
+            throw e2;
+          }
+          return data;
+        });
       });
     }
 
@@ -1171,16 +1286,26 @@
       if (input.disabled) return;
       var text = input.value.trim();
       if (!text) return;
+      clearErr();
       msg(text, 'user');
       input.value = '';
       send(text).then(function () {
+        clearErr();
         // успешная отправка после /end = новая тема: убираем плашку закрытия
         try { localStorage.removeItem(closedKey()); } catch (err) {}
-      }).catch(function () {
-        msg(T('chat.sendErr'), 'bot');
+      }).catch(function (err) {
         input.value = text;
+        if (err && err.body && err.body.code === 'captcha') {
+          // токен капчи протух (живёт ~5 минут) — рисуем виджет заново
+          renderCaptcha();
+          showErr(T('chat.captchaErr'));
+        } else {
+          showErr(sendErrorText(err));
+        }
       });
     });
+
+    input.addEventListener('input', clearErr);
   }
 
   /* ---------- Boot ---------- */

@@ -144,6 +144,8 @@ $$;
 | `TELEGRAM_WEBHOOK_SECRET` | случайная строка (`openssl rand -hex 32`) |
 | `SUPABASE_URL` | Project Settings → API → Project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` (secret) |
+| `TURNSTILE_SITE_KEY` | Cloudflare Turnstile → Site Key (публичный) |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile → Secret Key (только сервер) |
 
 **Внимание:** `service_role` даёт полный доступ к БД — только на сервере (Vercel env),
 никогда во фронтенд. `SUPABASE_URL` в Supabase — как `https://xxxx.supabase.co`.
@@ -165,18 +167,40 @@ node scripts/set-webhook.js https://ll1ness.vercel.app/api/chat/webhook
 
 Открой `https://ll1ness.vercel.app` → чат → перед первым сообщением нужно
 принять политику конфиденциальности (кнопки «Принять»/«Отклонить» в виджете,
-текст политики открывается модалом на сайте) → напиши → в группе появится тема
+текст политики открывается модалом на сайте) и пройти капчу Cloudflare Turnstile
+→ напиши → в группе появится тема
 **«Гость #1»** → просто напиши в тему (без reply) → сообщение прилетит в виджет.
 Напиши в теме `/end` (от имени админа) → тема закроется, у гостя из чата
 удалятся все сообщения — останется только уведомление о закрытии; новое
 сообщение гостя создаст новую тему. Из БД сообщения закрытого диалога
 автоматически удаляются через 30 дней (миграция 2).
 
+### 7. Cloudflare Turnstile (капча)
+
+1. [dash.cloudflare.com](https://dash.cloudflare.com) → **Turnstile** → **Add site**.
+2. Домен: `ll1ness.vercel.app` (для локального теста — `localhost`), виджет — managed.
+3. Получи **Site Key** (публичный) и **Secret Key** (секретный).
+4. В Vercel env добавь `TURNSTILE_SITE_KEY` и `TURNSTILE_SECRET_KEY` → **Redeploy**.
+
+Порядок в виджете: согласие с политикой → капча → поле ввода. Токен капчи
+проверяется сервером при каждом сообщении (`send.js` → siteverify). Если токен
+протух (живёт ~5 минут) — виджет сам перерисует капчу и попросит подтвердить
+ещё раз. Пока `TURNSTILE_SECRET_KEY` не задан — капча отключена, чат работает
+как раньше. Site Key публичный (отдаётся из `/api/chat/config`), Secret Key —
+только на сервере.
+
 ## Контракт API
 
-- `POST /api/chat/send` `{sid, text}` → `{ok: true}` (400/429/502 при ошибках).
-  `sid` — UUID-подобный (8–64 символа), `text` — 1–500 символов.
-  Если тему поддержка закрыла — следующий запрос создаёт **новую** тему «Гость #N».
+- `POST /api/chat/send` `{sid, text, captcha}` → `{ok: true}`; ошибки: 400/403/429/500/502
+  с телом `{ok: false, error, code}`. `sid` — UUID-подобный (8–64 символа),
+  `text` — 1–500 символов, `captcha` — токен Cloudflare Turnstile (если капча
+  настроена). Если тему поддержка закрыла — следующий запрос
+  создаёт **новую** тему «Гость #N». Коды ошибок: `bad` (400), `captcha` (403),
+  `rate_limit` (429), `no_chat` (500), `busy`/`timeout`/`thread`/`server` (502).
+  Виджет показывает ошибку человеческим текстом — красным под полем ввода
+  (не сообщением в чате).
+- `GET /api/chat/config` → `{ok: true, sitekey}` — публичные настройки виджета
+  (Site Key капчи; Secret Key наружу не отдаётся).
 - `GET /api/chat/poll?sid=...&lastId=...` → `{ok: true, messages: [{id, text, ts}]}`.
   Сообщение со служебным текстом `\u0001closed\u0001` — поддержка закрыла тему:
   виджет очищает чат и показывает только уведомление о закрытии.
@@ -191,6 +215,7 @@ node scripts/set-webhook.js https://ll1ness.vercel.app/api/chat/webhook
 - Токен бота и `service_role` — только на сервере (Vercel env).
 - Вебхук проверяет секрет, сообщения от ботов игнорируются.
 - Троттлинг: не чаще 1 сообщения в 2 секунды на сессию.
+- Капча Cloudflare Turnstile перед отправкой (пока задан `TURNSTILE_SECRET_KEY`).
 - Тема называется «Гость #N», сообщения внутри — без префикса.
 
 ## Локальный запуск

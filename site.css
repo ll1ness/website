@@ -1554,3 +1554,30 @@ body.modal-open { overflow: hidden; }
 .privacy-close:hover { border-color: #f0f0f0; }
 @keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .privacy-modal { animation: none; } }
+
+/* ── Ошибка отправки: красный текст под инпутом ── */
+.chat-error {
+  margin: 6px 10px 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #ff6b6b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  word-break: break-word;
+}
+.chat-error[hidden] { display: none; }
+
+/* ── Cloudflare Turnstile: капча после согласия с политикой ── */
+.chat-captcha {
+  margin: 8px 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.chat-captcha[hidden] { display: none; }
+.chat-captcha-label {
+  font-size: 11.5px;
+  color: #9a9a9a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+.chat-captcha iframe { border-radius: 10px; overflow: hidden; }
