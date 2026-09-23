@@ -816,7 +816,7 @@
     var sideBox = el('div', 'steam-side-box');
     var warn = enField(p, 'warnEn') || p.warn;
     if (warn) sideBox.appendChild(el('div', 'steam-warn', warn));
-    var hasDesktop = p.desktopDownloads && p.desktopDownloads.length;
+    var hasDesktop = p.desktopDownloads && p.desktopDownloads.length && !p.downloadDisabled;
     if (hasDesktop) {
       var db = el('button', 'steam-btn primary', T('project.downloadBtn') + ' →');
       db.type = 'button';
