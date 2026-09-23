@@ -818,7 +818,7 @@
     if (warn) sideBox.appendChild(el('div', 'steam-warn', warn));
     var hasDesktop = p.desktopDownloads && p.desktopDownloads.length;
     if (hasDesktop) {
-      var db = el('button', 'steam-btn primary', T('project.desktopBtn') + ' →');
+      var db = el('button', 'steam-btn primary', T('project.downloadBtn') + ' →');
       db.type = 'button';
       db.addEventListener('click', function () { openDesktopModal(p, db); });
       sideBox.appendChild(db);
