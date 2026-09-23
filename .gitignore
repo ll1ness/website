@@ -4,3 +4,6 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 .aider*
+.env
+.env.*
+!.env.example

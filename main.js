@@ -968,6 +968,13 @@
     window.addEventListener('resize', syncChatLift, { passive: true });
     syncChatLift();
 
+    var sid = null;
+    var lastMsgId = 0;
+    var pollTimer = null;
+    try {
+      sid = localStorage.getItem('ll1chat.sid') || null;
+      if (sid) lastMsgId = parseInt(localStorage.getItem('ll1chat.last.' + sid) || '0', 10) || 0;
+    } catch (err) {}
     var booted = false;
 
     function msg(text, who) {
@@ -978,10 +985,27 @@
       return m;
     }
 
+    // Сессия гостя — UUID в localStorage; по ней в Telegram создаётся тема «Гость #N».
+    function sessionId() {
+      if (sid) return sid;
+      try {
+        sid = localStorage.getItem('ll1chat.sid');
+        if (!sid) {
+          sid = (window.crypto && window.crypto.randomUUID)
+            ? window.crypto.randomUUID()
+            : 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+          localStorage.setItem('ll1chat.sid', sid);
+        }
+      } catch (err) {
+        sid = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+      }
+      return sid;
+    }
+
     function welcome() {
       if (booted) return;
       booted = true;
-      msg(T('chat.welcome'), 'bot');
+      msg(T('chat.greeting'), 'bot');
       var wrap = el('div', 'chat-channels');
       CHAT_CHANNELS.forEach(function (c) {
         var a = el('a', 'chat-channel');
@@ -997,6 +1021,46 @@
       body.scrollTop = body.scrollHeight;
     }
 
+    function renderIncoming(list) {
+      for (var i = 0; i < list.length; i++) {
+        var m = list[i];
+        if (!m || !m.text || m.id <= lastMsgId) continue;
+        lastMsgId = m.id;
+        msg(m.text, 'bot');
+      }
+      try {
+        if (lastMsgId) localStorage.setItem('ll1chat.last.' + sessionId(), String(lastMsgId));
+      } catch (err) {}
+    }
+
+    function poll() {
+      fetch('/api/chat/poll?sid=' + encodeURIComponent(sessionId()) + '&lastId=' + lastMsgId, { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d && d.messages) renderIncoming(d.messages); })
+        .catch(function () {});
+    }
+
+    function startPolling() {
+      stopPolling();
+      poll();
+      pollTimer = setInterval(poll, 3000);
+    }
+
+    function stopPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    function send(text) {
+      return fetch('/api/chat/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sid: sessionId(), text: text })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    }
+
     function setOpen(open) {
       widget.classList.toggle('open', open);
       launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -1004,7 +1068,10 @@
       panel.setAttribute('aria-hidden', open ? 'false' : 'true');
       if (open) {
         welcome();
+        startPolling();
         setTimeout(function () { input.focus(); }, 250);
+      } else {
+        stopPolling();
       }
     }
 
@@ -1023,22 +1090,10 @@
       if (!text) return;
       msg(text, 'user');
       input.value = '';
-
-      function fallback() {
-        msg(T('chat.fallback'), 'bot');
-      }
-      setTimeout(function () {
-        try {
-          navigator.clipboard.writeText(text).then(
-            function () {
-              msg(T('chat.copied'), 'bot');
-            },
-            fallback
-          );
-        } catch (err) {
-          fallback();
-        }
-      }, 350);
+      send(text).catch(function () {
+        msg(T('chat.sendErr'), 'bot');
+        input.value = text;
+      });
     });
   }
 
