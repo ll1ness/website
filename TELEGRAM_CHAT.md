@@ -28,6 +28,9 @@
 1. У @BotFather создаёшь бота (`/newbot`) → получаешь токен.
 2. Супергруппа в режиме форума («Темы» включены — уже сделано).
 3. Бота добавляешь в группу **админом** (право управления темами).
+4. **У BotFather: `/setprivacy` → Disable.** Иначе бот в группе видит только
+   упоминания и ответы на свои сообщения — письмо в тему без reply не долетит
+   до чата на сайте.
 
 ### 2. ID группы
 
@@ -88,6 +91,19 @@ end;
 $$;
 ```
 
+**Миграция** (если схема уже создавалась раньше — выполни эти строки):
+
+```sql
+alter table chat_sessions add column if not exists closed_at bigint;
+alter table chat_messages add column if not exists kind text;
+create table if not exists chat_ratings (
+  id bigint generated always as identity primary key,
+  sid text not null,
+  score int not null,
+  ts bigint not null
+);
+```
+
 ### 4. Vercel: переменные окружения
 
 В Project → Settings → Environment Variables добавь:
@@ -119,22 +135,31 @@ node scripts/set-webhook.js https://ll1ness.vercel.app/api/chat/webhook
 ### 6. Тест
 
 Открой `https://ll1ness.vercel.app` → чат → напиши → в группе появится тема
-**«Гость #1»** → ответь в теме → ответ прилетит в виджет.
+**«Гость #1»** → просто напиши в тему (без reply) → сообщение прилетит в виджет.
+Напиши в теме `/end` (от имени админа) → тема закроется, у гостя появится уведомление и окно
+оценки; после оценки новое сообщение гостя создаст новую тему.
 
 ## Контракт API
 
 - `POST /api/chat/send` `{sid, text}` → `{ok: true}` (400/429/502 при ошибках).
   `sid` — UUID-подобный (8–64 символа), `text` — 1–500 символов.
-- `GET /api/chat/poll?sid=...&lastId=...` → `{ok: true, messages: [{id, text, ts}]}`.
+  Если тему поддержка закрыла — следующий запрос создаёт **новую** тему «Гость #N».
+- `GET /api/chat/poll?sid=...&lastId=...` → `{ok: true, messages: [{id, text, ts, kind}]}`.
+  `kind: "closed"` — поддержка закрыла тему (виджет показывает закрытие + окно оценки).
+- `POST /api/chat/rate` `{sid, score}` (1–5) — оценка после закрытия; сохраняется
+  в `chat_ratings` и дублируется в общую тему форума группы.
 - `POST /api/chat/webhook` — только от Telegram, проверяет
-  `X-Telegram-Bot-Api-Secret-Token`.
+  `X-Telegram-Bot-Api-Secret-Token`. Понимает обычные сообщения в темах
+  и команду `/end`: админ пишет её в теме гостя → тема закрывается
+  (жестко через `closeForumTopic`) и гость получает уведомление + окно оценки.
+  Для не-админов команда игнорируется.
 
 ## Безопасность
 
 - Токен бота и `service_role` — только на сервере (Vercel env).
 - Вебхук проверяет секрет, сообщения от ботов игнорируются.
 - Троттлинг: не чаще 1 сообщения в 2 секунды на сессию.
-- Сообщения гостя в теме идут с префиксом: `Гость #7: текст`.
+- Тема называется «Гость #N», сообщения внутри — без префикса.
 
 ## Локальный запуск
 
