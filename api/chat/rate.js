@@ -22,7 +22,10 @@ export default async function handler(req, res) {
 
   const chatId = process.env.TELEGRAM_CHAT_ID;
   try {
-    await dbInsert('chat_ratings', { sid: sid, score: score, ts: Date.now() });
+    // сохраняем оценку, если таблица chat_ratings уже создана (миграция);
+    // иначе оценка всё равно уходит в группу и запрос считается успешным
+    try { await dbInsert('chat_ratings', { sid: sid, score: score, ts: Date.now() }); }
+    catch (err2) {}
 
     let name = 'Гость';
     try {

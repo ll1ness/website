@@ -1,6 +1,7 @@
 // POST /api/chat/send  { sid, text }
 // Первое сообщение сессии создаёт в супергруппе-форуме тему «Гость #N».
-// Если прошлую тему поддержка закрыла — следующий вопрос уходит в НОВУЮ тему.
+// Если прошлую тему поддержка закрыла командой /end (привязка thread>sid удалена) —
+// следующий вопрос уходит в НОВУЮ тему. Работает и без колонки closed_at.
 import { telegram, dbSelect, dbInsert, dbDelete, dbUpsert, dbRpc, readBody, sendJson, SID_RE } from '../../lib/tg.js';
 
 const RATE_MS = 2000; // не чаще одного сообщения в 2 секунды на сессию
@@ -29,28 +30,30 @@ export default async function handler(req, res) {
     }
     await dbUpsert('chat_rate', { sid: sid, ts: Date.now() }, 'sid');
 
-    let sess = null;
-    try {
-      sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name,closed_at&sid=eq.' + e(sid));
-    } catch (err1) {
-      // миграция с closed_at ещё не применена в БД — работаем без функционала закрытия
-      sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name&sid=eq.' + e(sid));
-    }
+    const sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name&sid=eq.' + e(sid));
     let thread = sess && sess.length ? sess[0].thread_id : null;
     let name = sess && sess.length ? sess[0].guest_name : null;
-    const closed = sess && sess.length ? sess[0].closed_at : null;
 
-    // новая тема: при первом сообщении или после закрытия предыдущей темы
-    if (!thread || closed) {
-      if (thread && closed) {
-        try { await dbDelete('chat_threads', 'thread_id=eq.' + e(thread)); } catch (err2) {}
+    // тема считается закрытой, если её привязка thread>sid удалена командой /end
+    let mapped = true;
+    if (thread) {
+      try {
+        const m = await dbSelect('chat_threads', 'select=sid&thread_id=eq.' + e(thread));
+        mapped = !!(m && m.length);
+      } catch (err2) { mapped = true; }
+    }
+
+    // новая тема: при первом сообщении или если прошлая тема закрыта
+    if (!thread || !mapped) {
+      if (thread && !mapped) {
+        try { await dbDelete('chat_threads', 'thread_id=eq.' + e(thread)); } catch (err3) {}
       }
       const n = await dbRpc('next_val', { cname: 'guestCount' });
       name = 'Гость #' + n;
       const created = await telegram('createForumTopic', { chat_id: chatId, name: name });
       thread = String(created.message_thread_id);
       await Promise.all([
-        dbUpsert('chat_sessions', { sid: sid, thread_id: thread, guest_name: name, closed_at: null }, 'sid'),
+        dbUpsert('chat_sessions', { sid: sid, thread_id: thread, guest_name: name }, 'sid'),
         dbInsert('chat_threads', { thread_id: thread, sid: sid })
       ]);
     }

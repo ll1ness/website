@@ -1,11 +1,15 @@
 // POST /api/chat/webhook  — приём апдейтов от Telegram (вебхук бота).
 // 1) Письмо админа в теме гостя → chat_messages → долетает в виджет на сайте.
-// 2) Команда /end (в теме гостя, только от админа) → тема закрывается,
-//    гость видит «тема закрыта» + окно оценки; привязка thread→session удаляется,
-//    следующий вопрос гостя создаст новую тему.
+// 2) Команда /end (в теме гостя, только от админа) → тема закрывается:
+//    удаляется привязка thread→session (следующий вопрос откроет новую тему),
+//    гостю пишется событие-маркер «тема закрыта» → виджет показывает уведомление
+//    и окно оценки. Схема работает и до миграции (без колонок kind/closed_at).
 import { telegram, dbSelect, dbInsert, dbDelete, dbUpsert, readBody, sendJson } from '../../lib/tg.js';
 
 const e = encodeURIComponent;
+
+// служебный маркер «тема закрыта» (вместо колонки kind — работает до миграции)
+export const CLOSED_SENTINEL = '\u0001closed\u0001';
 
 function isAdmin(status) {
   return status === 'administrator' || status === 'creator';
@@ -39,14 +43,14 @@ export default async function handler(req, res) {
           const rows = await dbSelect('chat_threads', 'select=sid&thread_id=eq.' + e(thread));
           if (rows && rows.length) {
             const sid = rows[0].sid;
-            try {
-              await telegram('closeForumTopic', { chat_id: chatId, message_thread_id: Number(thread) });
-            } catch (err3) {}
-            await Promise.all([
-              dbInsert('chat_messages', { sid: sid, text: '', ts: Date.now(), kind: 'closed' }),
-              dbDelete('chat_threads', 'thread_id=eq.' + e(thread))
-            ]);
-            try { await dbUpsert('chat_sessions', { sid: sid, closed_at: Date.now() }, 'sid'); } catch (err4) {}
+            // закрываем тему в Telegram
+            try { await telegram('closeForumTopic', { chat_id: chatId, message_thread_id: Number(thread) }); } catch (err3) {}
+            // главный сигнал: разрываем привязку темы — следующий вопрос откроет НОВУЮ тему
+            try { await dbDelete('chat_threads', 'thread_id=eq.' + e(thread)); } catch (err4) {}
+            // пишем событие для виджета (маркер вместо колонки kind — до миграции)
+            try { await dbInsert('chat_messages', { sid: sid, text: CLOSED_SENTINEL, ts: Date.now() }); } catch (err5) {}
+            // метаданные закрытия (опционально: колонки может ещё не быть)
+            try { await dbUpsert('chat_sessions', { sid: sid, closed_at: Date.now() }, 'sid'); } catch (err6) {}
           }
         }
       }
