@@ -690,7 +690,7 @@
     if (p.screenshots && p.screenshots.length) slides = p.screenshots.slice();
     else if (p.gif) slides.push(p.gif);
 
-    // верхняя зона: большое медиа + панель «Скачать»
+    // верхняя зона: большое медиа + панель действий
     var mainRow = el('div', 'steam-main');
 
     var media = el('div', 'steam-media');
@@ -746,16 +746,16 @@
     if (strip) media.appendChild(strip);
     mainRow.appendChild(media);
 
-    // панель «Скачать» — как блок покупки в Steam
+    // панель действий — как блок покупки в Steam
     var side = el('div', 'steam-side');
-    side.appendChild(el('div', 'steam-side-title', T('project.download', { name: p.name })));
+    side.appendChild(el('div', 'steam-side-title', p.name));
     var sideBox = el('div', 'steam-side-box');
     var warn = enField(p, 'warnEn') || p.warn;
     if (warn) sideBox.appendChild(el('div', 'steam-warn', warn));
     if (p.downloads && p.downloads.length) {
       p.downloads.forEach(function (d, i) {
         if (!d.url || d.url === '#') return;
-        var a = el('a', 'steam-btn' + (i === 0 ? ' primary' : ''), (i === 0 ? T('project.dlBtn') : '') + dlLabel(d.label) + ' →');
+        var a = el('a', 'steam-btn' + (i === 0 ? ' primary' : ''), dlLabel(d.label) + ' →');
         a.href = d.url;
         a.target = '_blank';
         a.rel = 'noopener';
