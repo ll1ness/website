@@ -50,7 +50,13 @@ function startServer() {
 const server = createServer(async (req, res) => {
   try {
     let pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    if (pathname === '/') pathname = '/index.html';
+    if (pathname === '/') {
+      pathname = '/index.html';
+    } else if (pathname.endsWith('/')) {
+      pathname += 'index.html';
+    } else if (!extname(pathname)) {
+      pathname += '.html';
+    }
 
     const filePath = normalize(join(ROOT, pathname));
     if (!filePath.startsWith(ROOT)) {
