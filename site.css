@@ -1344,20 +1344,25 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   flex: 1;
   min-width: 0;
   resize: none;
-  min-height: 38px;
+  min-height: 32px;
   max-height: 120px;
   line-height: 1.45;
+  overflow-x: hidden;
   overflow-y: auto;
+  /* скрываем полосу прокрутки: высота и так авто-подгоняется, а длинный текст
+     скроллится колесом/тачем */
+  scrollbar-width: none;
   background: #0c0c0c;
   border: 1px solid #222;
   border-radius: 8px;
-  padding: 9px 12px;
+  padding: 8px 12px;
   color: #f0f0f0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: 13px;
   outline: none;
   transition: border-color .2s;
 }
+.chat-input::-webkit-scrollbar { display: none; }
 .chat-input:focus { border-color: #555; }
 .chat-input::placeholder { color: #666; }
 .chat-send {
