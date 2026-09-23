@@ -1,16 +1,17 @@
 // POST /api/chat/send  { sid, text }
 // Первое сообщение сессии создаёт в супергруппе-форуме тему «Гость #N»
 // и запоминает session -> message_thread_id. Дальше всё летит в ту же тему.
-import { telegram, kvGet, kvSet, kvIncr, readBody, sendJson, SID_RE } from '../../lib/tg.js';
+import { telegram, dbSelect, dbInsert, dbUpsert, dbRpc, readBody, sendJson, SID_RE } from '../../lib/tg.js';
 
 const RATE_MS = 2000; // не чаще одного сообщения в 2 секунды на сессию
+const e = encodeURIComponent;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return sendJson(res, 405, { ok: false, error: 'method' });
 
   let body;
   try { body = JSON.parse((await readBody(req)) || '{}'); }
-  catch (e) { return sendJson(res, 400, { ok: false, error: 'bad json' }); }
+  catch (err) { return sendJson(res, 400, { ok: false, error: 'bad json' }); }
 
   const sid = String(body.sid || '').trim();
   const text = String(body.text || '').trim();
@@ -21,25 +22,25 @@ export default async function handler(req, res) {
   if (!chatId) return sendJson(res, 500, { ok: false, error: 'no chat' });
 
   try {
-    // throttle
-    const rl = await kvGet('rl:' + sid);
-    if (rl && Date.now() - Number(rl) < RATE_MS) {
+    // throttle: не чаще одного сообщения в 2 секунды на сессию
+    const rl = await dbSelect('chat_rate', 'select=ts&sid=eq.' + e(sid));
+    if (rl && rl.length && Date.now() - Number(rl[0].ts) < RATE_MS) {
       return sendJson(res, 429, { ok: false, error: 'slow down' });
     }
-    await kvSet('rl:' + sid, Date.now());
+    await dbUpsert('chat_rate', { sid: sid, ts: Date.now() }, 'sid');
 
-    let thread = await kvGet('session:' + sid);
-    let name = await kvGet('name:' + sid);
+    const sess = await dbSelect('chat_sessions', 'select=thread_id,guest_name&sid=eq.' + e(sid));
+    let thread = sess && sess.length ? sess[0].thread_id : null;
+    let name = sess && sess.length ? sess[0].guest_name : null;
 
     if (!thread) {
-      const n = await kvIncr('guestCount');
+      const n = await dbRpc('next_val', { cname: 'guestCount' });
       name = name || ('Гость #' + n);
       const created = await telegram('createForumTopic', { chat_id: chatId, name: name });
       thread = String(created.message_thread_id);
       await Promise.all([
-        kvSet('session:' + sid, thread),
-        kvSet('thread:' + thread, sid),
-        kvSet('name:' + sid, name)
+        dbInsert('chat_sessions', { sid: sid, thread_id: thread, guest_name: name }),
+        dbInsert('chat_threads', { thread_id: thread, sid: sid })
       ]);
     }
 
