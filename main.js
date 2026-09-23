@@ -950,6 +950,9 @@
     var input = document.getElementById('chat-input');
     if (!widget || !launcher || !panel || !closeBtn || !body || !form || !input) return;
 
+    var CONSENT_KEY = 'll1chat.consent';
+    var privacyModal = null;
+
     input.placeholder = T('chat.inputPh');
     input.disabled = !consented();
 
@@ -1041,8 +1044,6 @@
     }
 
     // ── политика конфиденциальности: согласие + модал на сайте ──
-    var CONSENT_KEY = 'll1chat.consent';
-    var privacyModal = null;
 
     function consented() {
       try { return localStorage.getItem(CONSENT_KEY) === '1'; } catch (err) { return false; }
@@ -1172,7 +1173,10 @@
       if (!text) return;
       msg(text, 'user');
       input.value = '';
-      send(text).catch(function () {
+      send(text).then(function () {
+        // успешная отправка после /end = новая тема: убираем плашку закрытия
+        try { localStorage.removeItem(closedKey()); } catch (err) {}
+      }).catch(function () {
         msg(T('chat.sendErr'), 'bot');
         input.value = text;
       });
