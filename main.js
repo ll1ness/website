@@ -1403,26 +1403,26 @@
       }
     }
 
-    // арт на всю hero-секцию: канвас растягиваем под весь блок .hero
+    // арт как фон: считаем по контейнеру .hero-art (CSS управляет его размером и позицией)
     function heroBox() {
-      var host = document.querySelector('.hero');
+      var host = canvas.parentElement;
       return {
-        w: (host && host.clientWidth) || 1120,
+        w: (host && host.clientWidth) || 800,
         h: (host && host.clientHeight) || 640
       };
     }
-    // плотность: ограничиваем число ячеек, чтобы на большом экране не проседал FPS —
-    // укрупняем ячейку (кратно базовой 4×7), пока ячеек не станет ~16 тыс.
+    // плотность: целочисленные ячейки кратные 4x7 для чётких глифов,
+    // CSS масштабирует canvas на весь .hero-art без обрезки
     function pickCells() {
       var box = heroBox();
-      var MAX = 16000;
-      var sc = Math.max(1, Math.ceil(Math.sqrt(Math.max(1, box.w * box.h) / (4 * 7 * MAX))));
-      var cw = 4 * sc, ch = 7 * sc;
-      return {
-        cols: Math.max(30, Math.round(box.w / cw)),
-        rows: Math.max(12, Math.round(box.h / ch)),
-        cellW: cw, cellH: ch
-      };
+      var w = box.w || 800, h = box.h || 640;
+      var BASE_CW = 4, BASE_CH = 7;
+      var MAX = 12000;
+      var sc = Math.max(1, Math.ceil(Math.sqrt(Math.max(1, w * h) / (BASE_CW * BASE_CH * MAX))));
+      var cw = BASE_CW * sc, ch = BASE_CH * sc;
+      var cols = Math.max(30, Math.round(w / cw));
+      var rows = Math.max(12, Math.round(h / ch));
+      return { cols: cols, rows: rows, cellW: cw, cellH: ch };
     }
     var fadeX = [], fadeY = [];
     // края арта плавно растворяются в прозрачность — узкая полоса затухания,
@@ -1458,15 +1458,8 @@
       makeFade();
       canvas.width = COLS * CELL_W * DPR;
       canvas.height = ROWS * CELL_H * DPR;
-      canvas.style.width = (COLS * CELL_W) + 'px';
-      canvas.style.height = (ROWS * CELL_H) + 'px';
-      var gridAspect = (COLS * CELL_W) / (ROWS * CELL_H);
-      // полный кадр в сетку (cover-fit): картинка заполняет весь hero
-      var srcAspect = img.width / img.height;
-      var sx = 0, sy = 0, sw = img.width, sh = img.height;
-      if (srcAspect > gridAspect) { sh = img.height; sw = sh * gridAspect; sx = (img.width - sw) / 2; }
-      else { sw = img.width; sh = sw / gridAspect; sy = (img.height - sh) / 2; }
-      sample(function (t) { t.drawImage(img, sx, sy, sw, sh, 0, 0, COLS, ROWS); });
+      // рисуем картинку на весь canvas без обрезки и cover-fit подгонок
+      sample(function (t) { t.drawImage(img, 0, 0, COLS, ROWS); });
       normalizeDark();
       loadedImg = img;
       start();
@@ -1495,8 +1488,7 @@
       makeFade();
       canvas.width = COLS * CELL_W * DPR;
       canvas.height = ROWS * CELL_H * DPR;
-      canvas.style.width = (COLS * CELL_W) + 'px';
-      canvas.style.height = (ROWS * CELL_H) + 'px';
+      // CSS управляет размером canvas (width/height 100%), не задаём inline-стили
       sample(function (t) { t.drawImage(src, 0, 0, COLS, ROWS); });
       start();
     }
