@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+                                                                                                            \<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta name='dmca-site-verification' content='ek91ek50eXRqTExMSXc4WU5SZ1J6eGJ3L21qRkduS0FMRU9vdTRHaUJGaz01' />
@@ -51,6 +51,15 @@
   <script src="techon-ui.min.js?v=2"></script>
   <script src="i18n.js?v=11"></script>
   <link rel="stylesheet" href="site.css?v=30">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="hero3d.js?v=1"></script>
 </head>
 <body>
 
@@ -78,6 +87,13 @@
     </div>
   </nav>
 
+  <!-- === PRELOADER === -->
+  <div id="preloader" class="preloader" aria-hidden="true">
+    <div class="preloader-inner">
+      <div class="to-spinner" data-size="l"></div>
+    </div>
+  </div>
+
   <!-- === HERO === -->
   <div class="page" id="top">
     <section class="hero">
@@ -88,9 +104,10 @@
           <button type="button" class="to-button" data-i18n="hero.telegram" onclick="window.openChat && window.openChat()">Telegram →</button>
         </div>
       </div>
+      <canvas id="hero-3d" aria-hidden="true" tabindex="-1"></canvas>
       <div class="hero-art">
-        <canvas id="hero-ascii" aria-hidden="true" tabindex="-1"></canvas>
-        <div class="hero-model-placeholder" data-i18n="hero.modelPlaceholder">3D Model</div>
+        <div class="ascii-half ascii-left"><canvas id="hero-ascii-l" aria-hidden="true" tabindex="-1"></canvas></div>
+        <div class="ascii-half ascii-right"><canvas id="hero-ascii-r" aria-hidden="true" tabindex="-1"></canvas></div>
       </div>
       <div class="scroll-hint" aria-hidden="true">
         <span class="scroll-mouse"><span class="scroll-wheel"></span></span>
