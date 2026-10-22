@@ -176,6 +176,26 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-quote-wrap {
+  position: relative;
+  z-index: 2;
+  padding: 0 2rem;
+}
+
+.hero-quote {
+  font-family: 'TechOnNotes', 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  margin: 6px 0 0 0;
+  padding: 0;
+  white-space: nowrap;
 }
 /* 3D куб — в щели между половинами ASCII-арта, под артом но над фоном */
 #hero-3d {
@@ -431,6 +451,8 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
 .scroll-hint {
   opacity: 0;
   transition: opacity .6s ease 1.2s;
+  flex-direction: column;
+  align-items: center;
 }
 .scroll-hint.revealed {
   opacity: .75;

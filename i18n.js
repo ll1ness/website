@@ -15,6 +15,7 @@
       'lang.en': 'English',
 
       'marquee.aria': 'Бренды и сервисы, с которыми мы работаем',
+      'hero.quote': 'Инновации не имитации',
       'hero.cta': 'Смотреть проекты',
       'hero.telegram': 'Telegram →',
 
@@ -135,6 +136,7 @@
       'lang.en': 'English',
 
       'marquee.aria': 'Brands and services we work with',
+      'hero.quote': 'Innovation not imitation',
       'hero.cta': 'View projects',
       'hero.telegram': 'Telegram →',
 

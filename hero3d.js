@@ -4,6 +4,9 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 (function () {
   'use strict';
 
+  // Skip if not on the index page (project.html has no preloader/hero canvas)
+  if (document.body.hasAttribute('data-page')) return;
+
   var canvas = document.getElementById('hero-3d');
   if (!canvas) return;
 
@@ -13,6 +16,11 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     if (preloader) preloader.classList.add('hidden');
     return;
   }
+
+  var preloader = document.getElementById('preloader');
+  var done = false;
+  var t0 = performance.now();
+  console.log('[hero3d] init', t0.toFixed(0) + 'ms');
 
   // куб в щели между раздвинутыми половинами ASCII-арта
   var SIZE = 280;
@@ -30,6 +38,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
+  console.log('[hero3d] renderer ready', (performance.now() - t0).toFixed(0) + 'ms');
 
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
@@ -51,6 +60,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
   var diffMap = texLoader.load('assets/textures/CubeDiffMap.png');
   diffMap.colorSpace = THREE.SRGBColorSpace;
   var specMap = texLoader.load('assets/textures/CubeSpecMap.png');
+  console.log('[hero3d] textures requested', (performance.now() - t0).toFixed(0) + 'ms');
 
   var material = new THREE.MeshStandardMaterial({
     map: diffMap,
@@ -77,6 +87,8 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
   loader.load(
     'assets/cubeTestLow01.obj',
     function (obj) {
+      done = true;
+      console.log('[hero3d] OBJ loaded', (performance.now() - t0).toFixed(0) + 'ms');
       model = obj;
       model.traverse(function (child) {
         if (child.isMesh) child.material = material;
@@ -93,25 +105,28 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
       scene.add(model);
       canvas.classList.add('revealed');
 
-      var preloader = document.getElementById('preloader');
       if (preloader) preloader.classList.add('hidden');
+      console.log('[hero3d] preloader hidden', (performance.now() - t0).toFixed(0) + 'ms');
 
       raf = requestAnimationFrame(animate);
     },
     undefined,
     function (err) {
+      done = true;
       console.warn('[hero3d] Failed to load OBJ:', err);
-      var preloader = document.getElementById('preloader');
       if (preloader) preloader.classList.add('hidden');
     }
   );
 
+  // Fallback: only hide preloader if model never loaded
   setTimeout(function () {
-    var preloader = document.getElementById('preloader');
-    if (preloader && !preloader.classList.contains('hidden')) {
-      preloader.classList.add('hidden');
+    if (!done) {
+      console.warn('[hero3d] Fallback: hiding preloader after timeout');
+      if (preloader && !preloader.classList.contains('hidden')) {
+        preloader.classList.add('hidden');
+      }
     }
-  }, 4000);
+  }, 10000);
 
   window.addEventListener('beforeunload', function () {
     if (raf) cancelAnimationFrame(raf);
