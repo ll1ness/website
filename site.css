@@ -177,67 +177,101 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   z-index: 0;
   pointer-events: none;
 }
-.hero-model-placeholder {
+/* 3D куб — в щели между половинами ASCII-арта, под артом но над фоном */
+#hero-3d {
   position: absolute;
-  right: 10%;
+  left: calc(50% + 30%);
   top: 50%;
-  transform: translateY(-50%);
-  left: auto;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  height: 380px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  filter: brightness(3) blur(6px);
+  transition: opacity .6s cubic-bezier(.22,1,.36,1),
+              filter 2.8s cubic-bezier(.22,1,.36,1) .3s;
 }
-#hero-ascii {
+#hero-3d.revealed {
+  opacity: .7;
+  filter: brightness(1) blur(0);
+}
+
+/* ASCII-арт: две половины раздвинуты, между ними — куб */
+.ascii-half {
   position: absolute;
-  inset: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  filter: brightness(0.6) blur(4px);
+  transform: scale(1.08);
+  transition: opacity .6s cubic-bezier(.22,1,.36,1),
+              filter 2.8s cubic-bezier(.22,1,.36,1) .3s,
+              transform 2.4s cubic-bezier(.22,1,.36,1) .2s;
+}
+.ascii-left {
+  left: -60px;
+  top: 0;
+  transform-origin: right center;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 30%), linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 30%), linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, transparent 100%);
+}
+.ascii-right {
+  right: 0;
+  top: 0;
+  transform-origin: left center;
+  transform: translateY(20px) scale(1.08);
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 70%, transparent 100%), linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,1) 70%, transparent 100%), linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, transparent 100%);
+}
+.ascii-half canvas {
+  position: absolute;
+  top: 0;
   width: 100%;
   height: 100%;
   display: block;
   pointer-events: auto;
-  opacity: .85;
   user-select: none;
   -webkit-user-select: none;
   object-fit: cover;
-  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.32) 34%, rgba(0,0,0,.32) 66%, rgba(0,0,0,.72) 100%);
-  mask-image: linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.32) 34%, rgba(0,0,0,.32) 66%, rgba(0,0,0,.72) 100%);
+  filter: blur(0.3px);
 }
-#hero-ascii {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: auto;
+.ascii-left canvas {
+  left: 0;
+}
+.ascii-right canvas {
+  right: 0;
+}
+
+/* reveal states */
+.hero-art.revealing .ascii-half {
+  opacity: .9;
+  filter: brightness(0.85) blur(2px);
+}
+.hero-art.revealing .ascii-left {
+  transform: scale(1.02);
+}
+.hero-art.revealing .ascii-right {
+  transform: translateY(20px) scale(1.02);
+}
+.hero-art.revealed .ascii-half {
   opacity: .85;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.32) 34%, rgba(0,0,0,.32) 66%, rgba(0,0,0,.72) 100%);
-  mask-image: linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.32) 34%, rgba(0,0,0,.32) 66%, rgba(0,0,0,.72) 100%);
+  filter: brightness(0.7) blur(0);
 }
-/* заглушка для 3D модели в центре ASCII */
-.hero-model-placeholder {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 240px;
-  height: 240px;
-  border: 2px dashed rgba(255, 255, 255, .15);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: rgba(255, 255, 255, .4);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  pointer-events: none;
-  z-index: 1;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, .02) 0%, transparent 70%);
+.hero-art.revealed .ascii-left {
+  transform: scale(1);
 }
-@media (max-width: 768px) {
-  .hero-model-placeholder {
-    width: 180px;
-    height: 180px;
-  }
+.hero-art.revealed .ascii-right {
+  transform: translateY(20px) scale(1);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .ascii-half { animation: none !important; }
+}
+
 @media (max-width: 640px) {
   #hero-ascii { opacity: .65; }
 }
@@ -249,6 +283,51 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
     text-align: center;
   }
 }
+
+/* ---------- Preloader ---------- */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #020202;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .8s cubic-bezier(.22,1,.36,1), visibility .8s;
+}
+.preloader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.preloader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+/* переопределяем цвет спиннера TechOne под тёмную тему */
+.preloader .to-spinner::after {
+  border-color: rgba(255,255,255,.12);
+  border-top-color: rgba(255,255,255,.7);
+}
+.preloader-note {
+  font-size: 13px;
+  color: rgba(255,255,255,.5);
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.5;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.preloader-note.visible {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .preloader { transition: none; }
+}
+
+/* ---------- Hero reveal animation ---------- */
 .hero-content {
   display: flex;
   flex-direction: column;
@@ -256,6 +335,112 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   text-align: left;
   z-index: 2;
 }
+
+/* h1: радиальное проявление — blur + scale + яркая вспышка */
+.hero h1 {
+  opacity: 0;
+  transform: translateY(40px) scale(1.06);
+  filter: blur(8px) brightness(2.5);
+  transition: opacity .8s cubic-bezier(.22,1,.36,1),
+              transform 1s cubic-bezier(.22,1,.36,1),
+              filter 1.4s cubic-bezier(.22,1,.36,1),
+              text-shadow .6s ease;
+}
+.hero-content.revealed h1 {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0) brightness(1);
+  text-shadow: 0 2px 22px rgba(0,0,0,.85), 0 0 40px rgba(255,255,255,.08);
+}
+
+/* кнопки: выезжают снизу с индивидуальной задержкой */
+.hero-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+.hero-actions .to-button {
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.hero-content.revealed .hero-actions .to-button {
+  animation: btnReveal .8s cubic-bezier(.22,1,.36,1) both;
+}
+.hero-content.revealed .hero-actions .to-button:nth-child(1) { animation-delay: .35s; }
+.hero-content.revealed .hero-actions .to-button:nth-child(2) { animation-delay: .55s; }
+
+@keyframes btnReveal {
+  0%   { opacity: 0; filter: blur(4px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+/* вспышка-свечение на кнопках при появлении */
+.hero-content.revealed .hero-actions .to-button[data-variant="primary"] {
+  animation: btnReveal .8s cubic-bezier(.22,1,.36,1) .35s both, btnGlow 1.2s ease .6s 1 both;
+}
+.hero-content.revealed .hero-actions .to-button:not([data-variant="primary"]) {
+  animation: btnReveal .8s cubic-bezier(.22,1,.36,1) .35s both, btnGlowSubtle 1.2s ease .8s 1 both;
+}
+
+@keyframes btnGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  40%  { box-shadow: 0 0 24px 4px rgba(255,255,255,.18), 0 0 60px 8px rgba(255,255,255,.06); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+@keyframes btnGlowSubtle {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  40%  { box-shadow: 0 0 16px 2px rgba(255,255,255,.1); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1,
+  .hero-actions .to-button {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+    animation: none;
+  }
+}
+
+/* хостинг-нота */
+.hero-hosting-note {
+  font-size: 12px;
+  color: rgba(255,255,255,.4);
+  margin-top: 16px;
+  max-width: 360px;
+  line-height: 1.5;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.hero-hosting-note.visible {
+  opacity: 1;
+}
+
+.hero-art {
+  opacity: 0;
+  transition: opacity .4s ease .2s;
+}
+.hero-art.revealed {
+  opacity: 1;
+}
+.scroll-hint {
+  opacity: 0;
+  transition: opacity .6s ease 1.2s;
+}
+.scroll-hint.revealed {
+  opacity: .75;
+}
+.scroll-hint.hidden {
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+/* базовая типографика h1 (анимация — в Hero reveal выше) */
 .hero h1 {
   font-size: clamp(36px, 6vw, 60px);
   line-height: 1.15;
@@ -263,14 +448,6 @@ h3, h4, h5, h6 { font-family: 'TechOnCartoon', 'Courier New', monospace; }
   text-align: left;
   width: fit-content;
   margin: 0;
-  text-shadow: 0 2px 22px rgba(0, 0, 0, .85);
-}
-.hero-actions {
-  display: flex;
-  justify-content: flex-start;
-  gap: 12px;
-  margin-top: 32px;
-  flex-wrap: wrap;
 }
 
 /* индикатор прокрутки: мышь с анимированным колесиком */

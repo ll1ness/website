@@ -19,7 +19,7 @@
       'hero.telegram': 'Telegram →',
 
       'widget.aria': 'Профиль GitHub',
-      'widget.role': 'инди-разработчик',
+      'widget.role': 'Software Engineer',
       'widget.bio': 'Создаю веб и десктоп приложения с открытым исходным кодом.',
       'widget.activity': 'Публичная активность',
       'contrib.loading': 'Загрузка…',
@@ -139,7 +139,7 @@
       'hero.telegram': 'Telegram →',
 
       'widget.aria': 'GitHub profile',
-      'widget.role': 'indie developer',
+      'widget.role': 'Software Engineer',
       'widget.bio': 'I build open-source web and desktop apps. Coding is my hobby.',
       'widget.activity': 'Public activity',
       'contrib.loading': 'Loading…',

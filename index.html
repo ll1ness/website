@@ -91,18 +91,20 @@
   <div id="preloader" class="preloader" aria-hidden="true">
     <div class="preloader-inner">
       <div class="to-spinner" data-size="l"></div>
+      <p class="preloader-note" id="preloader-note">Сайт размещён на зарубежном хостинге. Если вы в РФ — рекомендуется использовать VPN.</p>
     </div>
   </div>
+  <script>setTimeout(function(){var n=document.getElementById('preloader-note');if(n)n.classList.add('visible')},3000)</script>
 
   <!-- === HERO === -->
   <div class="page" id="top">
     <section class="hero">
       <div class="hero-content">
         <h1>ll1ness.</h1>
-        <div class="hero-actions">
-          <a href="#projects" class="to-button" data-variant="primary" data-i18n="hero.cta">Смотреть проекты</a>
-          <button type="button" class="to-button" data-i18n="hero.telegram" onclick="window.openChat && window.openChat()">Telegram →</button>
-        </div>
+      <div class="hero-actions">
+        <a href="#projects" class="to-button" data-variant="primary" data-i18n="hero.cta">Смотреть проекты</a>
+        <button type="button" class="to-button" data-i18n="hero.telegram" onclick="window.openChat && window.openChat()">Telegram →</button>
+      </div>
       </div>
       <canvas id="hero-3d" aria-hidden="true" tabindex="-1"></canvas>
       <div class="hero-art">

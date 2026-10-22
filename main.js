@@ -1334,32 +1334,42 @@
 
   /* ---------- Boot ---------- */
 
-  // ─── HERO: интерактивный ASCII-арт «ЛИНЕСС» ────────────────────
+  // ─── HERO: интерактивный ASCII-арт «ЛИНЕСС» (две половины) ─────
   var ASCII_RAMP = ' .:-=+*#%@';
 
   function initHeroAscii() {
-    var canvas = document.getElementById('hero-ascii');
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    var canvasL = document.getElementById('hero-ascii-l');
+    var canvasR = document.getElementById('hero-ascii-r');
+    if (!canvasL || !canvasR) return;
+    var ctxL = canvasL.getContext('2d');
+    var ctxR = canvasR.getContext('2d');
+    if (!ctxL || !ctxR) return;
 
     var CELL_W = 4, CELL_H = 7, COLS = 268, ROWS = 64;
-    var DPR = Math.min(2, window.devicePixelRatio || 1); // плотность пикселей экрана (макс 2 — запас памяти)
+    var DPR = Math.min(2, window.devicePixelRatio || 1);
     var grid = [], energy = [], pointer = null, raf = 0, animT0 = 0;
+    var windTime = 0;
     var loadedImg = null, started = false;
-    canvas.width = COLS * CELL_W * DPR;
-    canvas.height = ROWS * CELL_H * DPR;
     var F_GLOW = 11, SPR = null;
+    var artEl = document.querySelector('.hero-art');
 
-    // спрайты глифов: рисуем символ один раз в маленький канвас (в пикселях экрана,
-    // чтобы глифы были чёткими на любом DPI) и дальше клеим drawImage —
-    // быстрее fillText, и символ не может "съехать" за ячейку
+    // половина колонок для каждого канваса
+    function halfCols() { return Math.ceil(COLS / 2); }
+
+    function sizeCanvases() {
+      var hc = halfCols();
+      var w = hc * CELL_W * DPR;
+      var h = ROWS * CELL_H * DPR;
+      canvasL.width = w; canvasL.height = h;
+      canvasR.width = w; canvasR.height = h;
+    }
+    sizeCanvases();
+
     function makeSprite(fontPx, w, h, color, k) {
       var dw = Math.max(1, Math.round(w * DPR));
       var dh = Math.max(1, Math.round(h * DPR));
       var sc = document.createElement('canvas');
-      sc.width = dw;
-      sc.height = dh;
+      sc.width = dw; sc.height = dh;
       var s2 = sc.getContext('2d');
       s2.font = (fontPx * DPR) + 'px Consolas, "Courier New", monospace';
       s2.textAlign = 'center';
@@ -1368,7 +1378,7 @@
       s2.fillText(ASCII_RAMP[k], dw / 2, dh / 2 + 0.5 * DPR);
       return sc;
     }
-    // спрайты собираем заново при каждой пересборке (размер ячейки может меняться)
+
     function initSprites() {
       F_GLOW = Math.round(CELL_H * 1.5);
       var gray = [], white = [], glow = [];
@@ -1394,7 +1404,6 @@
       }
     }
 
-    // очень тёмные картинки растягиваем: нормируем на ~95-й перцентиль яркости
     function normalizeDark() {
       var vals = grid.slice().sort(function (a, b) { return a - b; });
       var p95 = vals[Math.floor(vals.length * 0.95)];
@@ -1403,31 +1412,23 @@
       }
     }
 
-    // арт как фон: считаем по контейнеру .hero-art (CSS управляет его размером и позицией)
     function heroBox() {
-      var host = canvas.parentElement;
-      return {
-        w: (host && host.clientWidth) || 800,
-        h: (host && host.clientHeight) || 640
-      };
+      var host = artEl;
+      return { w: (host && host.clientWidth) || 800, h: (host && host.clientHeight) || 640 };
     }
-    // плотность: целочисленные ячейки кратные 4x7 для чётких глифов,
-    // CSS масштабирует canvas на весь .hero-art без обрезки
+
     function pickCells() {
       var box = heroBox();
       var w = box.w || 800, h = box.h || 640;
-      var BASE_CW = 4, BASE_CH = 7;
-      var MAX = 12000;
+      var BASE_CW = 4, BASE_CH = 7, MAX = 12000;
       var sc = Math.max(1, Math.ceil(Math.sqrt(Math.max(1, w * h) / (BASE_CW * BASE_CH * MAX))));
       var cw = BASE_CW * sc, ch = BASE_CH * sc;
       var cols = Math.max(30, Math.round(w / cw));
       var rows = Math.max(12, Math.round(h / ch));
       return { cols: cols, rows: rows, cellW: cw, cellH: ch };
     }
+
     var fadeX = [], fadeY = [];
-    // края арта плавно растворяются в прозрачность — узкая полоса затухания,
-    // чтобы не было резкого среза, но и без захвата большой площади:
-    // ~3.5% ширины и ~4.5% высоты
     function makeFade() {
       var fw = Math.max(3, Math.round(COLS * 0.035));
       var fh = Math.max(3, Math.round(ROWS * 0.045));
@@ -1441,26 +1442,37 @@
         fadeY.push(dr >= fh ? 1 : Math.pow(Math.max(0, dr) / fh, 1.3));
       }
     }
-    // на телефонах/планшетах (шире 1024px арт не показываем) движок не запускаем
+
+    // живые символы: меняются медленно, создавая эффект "дыхания"
+    var charIdx = [], charTimer = [];
+    var charPhase = [];
+    var breatheAmount = 0;
+    function initLiveChars() {
+      charIdx.length = 0; charTimer.length = 0; charPhase.length = 0;
+      for (var i = 0; i < COLS * ROWS; i++) {
+        var lum = grid[i];
+        if (lum > 0.05) {
+          var base = Math.round(lum * (ASCII_RAMP.length - 1));
+          charIdx.push(Math.max(0, Math.min(ASCII_RAMP.length - 1, base)));
+        } else {
+          charIdx.push(0);
+        }
+        charTimer.push(Math.random() * 4000 + 3000);
+        charPhase.push(Math.random() * Math.PI * 2);
+      }
+    }
+
     var HERO_MQ = window.matchMedia && window.matchMedia('(min-width: 1025px)');
     function isWide() { return !HERO_MQ || HERO_MQ.matches; }
-    function stop() {
-      if (raf) cancelAnimationFrame(raf);
-      raf = 0;
-      started = false;
-    }
+    function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; started = false; }
 
     function buildFromImage(img) {
       var d = pickCells();
-      COLS = d.cols; ROWS = d.rows;
-      CELL_W = d.cellW; CELL_H = d.cellH;
-      initSprites();
-      makeFade();
-      canvas.width = COLS * CELL_W * DPR;
-      canvas.height = ROWS * CELL_H * DPR;
-      // рисуем картинку на весь canvas без обрезки и cover-fit подгонок
+      COLS = d.cols; ROWS = d.rows; CELL_W = d.cellW; CELL_H = d.cellH;
+      initSprites(); makeFade(); sizeCanvases();
       sample(function (t) { t.drawImage(img, 0, 0, COLS, ROWS); });
       normalizeDark();
+      initLiveChars();
       loadedImg = img;
       start();
     }
@@ -1471,9 +1483,7 @@
       src.width = SRC_W; src.height = SRC_H;
       var s = src.getContext('2d');
       s.clearRect(0, 0, SRC_W, SRC_H);
-      s.fillStyle = '#fff';
-      s.textAlign = 'center';
-      s.textBaseline = 'middle';
+      s.fillStyle = '#fff'; s.textAlign = 'center'; s.textBaseline = 'middle';
       var fam = '"TechOnNotes","Courier New",monospace';
       var size = 150;
       s.font = '900 ' + size + 'px ' + fam;
@@ -1482,55 +1492,132 @@
       s.font = '900 ' + size + 'px ' + fam;
       s.fillText('ЛИНЕСС', SRC_W / 2, SRC_H / 2 + 6);
       var d = pickCells();
-      COLS = d.cols; ROWS = d.rows;
-      CELL_W = d.cellW; CELL_H = d.cellH;
-      initSprites();
-      makeFade();
-      canvas.width = COLS * CELL_W * DPR;
-      canvas.height = ROWS * CELL_H * DPR;
-      // CSS управляет размером canvas (width/height 100%), не задаём inline-стили
+      COLS = d.cols; ROWS = d.rows; CELL_W = d.cellW; CELL_H = d.cellH;
+      initSprites(); makeFade(); sizeCanvases();
       sample(function (t) { t.drawImage(src, 0, 0, COLS, ROWS); });
+      initLiveChars();
       start();
+    }
+
+    var revealStart = 0, revealDur = 2400, revealing = false, revealedDone = false;
+    var revealDelay = [];
+
+    function buildRevealMap() {
+      revealDelay.length = 0;
+      var cx = COLS / 2, cy = ROWS / 2;
+      var maxDist = Math.sqrt(cx * cx + cy * cy);
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          var dx = c - cx, dy = r - cy;
+          var dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
+          var noise = Math.sin(c * 12.9898 + r * 78.233) * 0.08;
+          revealDelay.push(Math.max(0, Math.min(1, dist + noise)));
+        }
+      }
+    }
+
+    function startReveal() {
+      if (revealedDone || revealing) return;
+      revealing = true;
+      revealStart = performance.now();
+      if (artEl) artEl.classList.add('revealing');
     }
 
     function start() {
       if (started) return;
       started = true;
       animT0 = performance.now();
+      buildRevealMap();
+      setTimeout(startReveal, 300);
       render(!reduced);
     }
 
-    function render(loop) {
-      var W = COLS * CELL_W, H = ROWS * CELL_H; // логические CSS-пиксели
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);    // бэкинг-буфер в пикселях экрана — чёткие glyph'ы
+    // рисует половину ASCII-арта: colStart..colEnd
+    // offsetX — сдвиг в логических пикселях (для правой половины = halfCols * CELL_W)
+    function drawAscii(ctx, colStart, colEnd, offsetX, loop) {
+      var hc = colEnd - colStart;
+      var W = hc * CELL_W, H = ROWS * CELL_H;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, W, H);
 
-      // полоса света 30°: бежит слева направо, но светит ТОЛЬКО сквозь символы
-      var A = 30 * Math.PI / 180;
-      var cosA = Math.cos(A), sinA = Math.sin(A);
-      var nx = sinA, ny = -cosA;      // нормаль (движение — вправо-вверх)
-      var nMin = Math.min(0, W * nx, H * ny, W * nx + H * ny);
-      var nMax = Math.max(0, W * nx, H * ny, W * nx + H * ny);
-      var halfW = Math.max(36, Math.round(W * 0.055));
-      var sMin = nMin - halfW - 80, sMax = nMax + halfW + 80;
-      var s = sMin + (((performance.now() - animT0) / 1000 * 240) % (sMax - sMin));
+      // обновляем живые символы
+      if (revealedDone) {
+        for (var i = 0; i < COLS * ROWS; i++) {
+          var lum = grid[i];
+          if (lum < 0.05) continue;
+          charTimer[i] -= 16;
+          if (charTimer[i] <= 0) {
+            // яркие символы @ (index 9) никогда не меняются
+            if (charIdx[i] === 9) {
+              charTimer[i] = Math.random() * 4000 + 3000;
+              continue;
+            }
+            if (Math.random() < 0.3) {
+              var base = Math.round(lum * (ASCII_RAMP.length - 1));
+              if (base >= 8) {
+                charIdx[i] = Math.min(ASCII_RAMP.length - 1, base + (Math.random() < 0.5 ? 1 : 0));
+              } else if (base <= 2) {
+                charIdx[i] = Math.max(0, base - (Math.random() < 0.5 ? 1 : 0));
+              } else {
+                charIdx[i] = Math.max(0, Math.min(ASCII_RAMP.length - 1, base + (Math.floor(Math.random() * 3) - 1)));
+              }
+            }
+            charTimer[i] = Math.random() * 1500 + 800;
+          }
+          // движение только для ярких центров — края полностью заморожены
+          var edge = lum < 0.6 ? 0 : (lum - 0.6) * 2.5;
+          charPhase[i] += 0.08 * breatheAmount * edge;
+        }
+      }
 
-      var R = 4.5 * (9 / CELL_W); // радиус hover в ячейках — сохраняем физический размер ~40px
+      var revealProgress = 0;
+      var prevRevealedDone = revealedDone;
+      if (!revealedDone) {
+        if (!revealing) {
+          if (loop) raf = requestAnimationFrame(function () { render(true); });
+          return;
+        }
+        var elapsed = performance.now() - revealStart;
+        revealProgress = Math.min(1, elapsed / revealDur);
+        if (revealProgress >= 1) {
+          revealing = false;
+          revealedDone = true;
+          if (artEl) { artEl.classList.remove('revealing'); artEl.classList.add('revealed'); }
+        }
+      } else {
+        revealProgress = 1;
+        breatheAmount = 1;
+      }
+
+      var rt = revealedDone ? 1 : 1 - Math.pow(1 - revealProgress, 4);
+
+      var R = 4.5 * (9 / CELL_W);
       var px = pointer ? pointer.x : -99, py = pointer ? pointer.y : -99;
 
-      // проход 1: мягкий ореол — светящиеся символы рисуются чуть крупнее и аддитивно
       ctx.globalCompositeOperation = 'lighter';
       for (var r = 0; r < ROWS; r++) {
-        for (var c = 0; c < COLS; c++) {
+        for (var c = colStart; c < colEnd; c++) {
           var i = r * COLS + c;
           var lum = grid[i];
           if (lum < 0.05) continue;
-          var x = c * CELL_W + CELL_W / 2, y = r * CELL_H + CELL_H / 2;
-          var beam = Math.max(0, 1 - Math.abs((x * nx + y * ny) - s) / halfW);
+          var charReveal = revealedDone ? 1 : Math.max(0, Math.min(1, (rt - revealDelay[i]) / 0.35));
+          if (charReveal < 0.01) continue;
+          // берём символ из соседней ячейки — движение зависит от яркости
+          var ni = i;
+          if (revealedDone) {
+            // Отказываемся от прыжков по сетке — используем только фазу для легкого мерцания
+            // Это убирает "рваность" на краях
+            var edge = lum < 0.6 ? 0 : (lum - 0.6) * 2.5;
+            if (edge > 0) {
+              charPhase[i] += 0.04;
+            }
+          }
+          var x = c * CELL_W + CELL_W / 2 - offsetX, y = r * CELL_H + CELL_H / 2;
           var fa1 = fadeX[c] * fadeY[r];
-          if (beam > 0.25 && fa1 > 0.04) {
-            var gi = SPR.glow[Math.round(lum * (ASCII_RAMP.length - 1))];
-            ctx.globalAlpha = beam * 0.35 * fa1;
+          var revealGlow = (!revealedDone && charReveal > 0.01 && charReveal < 0.8) ? (1 - charReveal) * 0.6 : 0;
+          if (revealGlow > 0.05 && fa1 > 0.04) {
+            var gi = SPR.glow[charIdx[ni]];
+            ctx.globalAlpha = revealGlow * charReveal * fa1;
             ctx.drawImage(gi, x - (CELL_W + 8) / 2, y - (CELL_H + 8) / 2);
           }
         }
@@ -1538,9 +1625,8 @@
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
 
-      // проход 2: чёткие символы — в луче загораются белым
       for (var r2 = 0; r2 < ROWS; r2++) {
-        for (var c2 = 0; c2 < COLS; c2++) {
+        for (var c2 = colStart; c2 < colEnd; c2++) {
           var i2 = r2 * COLS + c2;
           var lum2 = grid[i2];
           var e = energy[i2];
@@ -1549,24 +1635,44 @@
           var target = pointer ? Math.max(0, 1 - d / R) : 0;
           e += (target - e) * 0.13;
           energy[i2] = e;
-          var x2 = c2 * CELL_W + CELL_W / 2, y2 = r2 * CELL_H + CELL_H / 2;
-          var beam2 = Math.max(0, 1 - Math.abs((x2 * nx + y2 * ny) - s) / halfW);
-          var a = (lum2 * 0.6 + beam2 * 0.95 + e * 0.6) * (fadeX[c2] * fadeY[r2]);
+          var charReveal2 = revealedDone ? 1 : Math.max(0, Math.min(1, (rt - revealDelay[i2]) / 0.35));
+          if (charReveal2 < 0.01) continue;
+          // берём символ из соседней ячейки — движение зависит от яркости
+          var ni2 = i2;
+          if (revealedDone) {
+            // Второй проход: также без прыжков, только стабильная отрисовка
+            var edge2 = lum2 < 0.6 ? 0 : (lum2 - 0.6) * 2.5;
+          }
+          var x2 = c2 * CELL_W + CELL_W / 2 - offsetX, y2 = r2 * CELL_H + CELL_H / 2;
+          var flashMul = (!revealedDone && charReveal2 > 0.1 && charReveal2 < 0.7) ? 1.6 : 1;
+          var a = (lum2 * 0.6 + e * 0.6) * (fadeX[c2] * fadeY[r2]) * charReveal2 * flashMul;
           if (a > 0.04) {
-            var hot = (e > 0.16 || beam2 > 0.55);
-            var s2 = hot ? SPR.white[Math.round(lum2 * (ASCII_RAMP.length - 1))]
-                         : SPR.gray[Math.round(lum2 * (ASCII_RAMP.length - 1))];
+            var hot = (e > 0.16 || !revealedDone && charReveal2 < 0.5);
+            var sp = hot ? SPR.white[charIdx[ni2]]
+                         : SPR.gray[charIdx[ni2]];
             ctx.globalAlpha = hot ? Math.min(1, a) : Math.min(0.95, a);
-            ctx.drawImage(s2, x2 - CELL_W / 2, y2 - CELL_H / 2);
+            ctx.drawImage(sp, x2 - CELL_W / 2, y2 - CELL_H / 2);
           }
         }
       }
       ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function render(loop) {
+      var hc = halfCols();
+      windTime = performance.now();
+      // левая половина: колонки 0..hc, без смещения
+      drawAscii(ctxL, 0, hc, 0, false);
+      // правая половина: колонки hc..COLS, смещение X = hc * CELL_W
+      drawAscii(ctxR, hc, COLS, hc * CELL_W, false);
       if (loop) raf = requestAnimationFrame(function () { render(true); });
     }
 
+    // pointer координаты считаем относительно .hero-art (обе половины покрывают его целиком)
     function onMove(e) {
-      var rect = canvas.getBoundingClientRect();
+      if (!artEl) return;
+      var rect = artEl.getBoundingClientRect();
       var x = e.clientX, y = e.clientY;
       if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
         if (pointer) pointer = null;
@@ -1590,7 +1696,7 @@
     var img = new Image();
     img.onload = function () {
       loadedImg = img;
-      if (!isWide()) return; // на телефонах/планшетах арт скрыт — движок не запускаем
+      if (!isWide()) return;
       buildFromImage(img);
     };
     img.onerror = function () {
@@ -1599,6 +1705,40 @@
       buildFromText();
     };
     img.src = 'assets/hero-ascii.webp';
+  }
+
+  // ─── HERO: анимация появления при загрузке ─────────────────────
+  function initHeroReveal() {
+    var content = document.querySelector('.hero-content');
+    var art = document.querySelector('.hero-art');
+    var hint = document.querySelector('.scroll-hint');
+    var preloader = document.getElementById('preloader');
+
+    function doReveal() {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          if (content) content.classList.add('revealed');
+          if (art) art.classList.add('revealed');
+          if (hint) hint.classList.add('revealed');
+        }, 80);
+      });
+    }
+
+    if (preloader) {
+      var observer = new MutationObserver(function () {
+        if (preloader.classList.contains('hidden')) {
+          observer.disconnect();
+          doReveal();
+        }
+      });
+      observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
+      if (preloader.classList.contains('hidden')) {
+        observer.disconnect();
+        doReveal();
+      }
+    } else {
+      doReveal();
+    }
   }
 
   function initScrollHint() {
@@ -1628,6 +1768,7 @@
     }
     initNavVar();
     initScrollHint();
+    initHeroReveal();
     renderGhWidget();
     injectLangLogos();
     renderContrib();
