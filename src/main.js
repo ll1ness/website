@@ -12,20 +12,12 @@ function isPhoneAuto() {
 
 async function boot() {
   const loader = document.getElementById('loader');
-  const pref = storedVersion();
-  const mobile = pref ? (pref === 'mobile') : isPhoneAuto();
-
-  if (mobile) {
-    if (loader) loader.classList.add('done');
-    const m = await import('./mobile.js');
-    m.initMobile();
-  } else {
     await import('./space.js');
+
     document.getElementById('full-toggle')?.querySelector('.js-mobile')?.addEventListener('click', () => {
       try { localStorage.setItem(VERSION_KEY, 'mobile'); } catch (e) {}
       location.reload();
     });
   }
-}
-
 boot();
+
