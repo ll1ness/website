@@ -1,23 +1,25 @@
-const VERSION_KEY = 'll1ness-version';
+/*
+ * Точка входа. Решение «показывать всплывашку о повороте экрана» принимает инлайн-скрипт
+ * в index.html — ещё до парсинга body. Здесь важно не запускать приложение: space.js
+ * импортируется динамически, поэтому вместе с ним не тянутся Three.js и ~50 МБ моделей.
+ */
 
-function storedVersion() {
-  try { return localStorage.getItem(VERSION_KEY); } catch (e) { return null; }
+const LOADER_LOGOS = [
+  { src: '/assets/techone.png', alt: 'TechOne' },
+  { src: '/assets/AlbaLogo.png', alt: 'AlbaSpace' },
+];
+
+// Картинки загрузчика (AlbaLogo.png весит ~775 КБ) подставляются только при реальном старте сайта.
+function renderLoaderLogos() {
+  const holder = document.getElementById('loader-logos');
+  if (!holder) return;
+  holder.innerHTML = LOADER_LOGOS
+    .map((logo) => `<img src="${logo.src}" class="loader-logo" alt="${logo.alt}">`)
+    .join('');
 }
 
-function isPhoneAuto() {
-  if (window.innerWidth >= 768) return false;
-  if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) return false;
-  return true;
+if (!window.rotateGate || !window.rotateGate.blocked) {
+  renderLoaderLogos();
+  import('./space.js');
 }
-
-async function boot() {
-  const loader = document.getElementById('loader');
-    await import('./space.js');
-
-    document.getElementById('full-toggle')?.querySelector('.js-mobile')?.addEventListener('click', () => {
-      try { localStorage.setItem(VERSION_KEY, 'mobile'); } catch (e) {}
-      location.reload();
-    });
-  }
-boot();
 

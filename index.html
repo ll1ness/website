@@ -3,6 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Портретный гейт: решение принимается до парсинга body и до импорта Three.js/моделей,
+    // поэтому на телефоне в вертикальной ориентации сайт не грузится вообще.
+    (function () {
+      var PORTRAIT = window.matchMedia('(orientation: portrait)');
+      var FINE_POINTER = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+      function isPhone() {
+        if (FINE_POINTER.matches) return false;
+        var screen = window.screen || {};
+        var w = screen.width || window.innerWidth;
+        var h = screen.height || window.innerHeight;
+        return Math.min(w, h) <= 600;
+      }
+
+      function isPortrait() {
+        return PORTRAIT.matches;
+      }
+
+      var blocked = isPhone() && isPortrait();
+      window.rotateGate = { blocked: blocked, isPhone: isPhone, isPortrait: isPortrait };
+      if (!blocked) return;
+
+      document.documentElement.className += ' portrait-block';
+
+      var reloading = false;
+      function onRotate() {
+        if (reloading || (isPhone() && isPortrait())) return;
+        reloading = true;
+        window.location.reload();
+      }
+      // На iOS screen.width/height не меняются при повороте, поэтому слушаем и MediaQuery, и resize.
+      if (PORTRAIT.addEventListener) PORTRAIT.addEventListener('change', onRotate);
+      else if (PORTRAIT.addListener) PORTRAIT.addListener(onRotate);
+      window.addEventListener('orientationchange', onRotate);
+      window.addEventListener('resize', onRotate);
+    })();
+  </script>
   <title>ll1ness — инди-разработчик | Веб, десктоп и открытые проекты</title>
   <meta name="description" content="ll1ness — инди-разработчик и web-developer. Открытые проекты на GitHub: TechOne UI, Spark Studio, Weather Seeker и другие. Интерактивный сайт на Three.js." />
   <meta name="keywords" content="ll1ness, инди разработчик, web developer, Three.js, TechOne UI, Spark Studio, Weather Seeker, open source, сайт, визитка" />
@@ -27,8 +65,29 @@
   <meta name="twitter:image" content="https://ll1ness.vercel.app/banner.png" />
   <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/src/style.css" />
+  <style>
+    /* Всплывашка «переверните экран» — самодостаточна, не зависит от style.css и от JS-приложения. */
+    #rotate-gate{display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:32px 24px;text-align:center;z-index:1000}
+    #rotate-gate .rg-visual{width:104px;height:104px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+    #rotate-gate .rg-phone{position:relative;width:44px;height:74px;border:2px solid rgba(240,240,240,.7);border-radius:9px;animation:rg-rotate 2.8s ease-in-out infinite}
+    #rotate-gate .rg-phone::after{content:'';position:absolute;left:50%;bottom:6px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:rgba(240,240,240,.45)}
+    #rotate-gate .rg-title{font-size:19px;font-weight:700;letter-spacing:.01em;margin:0 0 10px}
+    #rotate-gate .rg-text{margin:0;font-size:14px;line-height:1.6;color:#8b8b96;max-width:280px}
+    @keyframes rg-rotate{0%,20%{transform:rotate(0)}55%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+    @media(prefers-reduced-motion:reduce){#rotate-gate .rg-phone{animation:none;transform:rotate(-90deg)}}
+    html.portrait-block{height:100%;background:#03030a}
+    html.portrait-block body{display:flex;align-items:center;justify-content:center;height:100%;overflow:hidden;background:#03030a;color:#f0f0f0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+    html.portrait-block body>*{display:none!important}
+    html.portrait-block #rotate-gate{display:flex!important}
+  </style>
 </head>
 <body>
+  <div id="rotate-gate" role="dialog" aria-modal="true" aria-labelledby="rotate-gate-title">
+    <div class="rg-visual" aria-hidden="true"><span class="rg-phone"></span></div>
+    <h1 class="rg-title" id="rotate-gate-title">Переверните телефон</h1>
+    <p class="rg-text">Сайт рассчитан на горизонтальную ориентацию экрана. Поверните устройство&nbsp;&mdash; страница перезагрузится сама.</p>
+  </div>
+
   <div id="loader">
     <div id="ru-warning" class="ru-warning hidden">
       <span>Загрузка может быть долгой из-за региональных ограничений. Пожалуйста, подождите.</span>
@@ -37,157 +96,12 @@
     <div class="loader-spinner"></div>
     <div class="loader-text">Welcome</div>
     <div class="loader-progress"><div class="loader-bar"></div></div>
-    <div class="loader-logos"><img src="/assets/techone.png" class="loader-logo" alt="TechOne"><img src="/assets/AlbaLogo.png" class="loader-logo" alt="AlbaSpace"></div>
+    <div class="loader-logos" id="loader-logos"></div>
   </div>
 
   <div id="app"></div>
 
-  <div id="mobile-site" class="hidden">
-    <canvas id="m-canvas"></canvas>
-
-    <header class="m-header">
-      <div class="m-brand">ll1ness</div>
-      <div class="v-toggle" id="mobile-toggle">
-        <button type="button" class="v-btn v-pc js-full" title="Полная версия" aria-label="Полная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
-        <button type="button" class="v-btn v-mob active" title="Мобильная версия" aria-label="Мобильная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/></svg></button>
-      </div>
-    </header>
-
-    <div id="m-room-label" class="m-room-label">
-      <span class="m-room-idx">01</span>
-      <span class="m-room-name">Меркурий</span>
-      <span class="m-room-author">by <img src="/assets/AlbaLogo.png" alt="AlbaSpace"> AlbaSpace</span>
-    </div>
-
-    <div class="m-topword">ll1ness</div>
-
-    <section class="m-planet" data-slot="about">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">✦</span>
-        <h2>Солнце</h2>
-        <p>Звезда в центре Солнечной системы. Источник света и тепла для всех планет.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="projects">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">01</span>
-        <h2>Меркурий</h2>
-        <p>Самая близкая к Солнцу планета. День здесь длится дольше года.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="faq">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">02</span>
-        <h2>Венера</h2>
-        <p>Самая горячая планета, окутанная плотной атмосферой из углекислого газа.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="contacts">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">03</span>
-        <h2>Земля</h2>
-        <p>Наш дом. Единственная известная планета, где существует жизнь.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:0">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">04</span>
-        <h2>Марс</h2>
-        <p>Красная планета и цель будущих колонизаций человечества.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:1">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">05</span>
-        <h2>Юпитер</h2>
-        <p>Газовый гигант — самая большая планета Солнечной системы.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:2">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">06</span>
-        <h2>Сатурн</h2>
-        <p>Знаменит своими кольцами изо льда и камня.</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:3">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">07</span>
-        <h2>Уран</h2>
-        <p>Ледяной гигант, который вращается «лёжа на боку».</p>
-      </div>
-    </section>
-
-    <section class="m-planet" data-slot="proj:4">
-      <div class="m-proj m-reveal"></div>
-      <div class="m-planet-info m-reveal">
-        <span class="m-idx">08</span>
-        <h2>Нептун</h2>
-        <p>Самая дальняя планета, где дуют самые быстрые ветры.</p>
-      </div>
-    </section>
-
-    <section class="m-outro">
-      <div class="m-reveal">
-        <h2>Спасибо за внимание</h2>
-        <p>Исследуйте больше моих проектов на GitHub или присоединяйтесь в Discord.</p>
-        <div class="social-btns">
-          <a href="https://github.com/ll1ness" target="_blank" rel="noopener" class="to-button">GitHub</a>
-          <a href="https://discord.gg/nEcnZKQuCf" target="_blank" rel="noopener" class="to-button">Discord</a>
-          <a href="https://steamcommunity.com/id/ll1ness/" target="_blank" rel="noopener" class="to-button">Steam</a>
-          <a href="https://orcid.org/0009-0001-2539-7302" target="_blank" rel="noopener" class="to-button">ORCID</a>
-        </div>
-        <p style="margin-top:24px;font-size:11px;opacity:.6">Смотрите полную версию сайта — нажмите «Полная версия» вверху.</p>
-      </div>
-    </section>
-
-    <footer class="m-footer">© 2026 ll1ness</footer>
-  </div>
-
   <div id="ui" class="hidden">
-    <header id="header">
-      <div class="header-brand">
-        <a href="/" class="header-logo"><img src="/favicon.ico" alt="ll1ness" class="logo-img" /> ll1ness</a>
-      </div>
-      <nav class="header-nav">
-        <div class="dropdown" tabindex="0">
-          <a href="#" class="drop-btn">Карта сайта <span class="drop-arrow">▼</span></a>
-            <div class="drop-menu">
-              <a href="#" data-page="0">О</a>
-              <a href="#" data-page="1">Проекты</a>
-              <a href="#" data-page="2">ЧаВо</a>
-              <a href="#" data-page="3">Контакты</a>
-            </div>
-        </div>
-        <div class="dropdown" tabindex="0">
-          <a href="#" class="drop-btn">Продукты <span class="drop-arrow">▼</span></a>
-          <div class="drop-menu drop-menu--cols" id="product-menu"></div>
-        </div>
-        <a href="#" data-page="0">О</a>
-        <a href="#" data-page="3">Контакты</a>
-        <a href="#" data-page="2">ЧаВо</a>
-        <a href="https://github.com/ll1ness" target="_blank" rel="noopener">GitHub</a>
-      </nav>
-      <div class="v-toggle" id="full-toggle">
-        <button type="button" class="v-btn v-pc active" title="Полная версия" aria-label="Полная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></button>
-        <button type="button" class="v-btn v-mob js-mobile" title="Мобильная версия" aria-label="Мобильная версия"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M11 18h2"/></svg></button>
-      </div>
-    </header>
 
     <div id="nav-dots">
       <div class="nav-dot active" data-room="0"><span></span></div>
@@ -203,7 +117,7 @@
     <div id="room-label">
       <span class="room-idx">03</span>
       <span class="room-name">Земля</span>
-      <span class="room-author">by <img src="/assets/AlbaLogo.png"> AlbaSpace</span>
+      <span class="room-author">by AlbaSpace</span>
     </div>
 
     <div id="scroll-hint">

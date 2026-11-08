@@ -30,7 +30,7 @@ const planetDefs = [
   { pos: AU(19.2,6), file: 'Uranus_1_51118.glb',    color: 0x7ec8e3, ratio: RATIO(51118) },
   { pos: AU(30.1,7), file: 'Neptune_1_49528.glb',   color: 0x3b6ea0, ratio: RATIO(49528) },
 ];
-const names = ['Меркурий', 'Венера', 'Земля', 'Марс', 'Юпитер', 'Сатурн', 'Уран', 'Нептун'];
+const names = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uran', 'Neptun'];
 const ROT_PERIOD = [58.6, 243, 1, 1.03, 0.41, 0.45, 0.72, 0.67];
 const ROT_BASE = 0.00005;
 const AXIAL_TILT = [0.03, 177.4, 23.44, 25.19, 3.13, 26.73, 97.77, 28.32];
@@ -211,7 +211,7 @@ function uniformScale(root, ratio = 1) {
     s = Math.max(0.0001, Math.min(s, 20));
     root.scale.set(s, s, s);
     console.log(`${root.name}: scaled x${s.toFixed(6)} (ratio ${ratio}) → final ${(maxDim*s).toFixed(3)}`);
-    if (root.name === 'Земля') earthRadius = maxDim * s / 2;
+    if (root.name === 'Earth') earthRadius = maxDim * s / 2;
     return;
   }
   let mBox = null;
@@ -229,14 +229,14 @@ function uniformScale(root, ratio = 1) {
       s = Math.max(0.0001, Math.min(s, 20));
       root.scale.set(s, s, s);
       console.log(`${root.name}: mesh-scaled x${s.toFixed(6)} (ratio ${ratio}) → final ${(mMax*s).toFixed(3)}`);
-      if (root.name === 'Земля') earthRadius = mMax * s / 2;
+      if (root.name === 'Earth') earthRadius = mMax * s / 2;
       return;
     }
   }
   const s = 1.5;
   root.scale.set(s, s, s);
   console.log(`${root.name}: fallback scale x${s} (fixed)`);
-  if (root.name === 'Земля') earthRadius = 2;
+  if (root.name === 'Earth') earthRadius = 2;
 }
 
 const loader = new GLTFLoader();
