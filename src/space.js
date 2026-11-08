@@ -476,6 +476,20 @@ function start() {
   let orbitR = ORBIT_R;
   let targetOrbitR = ORBIT_R;
   let transD = D;
+  let scrollHintGone = false;
+
+  // Подсказка прокрутки показывается один раз за сессию: после первого же колеса она гаснет
+  // и удаляется из DOM, поэтому не возвращается при повторном посещении Земли.
+  function hideScrollHint() {
+    if (scrollHintGone) return;
+    scrollHintGone = true;
+    const el = document.getElementById('scroll-hint');
+    if (!el) return;
+    el.classList.add('hidden');
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
+    // Страховка на случай, если transition не отыгрался (например, вкладка в фоне).
+    setTimeout(() => el.remove(), 1200);
+  }
 
   function getCamPos(idx, t, p) {
     const def = planetDefs[idx].pos;
@@ -517,7 +531,7 @@ function start() {
     }
     as += e.deltaY;
     if (Math.abs(as) >= 60) { go(tr + (as > 0 ? 1 : -1)); as = 0; }
-    document.getElementById('scroll-hint')?.classList.toggle('hidden', tr !== 2);
+    hideScrollHint();
   }, { passive: false });
 
   const cv = renderer.domElement;
@@ -824,7 +838,7 @@ function start() {
       camera.lookAt(ep[0], ep[1], ep[2]);
         uiEl.classList.remove('hidden');
         ui();
-        document.getElementById('scroll-hint')?.classList.remove('hidden');
+        if (!scrollHintGone) document.getElementById('scroll-hint')?.classList.remove('hidden');
         if (skyMesh) { pivots[2].remove(skyMesh); skyMesh = null; }
       }
     } else if (trans) {

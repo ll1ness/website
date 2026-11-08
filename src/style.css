@@ -89,8 +89,8 @@ button,input,textarea{font-family:inherit}
 .room-author{font-size:10px;color:var(--text-dim);display:flex;align-items:center;gap:4px;opacity:.7}
 .room-author img{width:14px;height:14px;border-radius:2px}
 
-#scroll-hint{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:20;color:var(--text-dim);opacity:1;transition:opacity .8s}
-#scroll-hint.hidden{opacity:0}
+#scroll-hint{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:20;color:var(--text-dim);opacity:1;transition:opacity .8s,visibility .8s}
+#scroll-hint.hidden{opacity:0;visibility:hidden;pointer-events:none}
 
 /* ===== OVERLAYS ===== */
 #overlays{position:fixed;inset:0;z-index:5;pointer-events:none}
