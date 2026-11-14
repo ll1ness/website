@@ -4,12 +4,11 @@
 //    удаляется привязка thread→session (следующий вопрос откроет новую тему),
 //    гостю пишется событие-маркер «тема закрыта» → виджет показывает уведомление
 //    и окно оценки. Схема работает и до миграции (без колонок kind/closed_at).
-import { telegram, dbSelect, dbInsert, dbDelete, dbUpsert, readBody, sendJson } from '../../lib/tg.js';
+import { telegram, dbSelect, dbInsert, dbDelete, dbUpsert, readBody, sendJson, CLOSED_SENTINEL } from '../../lib/tg.js';
 
 const e = encodeURIComponent;
 
-// служебный маркер «тема закрыта» (вместо колонки kind — работает до миграции)
-export const CLOSED_SENTINEL = '\u0001closed\u0001';
+export { CLOSED_SENTINEL };
 
 function isAdmin(status) {
   return status === 'administrator' || status === 'creator';

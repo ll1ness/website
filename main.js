@@ -953,6 +953,9 @@
     if (!widget || !launcher || !panel || !closeBtn || !body || !form || !input || !errBox) return;
 
     var CONSENT_KEY = 'll1chat.consent';
+    var CLOSED_MARK = '\u0001closed\u0001';
+    var HISTORY_LIMIT = 200;
+    var SELF_TEXTS_MAX = 100;
     var privacyModal = null;
 
     input.placeholder = T('chat.inputPh');
@@ -971,18 +974,31 @@
     var sid = null;
     var lastMsgId = 0;
     var pollTimer = null;
+    // id и тексты реплик, показанных локально с этой страницы: сервер вернёт их
+    // в истории/поллинге — дубли не показываем
+    var selfIds = {};
+    var selfTexts = [];
+    // история подтягивается из Supabase один раз за загрузку страницы
+    var historyState = 'idle';
+    var historyWaiters = [];
+    // блок согласия лежит в конце тела чата — история вставляется перед ним
+    var tailAnchor = null;
     try {
       sid = localStorage.getItem('ll1chat.sid') || null;
       if (sid) lastMsgId = parseInt(localStorage.getItem('ll1chat.last.' + sid) || '0', 10) || 0;
     } catch (err) {}
     var booted = false;
 
-    function msg(text, who) {
+    function appendMsg(text, who, before) {
       var m = el('div', 'msg ' + who);
       m.textContent = text;
-      body.appendChild(m);
+      body.insertBefore(m, (before && before.parentNode === body) ? before : null);
       body.scrollTop = body.scrollHeight;
       return m;
+    }
+
+    function msg(text, who) {
+      return appendMsg(text, who, null);
     }
 
     // ошибки отправки: показываем красным под инпутом, а не сообщением в чате
@@ -1044,21 +1060,89 @@
       body.scrollTop = body.scrollHeight;
     }
 
+    function rememberSelf(text) {
+      selfTexts.push(text);
+      if (selfTexts.length > SELF_TEXTS_MAX) selfTexts.shift();
+    }
+
+    // наша ли это реплика (уже нарисована при отправке) — по id, на крайний
+    // случай по тексту: ответ send.js мог не дойти до браузера
+    function isSelfEcho(id, text) {
+      if (selfIds[id]) { delete selfIds[id]; return true; }
+      for (var i = selfTexts.length - 1; i >= 0; i--) {
+        if (selfTexts[i] === text) { selfTexts.splice(i, 1); return true; }
+      }
+      return false;
+    }
+
+    // сообщение из Supabase → пузырёк в чате
+    function renderMessage(m) {
+      if (!m || !m.id) return;
+      var text = m.text == null ? '' : String(m.text);
+      if (m.kind === 'closed' || text === CLOSED_MARK) { onClosed(); return; }
+      if (isSelfEcho(m.id, text)) return;
+      if (!text) return;
+      appendMsg(text, m.kind === 'me' ? 'user' : 'bot', tailAnchor);
+    }
+
+    function saveLastId() {
+      try {
+        if (lastMsgId) localStorage.setItem('ll1chat.last.' + sessionId(), String(lastMsgId));
+      } catch (err) {}
+    }
+
     function renderIncoming(list) {
       for (var i = 0; i < list.length; i++) {
         var m = list[i];
         if (!m || m.id <= lastMsgId) continue;
         lastMsgId = m.id;
-        if (m.kind === 'closed' || m.text === '\u0001closed\u0001') {
-          onClosed();
-          continue;
-        }
-        if (!m.text) continue;
-        msg(m.text, 'bot');
+        renderMessage(m);
       }
-      try {
-        if (lastMsgId) localStorage.setItem('ll1chat.last.' + sessionId(), String(lastMsgId));
-      } catch (err) {}
+      saveLastId();
+    }
+
+    function flushHistory() {
+      historyState = 'done';
+      var w = historyWaiters.slice();
+      historyWaiters.length = 0;
+      for (var i = 0; i < w.length; i++) {
+        try { w[i](); } catch (err) {}
+      }
+    }
+
+    // Синхронизация с Supabase: после перезагрузки страницы тело чата пустое,
+    // поэтому история берётся целиком (не по lastId) и диалог продолжается
+    // в той же теме. cb вызывается, когда история на экране (или запрос не удался).
+    function syncHistory(cb) {
+      if (cb) historyWaiters.push(cb);
+      if (historyState !== 'idle') {
+        if (historyState === 'done') flushHistory();
+        return;
+      }
+      historyState = 'loading';
+      fetch('/api/chat/history?sid=' + encodeURIComponent(sessionId()) +
+            '&limit=' + HISTORY_LIMIT, { cache: 'no-store' })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.messages) {
+            var list = d.messages;
+            var maxId = Number(d.lastId) || 0;
+            for (var i = 0; i < list.length; i++) {
+              if (list[i] && list[i].id > maxId) maxId = list[i].id;
+              renderMessage(list[i]);
+            }
+            if (maxId > lastMsgId) lastMsgId = maxId;
+            saveLastId();
+            if (d.closed) {
+              onClosed();
+              // тема закрыта на другой вкладке/устройстве — просим согласие снова,
+              // иначе заблокированного поля ввода уже не снять
+              if (!consented() && !body.querySelector('.consent-box')) renderConsent();
+            }
+          }
+        })
+        .catch(function () {})
+        .then(function () { flushHistory(); });
     }
 
     function poll() {
@@ -1076,6 +1160,12 @@
 
     function stopPolling() {
       if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    // поллинг запускаем уже после истории: иначе свежие ответы встали бы
+    // в тело чата раньше восстановленной переписки
+    function ensurePolling() {
+      if (widget.classList.contains('open') && !pollTimer) startPolling();
     }
 
     // ── политика конфиденциальности: согласие + модал на сайте ──
@@ -1107,6 +1197,7 @@
       accept.addEventListener('click', function () {
         try { localStorage.setItem(CONSENT_KEY, '1'); } catch (err) {}
         if (box.parentNode) box.parentNode.removeChild(box);
+        if (tailAnchor === box) tailAnchor = null;
         renderCaptcha();
       });
       actions.appendChild(accept);
@@ -1120,6 +1211,7 @@
       actions.appendChild(decline);
       box.appendChild(actions);
       body.appendChild(box);
+      tailAnchor = box; // история, если она доедет позже, встанет перед согласием
       body.scrollTop = body.scrollHeight;
     }
 
@@ -1272,9 +1364,9 @@
       panel.setAttribute('aria-hidden', open ? 'false' : 'true');
       if (open) {
         welcome();
-        startPolling();
         autosize();
         setTimeout(function () { input.focus(); }, 250);
+        syncHistory(ensurePolling);
       } else {
         stopPolling();
       }
@@ -1299,10 +1391,13 @@
       if (!text) return;
       clearErr();
       msg(text, 'user');
+      rememberSelf(text);
       input.value = '';
       autosize();
-      send(text).then(function () {
+      send(text).then(function (data) {
         clearErr();
+        // сервер вернул id сохранённой реплики — она не должна вернуться эхом
+        if (data && data.id) selfIds[data.id] = true;
         // успешная отправка после /end = новая тема: убираем плашку закрытия
         try { localStorage.removeItem(closedKey()); } catch (err) {}
       }).catch(function (err) {

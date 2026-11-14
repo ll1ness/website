@@ -6,7 +6,11 @@
 // Ошибки возвращаются с кодом для человеческого отображения в виджете:
 //   bad (400), captcha (403), rate_limit (429), no_chat (500),
 //   busy/timeout/thread/server (502).
-import { telegram, dbSelect, dbInsert, dbDelete, dbUpsert, dbRpc, readBody, sendJson, SID_RE } from '../../lib/tg.js';
+// Реплика гостя сохраняется в chat_messages с префиксом ME_PREFIX, а её id
+// уходит в ответ — так виджет восстанавливает диалог после перезагрузки,
+// но не показывает собственное сообщение дважды.
+
+import { telegram, dbSelect, dbInsert, dbInsertRow, dbDelete, dbUpsert, dbRpc, readBody, sendJson, SID_RE, ME_PREFIX } from '../../lib/tg.js';
 
 // Hobby-лимит Vercel по умолчанию — 10 c; увеличиваем, чтобы медленные внешние
 // вызовы (api.telegram.org / Supabase) не обрывались раньше ответа.
@@ -87,6 +91,19 @@ async function deliver(sid, text, skipThrottle) {
   });
 }
 
+// Эхо реплики гостя в БД (для истории виджета). Ошибка записи не ломает
+// доставку в Telegram — просто id не вернётся, и виджет не сможет отфильтровать
+// дубль при живом поллинге.
+async function recordGuestMessage(sid, text) {
+  try {
+    const rows = await dbInsertRow('chat_messages', { sid: sid, text: ME_PREFIX + text, ts: Date.now() });
+    return rows && rows.length ? Number(rows[0].id) || null : null;
+  } catch (err) {
+    console.error('[send] guest message not stored:', String(err.message || err));
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return sendJson(res, 405, { ok: false, error: 'method', code: 'bad' });
 
@@ -108,7 +125,8 @@ export default async function handler(req, res) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       await deliver(sid, text, skipThrottle);
-      return sendJson(res, 200, { ok: true });
+      const id = await recordGuestMessage(sid, text);
+      return sendJson(res, 200, { ok: true, id: id });
     } catch (err) {
       const msg = String(err.message || err);
       let code = 'server';

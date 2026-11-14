@@ -1,6 +1,9 @@
 // GET /api/chat/poll?sid=...&lastId=...
-// Возвращает ответы из Telegram для сессии (новые сообщения, id > lastId).
-import { dbSelect, dbUpsert, dbRpc, sendJson, SID_RE } from '../../lib/tg.js';
+// Новые сообщения сессии (id > lastId): ответы поддержки из Telegram, реплики
+// гостя из других вкладок и маркер закрытия темы — все с полем kind.
+// Историю целиком отдаёт /api/chat/history.
+
+import { dbSelect, dbUpsert, dbRpc, sendJson, SID_RE, decodeMessage } from '../../lib/tg.js';
 
 // Ленивая уборка: раз в сутки удаляем сообщения закрытых диалогов старше 30 дней.
 // RPC `cleanup_closed_messages` опционален — если функция не создана, пропускаем.
@@ -28,7 +31,8 @@ export default async function handler(req, res) {
       'chat_messages',
       'select=id,text,ts&sid=eq.' + encodeURIComponent(sid) + '&id=gt.' + lastId + '&order=id.asc&limit=20'
     );
-    return sendJson(res, 200, { ok: true, messages: messages || [] });
+    const list = (messages || []).map(decodeMessage).filter(Boolean);
+    return sendJson(res, 200, { ok: true, messages: list });
   } catch (err) {
     return sendJson(res, 502, { ok: false, error: String(err.message || err) });
   }
